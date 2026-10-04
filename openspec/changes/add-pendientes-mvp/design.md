@@ -6,12 +6,14 @@
 |---|---|---|---|
 | D1 | Android + PWA con el mismo código Ionic | Android da avisos confiables; la PWA se comparte por un link de WhatsApp sin instalar nada | En la PWA el aviso de vencimiento depende del calendario del usuario (`.ics`) |
 | D2 | Sin backend, sin login | Datos de salud = datos sensibles (Ley 1581 de 2012); menos superficie legal y menos desarrollo | Si se borra la app o los datos del navegador, se pierden los pendientes (respaldo JSON en fase 2) |
-| D3 | `idb-keyval` (IndexedDB) en ambas plataformas | Un solo camino de persistencia; guarda fotos como `Blob` sin el límite de ~5 MB de localStorage | IndexedDB en la PWA puede ser borrado por el navegador; se pide `navigator.storage.persist()` |
+| D3 | `idb-keyval` (IndexedDB) en ambas plataformas | Un solo camino de persistencia; guarda fotos como `Blob` sin el límite de ~5 MB de localStorage | IndexedDB en la PWA puede ser borrado por el navegador; se pide `navigator.storage.persist()` y, si se niega, la app sigue funcionando normalmente |
 | D4 | PDF con `pdfmake` en el dispositivo | Funciona sin conexión; no hay servidor que reciba datos de salud | Diseño del PDF más limitado que HTML→PDF |
 | D5 | Salidas: copiar (corto) + PDF (completo) + compartir. Sin Word | El usuario objetivo no edita `.docx` en el celular; el PDF no se desconfigura | Quien quiera editar lo hace en la vista previa de la app |
-| D6 | Normas y plantillas como datos (`normas.json`, `plantillas.ts`) | El contenido legal cambia; se edita sin tocar componentes y se versiona | Hay que mantener la etiqueta "Verificado el" al día |
-| D7 | El plazo cuenta desde la hora de reclamo, 48 horas corridas | La Resolución 1604 de 2013 define que las 48 h corren desde que el afiliado reclama | Si la hora registrada es incorrecta, el aviso también lo es; por eso es editable |
+| D6 | El contenido legal vive solo en dos archivos de datos: `normas.json` y las plantillas aprobadas (`plantillas.ts`). Nunca en componentes | El texto aprobado debe quedar literal; generarlo dinámicamente desde `normas.json` produciría frases sin revisión | Si cambia una norma hay que actualizar `normas.json` y, si la cita, la plantilla aprobada |
+| D7 | El plazo cuenta desde la hora de reclamo, 48 horas corridas. La hora es editable, no puede ser futura y se bloquea cuando hay una queja registrada | La Resolución 1604 de 2013 define que las 48 h corren desde que el afiliado reclama; bloquearla evita contradecir un documento ya radicado | Si se registró mal antes de radicar, hay que borrar el pendiente y crearlo de nuevo |
 | D8 | La app no clasifica el riesgo del reclamo ante la Supersalud | La clasificación la hace la Supersalud; adivinarla sería dar asesoría legal | El paso 2 no muestra un plazo de respuesta |
+| D9 | El estado y el evento "venció el plazo" se calculan; nunca se guardan | No dependen de que la app esté abierta al vencer y no pueden quedar inconsistentes | La bitácora de pantalla y la del PDF se arman con una función, no se leen tal cual |
+| D10 | Sin pantalla de Ajustes en el MVP | Menos pantallas; las dos acciones que la necesitarían (ayuda de batería y borrar todo) caben en flujos existentes | La ayuda de batería se muestra una sola vez; se puede volver a abrir desde el aviso de permisos |
 
 ## Estructura de carpetas
 
@@ -20,17 +22,18 @@ src/app/
   core/
     models/            # interfaces de dominio
     storage/           # repositorio sobre idb-keyval
-    domain/            # lógica pura y testeable (plazos, plantillas, bitácora)
+    domain/            # lógica pura y testeable (plazos, plantillas, bitácora, ics)
     platform/          # adaptadores: notificaciones, compartir, cámara, calendario
   features/
-    inicio/            # lista de pendientes + botón "Me dejaron un pendiente"
+    inicio/            # lista de pendientes + "Me dejaron un pendiente" + aviso legal fijo
     ventanilla/        # guía paso a paso
     pendiente-form/    # registro y edición
-    pendiente-detalle/ # contador, tarjeta de norma, bitácora, escalera
+    pendiente-detalle/ # contador, tarjeta de norma, bitácora, escalera, borrar
     reclamo/           # vista previa, copiar, PDF, compartir
-    pacientes/         # perfiles de paciente
+    pacientes/         # perfiles de paciente + "Borrar todos mis datos"
   shared/
     norma-card/        # tarjeta "¿Por qué tienes derecho?"
+    ayuda-avisos/      # hoja de ayuda de batería (Android)
 src/assets/data/
   normas.json
 ```
@@ -42,11 +45,11 @@ interface Paciente {
   id: string;
   nombre: string;
   tipoDocumento: 'CC' | 'CE' | 'TI' | 'PA' | 'PPT';
-  numeroDocumento: string;
+  numeroDocumento: string;            // único junto con tipoDocumento
   eps: string;
   telefono: string;
   correo?: string;
-  direccion: string;
+  direccion: string;                  // se precarga como direccionEntrega
 }
 
 interface Pendiente {
@@ -55,16 +58,21 @@ interface Pendiente {
   gestion?: Gestion;                  // si alguien gestiona por el paciente
   medicamentos: string[];
   farmacia: string;                   // farmacia o gestor farmacéutico
-  horaReclamo: string;                // ISO; inicia el plazo
+  horaReclamo: string;                // ISO; inicia el plazo; nunca futura
   numeroComprobante?: string;
   fotoComprobanteKey?: string;        // clave del Blob en IndexedDB
   autorizoDomicilio: boolean;
-  direccionEntrega: string;            // siempre obligatoria; se precarga desde el perfil
+  direccionEntrega: string;           // siempre obligatoria
   entregadoEn?: string;               // ISO
-  quejaEps?: { radicadaEn: string; radicado?: string; canal?: string };
-  quejaSupersalud?: { radicadaEn: string; radicado?: string };
-  recordatorioIcsEn?: string;         // ISO; última descarga del .ics (aviso de duplicado)
-  bitacora: EventoBitacora[];
+  quejaEps?: Queja;                   // una sola; registrarla de nuevo la reemplaza
+  quejaSupersalud?: Queja;            // una sola; registrarla de nuevo la reemplaza
+  icsAgregadoEn?: string;             // ISO; para el aviso "Ya agregaste este recordatorio"
+  bitacora: EventoGuardado[];
+}
+
+interface Queja {
+  radicadaEn: string;                 // ISO
+  radicado?: string;
 }
 
 interface Gestion {                   // todos obligatorios cuando existe
@@ -74,19 +82,37 @@ interface Gestion {                   // todos obligatorios cuando existe
   parentesco: string;                 // "hijo", "hija", "cuidador", etc.
 }
 
-type TipoEvento = 'creado' | 'vencido' | 'queja-eps' | 'queja-supersalud' | 'entregado' | 'nota';
+/** Eventos que SÍ se guardan en IndexedDB. */
+type TipoEventoGuardado = 'creado' | 'queja-eps' | 'queja-supersalud' | 'entregado' | 'nota';
 
-interface EventoBitacora {
+interface EventoGuardado {
   en: string;                         // ISO
-  tipo: TipoEvento;
+  tipo: TipoEventoGuardado;
   texto: string;
+}
+
+/**
+ * Solo para pantalla y PDF. 'vencido' NUNCA se guarda: lo inserta bitacoraVista()
+ * a la hora de vencimiento (ver "Bitácora derivada").
+ */
+type TipoEventoVista = TipoEventoGuardado | 'vencido';
+
+interface EventoVista {
+  en: string;
+  tipo: TipoEventoVista;
+  texto: string;
+}
+
+interface Preferencias {              // clave única 'preferencias' en IndexedDB
+  avisoLegalAceptado: boolean;
+  ayudaAvisosVista: boolean;
 }
 
 interface Norma {
   id: string;
   nombre: string;                     // "Decreto-Ley 019 de 2012"
   articulo?: string;                  // "Artículo 131"
-  resumen: string;                    // lenguaje sencillo, redacción propia
+  resumen: string;                    // ver "Criterio de lenguaje sencillo"
   urlFuente: string;
   verificadoEl: string;               // "2026-10-04"
   aplicaA: Array<'ventanilla' | 'plazo' | 'queja-eps' | 'queja-supersalud' | 'red-alterna'>;
@@ -95,17 +121,17 @@ interface Norma {
 
 ## Estado derivado (Signals)
 
-El estado del pendiente NO se guarda; se calcula para evitar inconsistencias:
-
 ```ts
 type EstadoPendiente =
   | 'en-plazo' | 'vencido' | 'escalado-eps' | 'escalado-supersalud'
   | 'entregado-a-tiempo' | 'entregado-tarde';
 
-// domain/plazo.ts — función pura, recibe `ahora` para poder testearla
+// domain/plazo.ts — funciones puras; reciben `ahora` para poder testearlas
 export const PLAZO_HORAS = 48;
-export function vencimiento(horaReclamo: string): Date { /* + 48 h */ }
-export function estado(p: Pendiente, ahora: Date): EstadoPendiente { /* reglas */ }
+export function vencimiento(horaReclamo: string): Date;
+export function estado(p: Pendiente, ahora: Date): EstadoPendiente;
+export function textoContador(p: Pendiente, ahora: Date): string;
+export function validarHoraReclamo(hora: string, ahora: Date): 'ok' | 'futura';
 ```
 
 Reglas de `estado()`, en orden:
@@ -115,9 +141,16 @@ Reglas de `estado()`, en orden:
 4. Si `ahora > vencimiento` → `vencido`.
 5. Si no → `en-plazo`.
 
-En la UI, una signal `ahora` se actualiza cada minuto para refrescar el contador.
+Reglas de `textoContador()` (solo cuando el pendiente no está entregado):
+- Falta 1 h o más → `Faltan X h` (redondeo hacia abajo)
+- Falta menos de 1 h → `Faltan X min`
+- Vencido hace menos de 1 h → `Vencido hace X min`
+- Vencido hace 1 h o más, pero menos de 48 h → `Vencido hace X h`
+- Vencido hace 48 h o más → `Vencido hace X días`
 
-### Etiquetas y colores de estado
+En la UI, una signal `ahora` se actualiza cada minuto.
+
+## Etiquetas y colores de estado
 
 | Estado | Etiqueta | Color |
 |---|---|---|
@@ -131,65 +164,64 @@ En la UI, una signal `ahora` se actualiza cada minuto para refrescar el contador
 Accesibilidad: el color **nunca** va solo; siempre acompaña la etiqueta de texto, y todos los
 colores pasan contraste (≥ 4.5:1 sobre fondo claro).
 
-### Bitácora derivada
+## Bitácora derivada
 
-El evento "Venció el plazo" se calcula igual que `estado()`: se muestra en la bitácora (en
-pantalla y en el PDF) si `ahora > vencimiento` y el pendiente no se entregó antes del
-vencimiento. No se guarda como evento; no necesita que la app esté abierta a la hora exacta.
+```ts
+// domain/bitacora.ts
+export function bitacoraVista(p: Pendiente, ahora: Date): EventoVista[];
+export function registrarQueja(p: Pendiente, paso: 'eps' | 'supersalud', q: Queja): Pendiente;
+```
 
-### Edición y borrado
-
-- **Editar:** se reprograma el aviso. Si ya hay una queja registrada (`quejaEps` o
-  `quejaSupersalud`), la hora de reclamo queda bloqueada para no contradecir un documento
-  ya radicado ⚖️.
-- **Borrar:** pide confirmación, cancela la notificación y elimina la foto del Blob.
-- **Perfiles:** únicos por (`tipoDocumento`, `numeroDocumento`); si se repiten, la app ofrece
-  usar el existente.
-- **Borrado total:** botón "Borrar todos mis datos" (doble confirmación) reutiliza el borrado
-  individual y cancela todos los avisos.
+- `bitacoraVista()` toma `p.bitacora` y, si `ahora > vencimiento` y el pendiente no se entregó antes
+  del vencimiento, inserta `{ tipo: 'vencido', en: vencimiento, texto: 'Venció el plazo de 48 horas' }`.
+  Devuelve todo ordenado por fecha. La pantalla y el PDF usan solo esta función.
+- `registrarQueja()` reemplaza `quejaEps`/`quejaSupersalud` y **actualiza** el evento de ese tipo
+  si ya existía, en lugar de agregar otro.
 
 ## Avisos
 
 - **Android:** `LocalNotifications.schedule` a la hora de vencimiento, con un ID numérico
-  derivado del ID del pendiente. Se cancela al marcar como entregado o al borrar el pendiente.
-  Se reprograman todos los pendientes abiertos al iniciar la app (`provideAppInitializer`).
-  - Primera vez que se registra un pendiente: hoja de ayuda "¿Cómo asegurar que te llegue el
-    aviso?" con el enlace a dontkillmyapp.com (una sola vez, sin pantalla de ajustes).
-  - Si el permiso de notificaciones está denegado: aviso con las opciones "Activar
-    notificaciones" o "Agregar a mi calendario" (reutiliza el `.ics` de la PWA).
-- **PWA:** botón que genera un `.ics` (texto VEVENT armado a mano, sin librería) con
-  `DTSTART` = vencimiento, una alarma (`VALARM`) a la misma hora y un **UID fijo por
-  pendiente**. Si ya se descargó antes, la app avisa "Ya agregaste este recordatorio el…"
-  usando `recordatorioIcsEn`; no se promete que todos los calendarios eliminen el duplicado.
+  derivado del ID del pendiente. Se cancela al entregar o borrar el pendiente y se reprograma al
+  editar la hora. Al iniciar la app (`provideAppInitializer`) se reprograman todos los pendientes abiertos.
+- **Permiso denegado:** el detalle del pendiente muestra un aviso con "Activar notificaciones"
+  y "Agregar a mi calendario" (reutiliza el `.ics`).
+- **Ayuda de batería:** la primera vez que se registra un pendiente en Android se abre
+  `shared/ayuda-avisos` (enlace a dontkillmyapp.com) y se guarda `ayudaAvisosVista = true`.
+- **PWA:** botón que genera un `.ics` (VEVENT armado a mano, sin librería) con
+  `UID: pendiente-<id>@pendientes48`, `DTSTART` = vencimiento y `VALARM` a la misma hora.
+  Si `icsAgregadoEn` existe, antes de descargar se muestra "Ya agregaste este recordatorio el…".
 - `PlatformService.isNative()` decide qué camino mostrar.
 
 ## Documentos
 
 - `domain/plantillas.ts` exporta funciones puras `(datos) => string` para el texto corto y
-  `(datos) => PdfDocDefinition` para el PDF. El texto legal es constante; solo se interpolan datos.
-- El borrador de redacción está en `plantillas.md` y debe revisarse antes de implementarse.
-- Fundamento legal: `normas.filter(n => n.aplicaA.includes(paso))`.
-- La foto del comprobante se reduce a máximo 1280 px de lado (JPEG 0.7) antes de guardarse
-  para que el PDF no pese demasiado.
+  `(datos) => PdfDocDefinition` para el PDF. El texto legal es literal y viene de `plantillas.md` aprobado.
+- Fundamento legal del PDF: `normas.filter(n => n.aplicaA.includes(paso))`.
+- El texto corto **no** incluye el aviso de no asesoría; el aviso va en la pantalla de copiar y en el pie del PDF.
+- Si `autorizoDomicilio` es `false`, la vista previa muestra la nota
+  "Este texto incluye tu autorización de entrega a domicilio".
+- La foto del comprobante se reduce a máximo 1280 px de lado (JPEG 0.7) antes de guardarse.
+
+## Criterio de lenguaje sencillo (`normas.json`)
+
+Cada `resumen`: máximo 2 oraciones y 45 palabras, dirigido al usuario como "usted",
+sin siglas salvo "EPS". Lo verifica una prueba unitaria.
 
 ## Pruebas mínimas
 
 - `plazo.spec.ts`: vencimiento exacto, cambio de día y de mes, cada regla de `estado()`,
-  hora de reclamo futura rechazada y formatos del contador (h / min / días).
-- `bitacora.spec.ts`: queja repetida reemplaza fecha y radicado sin duplicar eventos.
-- `ics.spec.ts`: el archivo generado contiene `DTSTART` correcto en UTC y un UID fijo por pendiente.
-- `plantillas.spec.ts`: interpolación con y sin "quien gestiona", con y sin número de comprobante.
-- `storage.spec.ts`: fallo de escritura muestra el mensaje y el formulario conserva lo escrito.
-- `normas.spec.ts`: cada `resumen` cumple el criterio (≤ 2 oraciones, ≤ 45 palabras,
-  "usted", solo sigla "EPS").
+  cada rama de `textoContador()`, `validarHoraReclamo()` con hora futura.
+- `bitacora.spec.ts`: `bitacoraVista()` con y sin vencimiento, entrega antes y después de vencer;
+  `registrarQueja()` repetida no duplica eventos.
+- `ics.spec.ts`: `DTSTART` correcto en UTC y `UID` estable para el mismo pendiente.
+- `plantillas.spec.ts`: los 4 casos de `plantillas.md`.
+- `normas.spec.ts`: criterio de lenguaje sencillo para cada `resumen`.
+- `storage.spec.ts`: fallo de escritura devuelve error controlado; perfil duplicado detectado.
 
 ## Riesgos
 
 - **Normas desactualizadas:** mitigado con `verificadoEl` visible y revisión periódica.
 - **Batería en Android (Xiaomi/Samsung):** la notificación puede retrasarse. Mitigación:
-  pedir permiso de alarmas exactas y mostrar la hoja de ayuda con dontkillmyapp.com la primera
-  vez que se registra un pendiente (ver "Avisos"; no hay pantalla de ajustes).
-- **Escritura local fallida (almacén lleno):** se muestra "No se pudo guardar. Libera espacio
-  e intenta de nuevo" y el formulario conserva lo escrito. Si se niega `storage.persist()`,
-  la app sigue funcionando normalmente.
-- **Interpretación legal:** la app explica y cita; no concluye. Aviso de no asesoría en todas las salidas.
+  permiso de alarmas exactas + hoja `ayuda-avisos` + alternativa `.ics`.
+- **Interpretación legal:** la app explica y cita; no concluye. Aviso de no asesoría fijo en inicio,
+  en cada tarjeta de norma, en la pantalla de copiar y en el pie de cada PDF.

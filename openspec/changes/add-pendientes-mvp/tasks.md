@@ -2,6 +2,7 @@
 
 Leyenda: 🅿️ = se puede trabajar en paralelo con otras tareas del mismo bloque (una por agente).
 Cada tarea termina con su verificación. No pasar al siguiente bloque sin revisar el anterior.
+Una rama de Git por tarea (ver `README.md`).
 
 ## Bloque 0 — Base (secuencial, la haces tú)
 - [x] 0.0 Repositorio y herramientas de IA
@@ -24,45 +25,84 @@ Cada tarea termina con su verificación. No pasar al siguiente bloque sin revisa
 - [ ] 0.2 Agregar Capacitor Android y PWA (`@angular/pwa`)
   - Verificación: corre en un celular Android y la PWA pasa la auditoría de instalación en Lighthouse
 - [ ] 0.3 Instalar dependencias: `idb-keyval`, `pdfmake`, plugins de Capacitor del `README.md`, `@ionic/pwa-elements`
-- [ ] 0.4 Crear `core/models` con las interfaces del `design.md` (incluye `recordatorioIcsEn`)
+  - Verificación: `npm ls` lista todas sin errores y `npx cap sync android` termina sin errores
+- [ ] 0.4 Crear `core/models` con las interfaces del `design.md` (incluye `icsAgregadoEn`)
+  - Verificación: `ng build` compila sin errores con los modelos importados en un archivo de prueba
 
 ## Bloque 1 — Dominio puro (🅿️ todas en paralelo, sin UI)
-- [ ] 1.1 🅿️ `domain/plazo.ts` + `plazo.spec.ts` (vencimiento, reglas de `estado()`, hora futura rechazada, formatos del contador)
-- [ ] 1.2 🅿️ `domain/bitacora.ts` (crear eventos automáticos, incluida la queja repetida que reemplaza sin duplicar) + pruebas
-- [ ] 1.3 🅿️ `domain/ics.ts` (generar archivo `.ics` con UID fijo por pendiente) + pruebas
-- [ ] 1.4 🅿️ `domain/plantillas.ts` con el texto aprobado de `plantillas.md` + pruebas
+- [ ] 1.1 🅿️ `domain/plazo.ts`: `vencimiento`, `estado`, `textoContador`, `validarHoraReclamo` + `plazo.spec.ts`
+  - Verificación: pruebas pasan para vencimiento con cambio de día y de mes, las 5 reglas de
+    `estado()`, las 5 ramas de `textoContador()` y la hora futura rechazada
+- [ ] 1.2 🅿️ `domain/bitacora.ts`: `bitacoraVista`, `registrarQueja` + `bitacora.spec.ts`
+  - Verificación: pruebas pasan para vencimiento calculado (con y sin entrega previa) y para
+    queja registrada dos veces sin duplicar eventos
+- [ ] 1.3 🅿️ `domain/ics.ts` (generar archivo `.ics`) + `ics.spec.ts`
+  - Verificación: pruebas pasan para `DTSTART` en UTC y `UID` idéntico en dos generaciones del mismo pendiente
+- [ ] 1.4 🅿️ `domain/plantillas.ts` con el texto aprobado de `plantillas.md` + `plantillas.spec.ts`
   - ✅ Desbloqueada: plantillas aprobadas el 2026-10-04
-  - Verificación: los 4 casos de prueba de `plantillas.md` pasan
-- [ ] 1.5 🅿️ `assets/data/normas.json` + servicio `NormasService` con `paraPaso(paso)`
-  - Verificación: cada URL abre la fuente oficial, `verificadoEl` está actualizado y una prueba
-    unitaria confirma que cada `resumen` cumple el criterio (≤ 2 oraciones, ≤ 45 palabras, "usted", solo sigla "EPS")
+  - Verificación: los 4 casos de prueba de `plantillas.md` pasan y el texto corto no contiene el aviso de no asesoría
+- [ ] 1.5 🅿️ `assets/data/normas.json` + servicio `NormasService` con `paraPaso(paso)` + `normas.spec.ts`
+  - Verificación: la prueba del criterio de lenguaje sencillo pasa; cada URL abre la fuente oficial
+    y `verificadoEl` está actualizado
 
 ## Bloque 2 — Plataforma y persistencia (🅿️ en paralelo)
-- [ ] 2.1 🅿️ `core/storage`: repositorio de pacientes y pendientes sobre `idb-keyval`; fotos como `Blob`
-  - Prueba: fallo de escritura → mensaje "No se pudo guardar. Libera espacio e intenta de nuevo" y el formulario conserva lo escrito
-- [ ] 2.2 🅿️ `platform/notificaciones`: programar, cancelar y reprogramar al iniciar (solo nativo)
-  - Incluye: hoja de ayuda "¿Cómo asegurar que te llegue el aviso?" (dontkillmyapp.com) la primera vez
-    que se registra un pendiente, y salida a `.ics` si el permiso está denegado
+- [ ] 2.1 🅿️ `core/storage`: repositorio de pacientes, pendientes y preferencias sobre `idb-keyval`;
+  fotos como `Blob`; detección de perfil duplicado; `borrarTodo()`; errores de escritura controlados
+  - Verificación: `storage.spec.ts` pasa para guardar/leer, perfil duplicado, fallo de escritura
+    simulado y `borrarTodo()` dejando IndexedDB vacío
+- [ ] 2.2 🅿️ `platform/notificaciones`: programar, cancelar, reprogramar al iniciar y consultar permiso (solo nativo)
+  - Verificación: en Android, un pendiente con vencimiento a 2 min dispara la notificación; al
+    marcarlo entregado antes, no llega; tras cerrar y abrir la app, el aviso sigue programado
 - [ ] 2.3 🅿️ `platform/compartir`: copiar texto, compartir PDF, descarga como respaldo en la PWA
-- [ ] 2.4 🅿️ `platform/camara`: tomar foto y reducirla a 1280 px, JPEG 0.7
+  - Verificación: en Android el menú de compartir muestra WhatsApp con el PDF adjunto; en un
+    navegador de escritorio el PDF se descarga
+- [ ] 2.4 🅿️ `platform/camara`: tomar foto o elegir de la galería; reducir a 1280 px, JPEG 0.7;
+  manejar permiso denegado
+  - Verificación: foto tomada y foto de galería quedan de 1280 px o menos; con permiso de cámara
+    denegado se ofrece la galería sin error
 
 ## Bloque 3 — Pantallas (🅿️ en paralelo cuando 1 y 2 estén listos)
-- [ ] 3.1 🅿️ `shared/norma-card` (tarjeta de la norma con el aviso de no asesoría incluido)
-- [ ] 3.2 🅿️ `features/pacientes` (crear y editar perfil, unicidad por tipo+número de documento, "Borrar todos mis datos" con doble confirmación)
-- [ ] 3.3 🅿️ `features/ventanilla` (guía de 3 pasos + norma-card en el paso 2)
-- [ ] 3.4 🅿️ `features/pendiente-form` (aviso si no autorizó domicilio, dirección siempre obligatoria precargada desde el perfil, hora futura rechazada)
-- [ ] 3.5 `features/pendiente-detalle` (contador, norma-card, bitácora, escalera, "Ya me llegó")
-  - Depende de: 3.1
-- [ ] 3.6 `features/reclamo` (vista previa editable, copiar, PDF, compartir)
+- [ ] 3.1 🅿️ `shared/norma-card` (incluye "Verificado el" y el aviso de no asesoría) y `shared/ayuda-avisos`
+  - Verificación: la tarjeta muestra los 5 elementos de la spec `normas` más el aviso de no
+    asesoría y, sin conexión, solo el enlace queda inactivo
+- [ ] 3.2 🅿️ `features/pacientes`: crear, editar, aviso de duplicado y "Borrar todos mis datos" con doble confirmación
+  - Verificación: un duplicado ofrece "Usar el perfil existente"; tras borrar todo, la app vuelve a la primera apertura
+- [ ] 3.3 🅿️ `features/ventanilla`: guía de 3 pasos, norma-card en el paso 2, alternativas del paso 3
+  - Verificación: en modo avión la guía se ve completa; con cámara denegada se puede llegar al registro
+- [ ] 3.4 🅿️ `features/pendiente-form`: registro y edición; dirección obligatoria precargada;
+  validación de hora futura; hora bloqueada si hay queja; aviso si no autorizó domicilio;
+  mensaje de fallo al guardar; hoja `ayuda-avisos` la primera vez en Android
+  - Verificación: no se puede guardar con hora futura ni sin dirección; con una queja registrada
+    la hora aparece bloqueada; la hoja de ayuda sale solo en el primer registro
+- [ ] 3.5 `features/pendiente-detalle`: contador, estado con etiqueta y color, norma-card, bitácora
+  (`bitacoraVista`) con notas manuales, escalera tipo stepper, "Ya me llegó", aviso de permiso
+  denegado, botón `.ics` con "Ya agregaste este recordatorio el…", y "Borrar" con confirmación
+  - Depende de: 3.1, 1.1, 1.2, 1.3
+  - Verificación: un pendiente vencido con la app cerrada muestra "Venció el plazo" en la bitácora;
+    el paso 1 sigue visible como "Completado" tras registrar la queja; el segundo toque al `.ics`
+    muestra el aviso; al borrar, desaparece de inicio, su aviso se cancela y la foto se elimina
+- [ ] 3.6 `features/reclamo`: vista previa editable, nota de autorización incluida, copiar con aviso
+  en pantalla, PDF, compartir
   - Depende de: 1.4, 2.3
-- [ ] 3.7 `features/inicio` (lista con estado + aviso de no asesoría: modal la primera vez y línea fija al pie después)
+  - Verificación: el texto copiado coincide con la plantilla aprobada y no trae el aviso; la nota de
+    autorización aparece solo si no autorizó en la farmacia; el PDF trae fundamento legal, bitácora y pie
+- [ ] 3.7 `features/inicio`: lista con estado (etiqueta + color), aviso legal en la primera apertura
+  y luego como línea fija al pie
+  - Verificación: la primera vez exige "Entiendo"; después el aviso queda visible al pie en cada apertura
 
 ## Bloque 4 — Verificación (la haces tú, en un celular real)
 - [ ] 4.1 Flujo completo en Android: registrar → vence (horaReclamo editada a 47 h 59 min atrás) → notificación → queja EPS → queja Supersalud
+  - Verificación: cada paso queda en la bitácora y el PDF del paso 2 cita la queja ante la EPS
 - [ ] 4.2 Flujo completo en la PWA, incluido el `.ics` en el calendario del celular
+  - Verificación: el evento aparece en el calendario a la hora de vencimiento
 - [ ] 4.3 Modo avión: guía, registro y PDF funcionan sin conexión
-- [ ] 4.4 Prueba con un usuario real (tu mamá o alguien en la fila de un dispensario)
-- [ ] 4.5 Accesibilidad: Lighthouse con puntaje ≥ 90 en accesibilidad (PWA) + revisión manual
-  (texto ≥ 18 px, una acción principal por pantalla, contraste de colores)
+  - Verificación: los tres se completan sin errores con el modo avión activo
+- [ ] 4.4 Accesibilidad
+  - Verificación: Lighthouse con 90 o más en accesibilidad en inicio, detalle y reclamo; revisión
+    manual de texto base de 18 px o más, una acción principal por pantalla y estados con etiqueta de texto
+- [ ] 4.5 Prueba con un usuario real (tu mamá o alguien en la fila de un dispensario)
+  - Verificación: la persona registra un pendiente y genera una queja sin ayuda; anotar dónde dudó
 - [ ] 4.6 (Opcional) Agregar Playwright MCP para automatizar el flujo 4.2 en el navegador
+  - Verificación: el flujo 4.2 corre de principio a fin sin intervención
 - [ ] 4.7 `/opsx:archive` del change `add-pendientes-mvp`
+  - Verificación: las specs quedan en `openspec/specs/` y el change en el archivo
