@@ -22,6 +22,13 @@ Herramientas: OpenCode usa `opencode.json`; `.mcp.json` se conserva para compati
 - Marca el checkbox de la tarea en `tasks.md` dentro del mismo PR.
 - Nunca hagas merge: Daniel revisa y aprueba cada PR.
 
+## Memoria viva (`memory.md`)
+- `memory.md` (raíz) es la memoria del proceso, basada en `proposal.md`: decisiones de ejecución,
+  lecciones del entorno y pendientes conocidos.
+- Al terminar una tarea, feature o cambio relevante, **actualízalo como último paso antes del PR**;
+  solo información con impacto futuro. No dupliques `tasks.md` (progreso), `design.md` (D1–D13)
+  ni contenido legal.
+
 ## Contenido legal
 - No modifiques el texto de `plantillas.md` ni `src/assets/data/normas.json` sin aprobación explícita de Daniel.
 - Ningún componente contiene texto legal; solo se lee de esos dos archivos.
