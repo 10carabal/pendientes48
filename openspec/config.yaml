@@ -33,4 +33,4 @@ rules:
   tasks:
     - Marcar con 🅿️ las tareas paralelizables y declarar dependencias.
     - Cada tarea termina con una verificación concreta.
-    - Una rama de Git por tarea.
+    - Una rama de Git por tarea (`feat/<n.°-tarea>`, o `chore/`/`docs/` para tareas sin número).
