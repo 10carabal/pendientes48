@@ -14,6 +14,12 @@ context: |
   lógica de dominio en funciones puras sin dependencias de Ionic y con pruebas unitarias;
   estado del pendiente derivado, nunca guardado.
 
+  Estructura (design.md D11/D12): carpetas por concepto en src/app/domain (TS puro, sin Angular,
+  Ionic ni Capacitor), data (idb-keyval y catálogo de normas), platform (único que importa
+  @capacitor/*), features (una carpeta por ruta) y shared (UI sin lógica de negocio).
+  Dependencias: features -> shared, data, platform, domain; data -> domain; domain -> nada.
+  Alias de imports entre capas: @domain/*, @data/*, @platform/*, @shared/*.
+
   Restricciones: local-first (sin backend, sin login; datos de salud sensibles, Ley 1581 de 2012);
   la app no es asesoría legal; el contenido legal vive solo en src/assets/data/normas.json y en
   las plantillas aprobadas de plantillas.md; accesibilidad: texto base >= 18px, botones grandes,

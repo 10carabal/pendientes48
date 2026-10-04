@@ -4,6 +4,15 @@ Contexto del proyecto: `README.md` y `openspec/config.yaml`. Trabajo spec-driven
 (`/opsx-explore`, `/opsx-propose`, `/opsx-qa`, `/opsx-apply`, `/opsx-archive`).
 Herramientas: OpenCode usa `opencode.json`; `.mcp.json` se conserva para compatibilidad con Claude Code.
 
+## Arquitectura (ver `design.md`, sección "Estructura de carpetas")
+- Carpetas por concepto, no por tipo: no crees `components/`, `services/` ni `models/`.
+- Dependencias en una sola dirección: `features` → `shared`, `data`, `platform`, `domain`;
+  `data` → `domain`; `shared` y `platform` → `domain` (solo tipos); `domain` → nada.
+- `domain/` es TypeScript puro: nunca importa Angular, Ionic ni Capacitor.
+- Solo `platform/` importa `@capacitor/*`; las pantallas no preguntan si están en nativo.
+- Entre capas usa los alias `@domain/*`, `@data/*`, `@platform/*`, `@shared/*`; dentro de la misma carpeta, rutas relativas.
+- Cada `.spec.ts` va al lado de su archivo.
+
 ## Git
 - Nunca hagas commit ni push directo a `main`.
 - Una rama por tarea: `feat/<n.° tarea>-<nombre>` (ej. `feat/1.1-plazo`); sin número: `chore/<nombre>` o `docs/<nombre>`.
