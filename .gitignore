@@ -22,3 +22,21 @@ android/local.properties
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Angular
+/tmp
+/out-tsc
+/bazel-out
+npm-debug.log
+yarn-error.log
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+/.angular/cache
+.sass-cache/
+/coverage
+__screenshots__/
