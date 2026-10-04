@@ -1,0 +1,31 @@
+{
+  "version": "2026.10.04",
+  "normas": [
+    {
+      "id": "dl-019-2012-art131",
+      "nombre": "Decreto-Ley 019 de 2012 (Ley Antitrámites)",
+      "articulo": "Artículo 131",
+      "resumen": "La EPS debe entregar los medicamentos completos en el momento en que usted los reclama. Si no puede, debe hacérselos llegar a su casa o trabajo en máximo 48 horas, siempre que usted autorice esa entrega.",
+      "urlFuente": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=45322",
+      "verificadoEl": "2026-10-04",
+      "aplicaA": ["ventanilla", "plazo", "queja-eps", "queja-supersalud"]
+    },
+    {
+      "id": "res-1604-2013",
+      "nombre": "Resolución 1604 de 2013 del Ministerio de Salud",
+      "articulo": "Artículo 1",
+      "resumen": "Reglamenta la entrega de pendientes a domicilio y aclara que las 48 horas empiezan a contar desde el momento en que usted reclama el medicamento en la farmacia.",
+      "urlFuente": "https://normograma.supersalud.gov.co/compilacion/docs/resolucion_minsaludps_1604_2013.htm",
+      "verificadoEl": "2026-10-04",
+      "aplicaA": ["plazo", "queja-eps", "queja-supersalud"]
+    },
+    {
+      "id": "ce-017-2026",
+      "nombre": "Circular Externa 017 de 2026 del Ministerio de Salud",
+      "resumen": "Ordena a las EPS reforzar la entrega a domicilio de los pendientes en máximo 48 horas y contar con redes alternas de farmacias donde usted pueda reclamar si la entrega falla.",
+      "urlFuente": "https://www.minsalud.gov.co/Comunicaciones/noticias/2026/Paginas/circular-para-garantizar-entrega-oportuna-medicamentos.aspx",
+      "verificadoEl": "2026-10-04",
+      "aplicaA": ["plazo", "red-alterna", "queja-eps", "queja-supersalud"]
+    }
+  ]
+}

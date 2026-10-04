@@ -1,0 +1,36 @@
+schema: spec-driven
+
+context: |
+  Pendientes48: app Android + PWA (mismo código) para pacientes colombianos a quienes la farmacia
+  de la EPS les deja un medicamento "pendiente". Guía en la ventanilla, cuenta 48 h desde la hora
+  de reclamo y, si se vencen, genera quejas (paso 1 EPS, paso 2 Supersalud) con la norma visible.
+  Usuarios: adultos mayores y familiares que gestionan por ellos; baja alfabetización digital.
+
+  Stack: Ionic + Angular standalone (Signals, zoneless) + Capacitor. Persistencia con idb-keyval
+  (IndexedDB) en ambas plataformas. PDF con pdfmake en el dispositivo. Plugins: local-notifications,
+  camera (+ pwa-elements), clipboard, share, filesystem.
+
+  Convenciones: archivos sin sufijo .component; provideAppInitializer para init asíncrono;
+  lógica de dominio en funciones puras sin dependencias de Ionic y con pruebas unitarias;
+  estado del pendiente derivado, nunca guardado.
+
+  Restricciones: local-first (sin backend, sin login; datos de salud sensibles, Ley 1581 de 2012);
+  la app no es asesoría legal; el contenido legal vive solo en src/assets/data/normas.json y en
+  las plantillas aprobadas de plantillas.md; accesibilidad: texto base >= 18px, botones grandes,
+  una acción principal por pantalla.
+
+  Glosario: pendiente (medicamento no entregado completo), hora de reclamo (inicia el plazo),
+  comprobante de pendiente, gestor farmacéutico, red alterna, PQRD, escalera de reclamo.
+
+rules:
+  proposal:
+    - Incluir siempre una sección "Fuera de alcance".
+  specs:
+    - Escenarios en formato WHEN/THEN; requisitos con SHALL o MUST.
+    - No escribir texto legal en las specs; referenciar normas.json o plantillas.md.
+  design:
+    - Cada decisión con su porqué y el trade-off aceptado.
+  tasks:
+    - Marcar con 🅿️ las tareas paralelizables y declarar dependencias.
+    - Cada tarea termina con una verificación concreta.
+    - Una rama de Git por tarea.
