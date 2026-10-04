@@ -14,29 +14,76 @@
 | D8 | La app no clasifica el riesgo del reclamo ante la Supersalud | La clasificación la hace la Supersalud; adivinarla sería dar asesoría legal | El paso 2 no muestra un plazo de respuesta |
 | D9 | El estado y el evento "venció el plazo" se calculan; nunca se guardan | No dependen de que la app esté abierta al vencer y no pueden quedar inconsistentes | La bitácora de pantalla y la del PDF se arman con una función, no se leen tal cual |
 | D10 | Sin pantalla de Ajustes en el MVP | Menos pantallas; las dos acciones que la necesitarían (ayuda de batería y borrar todo) caben en flujos existentes | La ayuda de batería se muestra una sola vez; se puede volver a abrir desde el aviso de permisos |
+| D11 | Carpetas por concepto en 4 capas (`domain`, `data`, `platform`, `features` + `shared`) con dependencias en una sola dirección; `domain/` sin Angular, Ionic ni Capacitor | La guía de estilo de Angular pide organizar por concepto y no por tipo; un dominio puro se prueba sin `TestBed` y protege la lógica legal y de plazos de cambios de framework | Más carpetas que una estructura plana; la regla de dependencias se revisa en cada PR (sin herramienta automática en el MVP) |
+| D12 | Alias de rutas en `tsconfig.json`: `@domain/*`, `@data/*`, `@platform/*`, `@shared/*` | Imports legibles y, en un PR, se ve de inmediato si una capa importa algo que no le corresponde | Ninguno relevante: lo resuelve el compilador; no requiere librerías |
 
-## Estructura de carpetas
+## Estructura de carpetas (D11)
 
 ```
 src/app/
-  core/
-    models/            # interfaces de dominio
-    storage/           # repositorio sobre idb-keyval
-    domain/            # lógica pura y testeable (plazos, plantillas, bitácora, ics)
-    platform/          # adaptadores: notificaciones, compartir, cámara, calendario
-  features/
-    inicio/            # lista de pendientes + "Me dejaron un pendiente" + aviso legal fijo
-    ventanilla/        # guía paso a paso
-    pendiente-form/    # registro y edición
-    pendiente-detalle/ # contador, tarjeta de norma, bitácora, escalera, borrar
-    reclamo/           # vista previa, copiar, PDF, compartir
-    pacientes/         # perfiles de paciente + "Borrar todos mis datos"
-  shared/
-    norma-card/        # tarjeta "¿Por qué tienes derecho?"
-    ayuda-avisos/      # hoja de ayuda de batería (Android)
+  domain/                        # TypeScript puro: sin Angular, Ionic ni Capacitor
+    pendiente/
+      pendiente.model.ts         # Pendiente, Queja, Gestion, eventos, EstadoPendiente
+      plazo.ts                   # vencimiento, estado, textoContador, validarHoraReclamo
+      bitacora.ts                # bitacoraVista, registrarQueja
+    paciente/
+      paciente.model.ts
+    reclamo/
+      plantillas.ts              # texto legal aprobado de plantillas.md, literal
+      plantillas-pdf.ts          # definición del PDF para pdfmake
+    norma/
+      norma.model.ts
+    calendario/
+      ics.ts                     # genera el texto del .ics (UID fijo)
+  data/                          # de dónde salen y adónde van los datos
+    app-db.ts                    # envoltura de idb-keyval
+    pacientes-store.ts
+    pendientes-store.ts
+    preferencias-store.ts
+    normas-catalogo.ts           # lee normas.json; paraPaso(paso)
+  platform/                      # único lugar que importa @capacitor/*
+    plataforma.ts                # isNative()
+    notificaciones.ts
+    compartir.ts
+    camara.ts
+    calendario-descarga.ts       # descarga del .ics en la PWA
+  features/                      # una carpeta por ruta; subcomponentes planos al lado
+    inicio/                      # inicio.ts, pendiente-item.ts
+    ventanilla/
+    pendiente-form/
+    pendiente-detalle/           # pendiente-detalle.ts, contador.ts, bitacora-lista.ts, escalera.ts
+    reclamo/                     # reclamo.ts, vista-previa.ts
+    pacientes/
+  shared/                        # UI de presentación, sin lógica de negocio
+    norma-card/                  # tarjeta "¿Por qué tienes derecho?"
+    ayuda-avisos/                # hoja de ayuda de batería (Android)
+    estado-chip/                 # etiqueta + color de cada estado
+    aviso-legal/                 # línea fija al pie + modal de primera apertura
+  app.ts · app.config.ts · app.routes.ts
 src/assets/data/
   normas.json
 ```
+
+Cada `.spec.ts` vive al lado de su archivo (ej. `plazo.spec.ts` junto a `plazo.ts`).
+
+### Reglas de la estructura
+
+1. **Por concepto, no por tipo.** No se crean carpetas `components/`, `services/` ni `models/`
+   (guía de estilo de Angular). Cada modelo vive junto a la lógica que lo usa.
+2. **Dependencias en una sola dirección:**
+   ```
+   features → shared, data, platform, domain
+   shared   → domain (solo tipos)
+   data     → domain
+   platform → domain (solo tipos)
+   domain   → nada (solo TypeScript y tipos de pdfmake)
+   ```
+3. **Solo `platform/` importa `@capacitor/*`.** Cada adaptador resuelve internamente el camino
+   Android y el respaldo de la PWA; las pantallas nunca preguntan si están en nativo.
+4. **Nombres de Angular 22:** sin sufijo de rol (`pendiente-detalle.ts` → `class PendienteDetalle`);
+   los tipos llevan `.model.ts`. Ninguna pantalla se llama solo como un tipo (`Pendiente`).
+5. **Imports entre capas con alias** (D12): `import { estado } from '@domain/pendiente/plazo'`.
+   Dentro de la misma carpeta se usan rutas relativas.
 
 ## Modelo de datos
 
@@ -126,7 +173,7 @@ type EstadoPendiente =
   | 'en-plazo' | 'vencido' | 'escalado-eps' | 'escalado-supersalud'
   | 'entregado-a-tiempo' | 'entregado-tarde';
 
-// domain/plazo.ts — funciones puras; reciben `ahora` para poder testearlas
+// domain/pendiente/plazo.ts — funciones puras; reciben `ahora` para poder testearlas
 export const PLAZO_HORAS = 48;
 export function vencimiento(horaReclamo: string): Date;
 export function estado(p: Pendiente, ahora: Date): EstadoPendiente;
@@ -167,7 +214,7 @@ colores pasan contraste (≥ 4.5:1 sobre fondo claro).
 ## Bitácora derivada
 
 ```ts
-// domain/bitacora.ts
+// domain/pendiente/bitacora.ts
 export function bitacoraVista(p: Pendiente, ahora: Date): EventoVista[];
 export function registrarQueja(p: Pendiente, paso: 'eps' | 'supersalud', q: Queja): Pendiente;
 ```
@@ -190,11 +237,11 @@ export function registrarQueja(p: Pendiente, paso: 'eps' | 'supersalud', q: Quej
 - **PWA:** botón que genera un `.ics` (VEVENT armado a mano, sin librería) con
   `UID: pendiente-<id>@pendientes48`, `DTSTART` = vencimiento y `VALARM` a la misma hora.
   Si `icsAgregadoEn` existe, antes de descargar se muestra "Ya agregaste este recordatorio el…".
-- `PlatformService.isNative()` decide qué camino mostrar.
+- `platform/plataforma.ts` (`isNative()`) decide el camino; solo lo usan los adaptadores de `platform/`, nunca las pantallas.
 
 ## Documentos
 
-- `domain/plantillas.ts` exporta funciones puras `(datos) => string` para el texto corto y
+- `domain/reclamo/plantillas.ts` exporta funciones puras `(datos) => string` para el texto corto y
   `(datos) => PdfDocDefinition` para el PDF. El texto legal es literal y viene de `plantillas.md` aprobado.
 - Fundamento legal del PDF: `normas.filter(n => n.aplicaA.includes(paso))`.
 - El texto corto **no** incluye el aviso de no asesoría; el aviso va en la pantalla de copiar y en el pie del PDF.
@@ -215,8 +262,8 @@ sin siglas salvo "EPS". Lo verifica una prueba unitaria.
   `registrarQueja()` repetida no duplica eventos.
 - `ics.spec.ts`: `DTSTART` correcto en UTC y `UID` estable para el mismo pendiente.
 - `plantillas.spec.ts`: los 4 casos de `plantillas.md`.
-- `normas.spec.ts`: criterio de lenguaje sencillo para cada `resumen`.
-- `storage.spec.ts`: fallo de escritura devuelve error controlado; perfil duplicado detectado.
+- `normas-catalogo.spec.ts`: criterio de lenguaje sencillo para cada `resumen`.
+- `pendientes-store.spec.ts` / `pacientes-store.spec.ts`: fallo de escritura devuelve error controlado; perfil duplicado detectado.
 
 ## Riesgos
 

@@ -28,6 +28,7 @@ papel y nadie le hace seguimiento. La ley ya le da 48 horas a la EPS para entreg
 - Cuentas / login / sincronización
 - Redacción con IA
 - Exportación a Word (.docx)
+- ESLint con reglas automáticas de dependencias entre capas (en el MVP se revisan en cada PR)
 
 ## Impacto
 - Capacidades nuevas: `ventanilla`, `pendientes`, `reclamos`, `normas`
