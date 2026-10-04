@@ -14,7 +14,7 @@
 | D8 | La app no clasifica el riesgo del reclamo ante la Supersalud | La clasificación la hace la Supersalud; adivinarla sería dar asesoría legal | El paso 2 no muestra un plazo de respuesta |
 | D9 | El estado y el evento "venció el plazo" se calculan; nunca se guardan | No dependen de que la app esté abierta al vencer y no pueden quedar inconsistentes | La bitácora de pantalla y la del PDF se arman con una función, no se leen tal cual |
 | D10 | Sin pantalla de Ajustes en el MVP | Menos pantallas; las dos acciones que la necesitarían (ayuda de batería y borrar todo) caben en flujos existentes | La ayuda de batería se muestra una sola vez; se puede volver a abrir desde el aviso de permisos |
-| D11 | Carpetas por concepto en 4 capas (`domain`, `data`, `platform`, `features` + `shared`) con dependencias en una sola dirección; `domain/` sin Angular, Ionic ni Capacitor | La guía de estilo de Angular pide organizar por concepto y no por tipo; un dominio puro se prueba sin `TestBed` y protege la lógica legal y de plazos de cambios de framework | Más carpetas que una estructura plana; la regla de dependencias se revisa en cada PR (sin herramienta automática en el MVP) |
+| D11 | Carpetas por concepto: `domain`, `data`, `platform`, `features` y `shared`, con dependencias en una sola dirección; `domain/` sin Angular, Ionic ni Capacitor | La guía de estilo de Angular pide organizar por concepto y no por tipo; un dominio puro se prueba sin `TestBed` y protege la lógica legal y de plazos de cambios de framework | Más carpetas que una estructura plana; la regla de dependencias se revisa en cada PR (sin herramienta automática en el MVP) |
 | D12 | Alias de rutas en `tsconfig.json`: `@domain/*`, `@data/*`, `@platform/*`, `@shared/*` | Imports legibles y, en un PR, se ve de inmediato si una capa importa algo que no le corresponde | Ninguno relevante: lo resuelve el compilador; no requiere librerías |
 
 ## Estructura de carpetas (D11)
@@ -83,7 +83,11 @@ Cada `.spec.ts` vive al lado de su archivo (ej. `plazo.spec.ts` junto a `plazo.t
 4. **Nombres de Angular 22:** sin sufijo de rol (`pendiente-detalle.ts` → `class PendienteDetalle`);
    los tipos llevan `.model.ts`. Ninguna pantalla se llama solo como un tipo (`Pendiente`).
 5. **Imports entre capas con alias** (D12): `import { estado } from '@domain/pendiente/plazo'`.
-   Dentro de la misma carpeta se usan rutas relativas.
+   Dentro de la misma carpeta se usan rutas relativas. Los archivos raíz (`app.ts`,
+   `app.config.ts`, `app.routes.ts`) importan `features/` con ruta relativa
+   (`./features/inicio/inicio`): son la composición de la app. Una feature jamás importa
+   de otra feature; si dos pantallas comparten UI va a `shared/`, y si comparten lógica
+   a `domain/` o `data/`.
 
 ## Modelo de datos
 

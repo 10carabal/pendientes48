@@ -27,6 +27,12 @@ Una rama de Git por tarea (ver `README.md`).
   - Nota: sin código nuevo; cambian rutas en `design.md` y `tasks.md`, reglas en `AGENTS.md`,
     resumen en `config.yaml` y alias en `tsconfig.json`
   - Verificación: `openspec validate --strict` pasa; `ng build` y `ng test` pasan con los alias configurados
+- [x] 0.1.2 Corregir ambigüedades de D11/D12 (conteo de capas e imports entre features)
+  - Nota: sin código nuevo; D11 y regla 5 en `design.md`, espejo en `AGENTS.md`, `README.md`
+    y `config.yaml`
+  - Verificación: `openspec validate --strict` pasa y la regla (feature→feature prohibido,
+    raíz→features relativo, sin "4 capas") queda igual en `design.md`, `AGENTS.md`, `README.md`
+    y `config.yaml`
 - [ ] 0.2 Agregar Capacitor Android y PWA (`@angular/pwa`)
   - Verificación: corre en un celular Android y la PWA pasa la auditoría de instalación en Lighthouse
 - [ ] 0.3 Instalar dependencias: `idb-keyval`, `pdfmake`, plugins de Capacitor del `README.md`, `@ionic/pwa-elements`
