@@ -17,6 +17,12 @@ medicamento queda pendiente, accesible desde la pantalla principal con un solo t
 - THEN se muestra la norma que lo respalda (desde `normas.json`) con su explicación en lenguaje sencillo
 - AND se explica que la entrega a domicilio aplica si el afiliado la autoriza
 
+#### Scenario: Paso de la foto con tres salidas
+- WHEN el usuario ve el paso 3
+- THEN puede tomar una foto, elegir una de la galería o elegir "anote el número del comprobante"
+- AND cualquiera de las tres opciones permite continuar con la guía
+  (la foto es opcional, así que ninguna es bloqueante)
+
 ### Requirement: Guía sin conexión
 La guía SHALL funcionar sin conexión a internet.
 

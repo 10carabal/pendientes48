@@ -16,6 +16,10 @@ de plantilla; no aparecen en el texto final. El texto fijo no se edita en la app
 - **Documento:** se escribe "con {{tipo}} n.° {{número}}" (sin "identificado(a)").
 - **Fechas** en formato largo: "4 de octubre de 2026"; horas en formato 12 h: "3:15 p. m."
 - **Campos opcionales** (comprobante, correo, radicado): si están vacíos, su frase o paréntesis desaparece completo.
+- **Dirección:** `{{direccionEntrega}}` es obligatoria en todos los casos (autorizó o no); el
+  texto final nunca queda con la dirección vacía. Cuando el usuario no autorizó en la farmacia,
+  la vista previa de la app muestra la nota "Este texto incluye tu autorización de entrega a
+  domicilio".
 
 ## Introducciones
 
