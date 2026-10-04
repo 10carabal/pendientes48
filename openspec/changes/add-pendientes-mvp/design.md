@@ -59,10 +59,11 @@ interface Pendiente {
   numeroComprobante?: string;
   fotoComprobanteKey?: string;        // clave del Blob en IndexedDB
   autorizoDomicilio: boolean;
-  direccionEntrega: string;
+  direccionEntrega: string;            // siempre obligatoria; se precarga desde el perfil
   entregadoEn?: string;               // ISO
   quejaEps?: { radicadaEn: string; radicado?: string; canal?: string };
   quejaSupersalud?: { radicadaEn: string; radicado?: string };
+  recordatorioIcsEn?: string;         // ISO; última descarga del .ics (aviso de duplicado)
   bitacora: EventoBitacora[];
 }
 
@@ -116,13 +117,50 @@ Reglas de `estado()`, en orden:
 
 En la UI, una signal `ahora` se actualiza cada minuto para refrescar el contador.
 
+### Etiquetas y colores de estado
+
+| Estado | Etiqueta | Color |
+|---|---|---|
+| `en-plazo` | En plazo | verde |
+| `vencido` | Vencido | rojo |
+| `escalado-eps` | Queja ante EPS | naranja |
+| `escalado-supersalud` | Queja ante Supersalud | rojo oscuro |
+| `entregado-a-tiempo` | Entregado a tiempo | verde oscuro |
+| `entregado-tarde` | Entregado tarde | gris |
+
+Accesibilidad: el color **nunca** va solo; siempre acompaña la etiqueta de texto, y todos los
+colores pasan contraste (≥ 4.5:1 sobre fondo claro).
+
+### Bitácora derivada
+
+El evento "Venció el plazo" se calcula igual que `estado()`: se muestra en la bitácora (en
+pantalla y en el PDF) si `ahora > vencimiento` y el pendiente no se entregó antes del
+vencimiento. No se guarda como evento; no necesita que la app esté abierta a la hora exacta.
+
+### Edición y borrado
+
+- **Editar:** se reprograma el aviso. Si ya hay una queja registrada (`quejaEps` o
+  `quejaSupersalud`), la hora de reclamo queda bloqueada para no contradecir un documento
+  ya radicado ⚖️.
+- **Borrar:** pide confirmación, cancela la notificación y elimina la foto del Blob.
+- **Perfiles:** únicos por (`tipoDocumento`, `numeroDocumento`); si se repiten, la app ofrece
+  usar el existente.
+- **Borrado total:** botón "Borrar todos mis datos" (doble confirmación) reutiliza el borrado
+  individual y cancela todos los avisos.
+
 ## Avisos
 
 - **Android:** `LocalNotifications.schedule` a la hora de vencimiento, con un ID numérico
   derivado del ID del pendiente. Se cancela al marcar como entregado o al borrar el pendiente.
   Se reprograman todos los pendientes abiertos al iniciar la app (`provideAppInitializer`).
+  - Primera vez que se registra un pendiente: hoja de ayuda "¿Cómo asegurar que te llegue el
+    aviso?" con el enlace a dontkillmyapp.com (una sola vez, sin pantalla de ajustes).
+  - Si el permiso de notificaciones está denegado: aviso con las opciones "Activar
+    notificaciones" o "Agregar a mi calendario" (reutiliza el `.ics` de la PWA).
 - **PWA:** botón que genera un `.ics` (texto VEVENT armado a mano, sin librería) con
-  `DTSTART` = vencimiento y una alarma (`VALARM`) a la misma hora.
+  `DTSTART` = vencimiento, una alarma (`VALARM`) a la misma hora y un **UID fijo por
+  pendiente**. Si ya se descargó antes, la app avisa "Ya agregaste este recordatorio el…"
+  usando `recordatorioIcsEn`; no se promete que todos los calendarios eliminen el duplicado.
 - `PlatformService.isNative()` decide qué camino mostrar.
 
 ## Documentos
@@ -136,13 +174,22 @@ En la UI, una signal `ahora` se actualiza cada minuto para refrescar el contador
 
 ## Pruebas mínimas
 
-- `plazo.spec.ts`: vencimiento exacto, cambio de día y de mes, cada regla de `estado()`.
+- `plazo.spec.ts`: vencimiento exacto, cambio de día y de mes, cada regla de `estado()`,
+  hora de reclamo futura rechazada y formatos del contador (h / min / días).
+- `bitacora.spec.ts`: queja repetida reemplaza fecha y radicado sin duplicar eventos.
+- `ics.spec.ts`: el archivo generado contiene `DTSTART` correcto en UTC y un UID fijo por pendiente.
 - `plantillas.spec.ts`: interpolación con y sin "quien gestiona", con y sin número de comprobante.
-- `ics.spec.ts`: el archivo generado contiene `DTSTART` correcto en UTC.
+- `storage.spec.ts`: fallo de escritura muestra el mensaje y el formulario conserva lo escrito.
+- `normas.spec.ts`: cada `resumen` cumple el criterio (≤ 2 oraciones, ≤ 45 palabras,
+  "usted", solo sigla "EPS").
 
 ## Riesgos
 
 - **Normas desactualizadas:** mitigado con `verificadoEl` visible y revisión periódica.
 - **Batería en Android (Xiaomi/Samsung):** la notificación puede retrasarse. Mitigación:
-  pedir permiso de alarmas exactas y mostrar un enlace a dontkillmyapp.com en ajustes.
+  pedir permiso de alarmas exactas y mostrar la hoja de ayuda con dontkillmyapp.com la primera
+  vez que se registra un pendiente (ver "Avisos"; no hay pantalla de ajustes).
+- **Escritura local fallida (almacén lleno):** se muestra "No se pudo guardar. Libera espacio
+  e intenta de nuevo" y el formulario conserva lo escrito. Si se niega `storage.persist()`,
+  la app sigue funcionando normalmente.
 - **Interpretación legal:** la app explica y cita; no concluye. Aviso de no asesoría en todas las salidas.

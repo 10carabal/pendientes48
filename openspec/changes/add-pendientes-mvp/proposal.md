@@ -9,10 +9,12 @@ papel y nadie le hace seguimiento. La ley ya le da 48 horas a la EPS para entreg
 ## Qué cambia
 - **Guía de ventanilla:** checklist para el momento en que la farmacia dice "quedó pendiente".
 - **Registro de pendientes:** medicamento, farmacia, hora de reclamo, foto del comprobante,
-  dirección autorizada y paciente (propio o un familiar).
+  dirección de entrega (siempre obligatoria, precargada desde el perfil) y paciente
+  (propio o un familiar).
 - **Contador de 48 h:** calculado desde la hora de reclamo; aviso al vencer
   (notificación local en Android, archivo `.ics` en la PWA).
-- **Bitácora:** cada evento del pendiente queda registrado con fecha y hora.
+- **Bitácora:** cada evento del pendiente queda registrado con fecha y hora, más notas
+  manuales del usuario (ej. "llamé a la línea de la EPS").
 - **Escalera de reclamo:** paso 1 queja ante la EPS (+ información de red alterna);
   paso 2 queja ante la Supersalud.
 - **Documentos:** texto corto para copiar, PDF completo con anexos y opción de compartir.

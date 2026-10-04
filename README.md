@@ -53,7 +53,8 @@ Regla: si una guía de una herramienta contradice este README o `openspec/config
 ## Restricciones (no negociables)
 - **Local-first:** sin backend, sin login, sin envío de datos a terceros. Los datos de salud
   son datos sensibles (Ley 1581 de 2012).
-- **No es asesoría legal:** aviso visible en la app y en cada documento generado.
+- **No es asesoría legal:** aviso visible en la app y en cada PDF; también en la pantalla
+  donde se copia el texto corto.
 - **Normas como datos:** el contenido legal vive en `normas.json` y `plantillas`, nunca
   hardcodeado en componentes.
 - **Accesibilidad:** texto base ≥ 18px, botones grandes, una acción principal por pantalla.
