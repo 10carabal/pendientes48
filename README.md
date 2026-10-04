@@ -20,7 +20,7 @@ no entrega un medicamento completo y queda "pendiente". La app:
 - Ionic (última versión estable) + Angular (standalone, Signals, zoneless) + Capacitor
 - Plataformas: Android (Capacitor) y PWA (mismo código)
 - Persistencia: IndexedDB vía `idb-keyval` (un solo camino para Android y web)
-- PDF: `pdfmake` (generado en el dispositivo)
+- PDF: `pdfmake` (generado en el dispositivo) + `@types/pdfmake` (tipos para `domain/`)
 - Plugins: `@capacitor/local-notifications`, `@capacitor/camera` + `@ionic/pwa-elements`,
   `@capacitor/clipboard`, `@capacitor/share`, `@capacitor/filesystem`
 - Pruebas: unitarias en servicios de dominio (plazos, plantillas)

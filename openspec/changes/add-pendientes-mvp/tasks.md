@@ -39,7 +39,10 @@ Una rama de Git por tarea (ver `README.md`).
     (regla 5 de `design.md`); Lighthouse ya no tiene auditoría PWA
   - Verificación: la app abre en un celular Android con `npx cap run android`; en Chrome,
     DevTools → Application → Manifest sin errores de instalabilidad y service worker activo
-- [ ] 0.3 Instalar dependencias: `idb-keyval`, `pdfmake`, plugins de Capacitor del `README.md`, `@ionic/pwa-elements`
+- [x] 0.3 Instalar dependencias: `idb-keyval`, `pdfmake`, plugins de Capacitor del `README.md`, `@ionic/pwa-elements`
+  - Nota: `@types/pdfmake` añadido como devDependency (pdfmake 0.3.11 no trae tipos y `domain/`
+    los necesita; aprobado por Daniel, `README.md` sincronizado). Las 3 moderadas de `uuid` en
+    `@capacitor/cli` quedan documentadas en `memory.md` sin acción
   - Verificación: `npm ls` lista todas sin errores y `npx cap sync android` termina sin errores
 - [ ] 0.4 Crear los modelos del `design.md` dentro de su concepto en `domain/` (`pendiente.model.ts`, `paciente.model.ts`, `norma.model.ts`; incluye `icsAgregadoEn`)
   - Verificación: `ng build` compila sin errores con los modelos importados en un archivo de prueba
