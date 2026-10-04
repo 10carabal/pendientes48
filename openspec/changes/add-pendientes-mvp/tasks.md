@@ -4,17 +4,21 @@ Leyenda: 🅿️ = se puede trabajar en paralelo con otras tareas del mismo bloq
 Cada tarea termina con su verificación. No pasar al siguiente bloque sin revisar el anterior.
 
 ## Bloque 0 — Base (secuencial, la haces tú)
-- [ ] 0.0 Repositorio y herramientas de IA
-  - [ ] 0.0.1 Verificar requisitos: Node LTS, Git, GitHub CLI (`gh`), Claude Code
-  - [ ] 0.0.2 Repositorio local: descomprimir, `git init -b main`, primer commit con las specs
-  - [ ] 0.0.3 Repositorio en GitHub: `gh repo create` privado y primer push
-  - [ ] 0.0.4 GitHub MCP: token fine-grained solo para `pendientes48` + servidor remoto en alcance local
-  - [ ] 0.0.5 OpenSpec: `openspec init` (conserva `specs/`, `changes/` y `config.yaml`)
-  - [ ] 0.0.6 Angular Agent Skills: `npx skills add https://github.com/angular/skills`
-  - [ ] 0.0.7 Verificar MCPs con `/mcp` y commit `chore: configurar herramientas de IA`
+- [x] 0.0 Repositorio y herramientas de IA
+  - [x] 0.0.1 Verificar requisitos: Node LTS, Git, GitHub CLI (`gh`), Claude Code
+    - Nota: agente OpenCode en lugar de Claude Code (mismo rol); Node v24.17.0, Git 2.54.0, gh 2.102.0
+  - [x] 0.0.2 Repositorio local: descomprimir, `git init -b main`, primer commit con las specs
+  - [x] 0.0.3 Repositorio en GitHub: `gh repo create` privado y primer push
+  - [x] 0.0.4 GitHub MCP: token fine-grained solo para `pendientes48` + servidor remoto en alcance local
+    - Nota: OAuth con DCR no lo soporta el servidor de GitHub; se usó PAT con `oauth: false` (secretos en entorno vía `{env:...}`, nunca en el repo)
+  - [x] 0.0.5 OpenSpec: `openspec init` (conserva `specs/`, `changes/` y `config.yaml`)
+  - [x] 0.0.6 Angular Agent Skills: `npx skills add https://github.com/angular/skills`
+  - [x] 0.0.7 Verificar MCPs con `/mcp` y commit `chore: configurar herramientas de IA`
+    - Commit `chore: configure AI tooling` en rama `chore/0.0-ai-tooling`, PR #1 mergeado a `main`
   - Verificación: `/mcp` muestra angular-cli, context7 y github conectados; el agente responde
     `get_best_practices`, encuentra en Context7 la doc de `@capacitor/local-notifications` y lista
     los issues del repo con GitHub MCP
+    - ✅ 2026-10-04: `get_best_practices` ✓ · Context7 resolvió `/ionic-team/capacitor-plugins` ✓ · GitHub `get_me` = 10carabal ✓
 - [ ] 0.1 Crear proyecto Ionic Angular standalone, zoneless, sin sufijo `.component`
   - Verificación: `ionic serve` muestra la pantalla de inicio vacía
 - [ ] 0.2 Agregar Capacitor Android y PWA (`@angular/pwa`)
