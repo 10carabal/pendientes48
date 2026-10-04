@@ -16,6 +16,7 @@
 | D10 | Sin pantalla de Ajustes en el MVP | Menos pantallas; las dos acciones que la necesitarían (ayuda de batería y borrar todo) caben en flujos existentes | La ayuda de batería se muestra una sola vez; se puede volver a abrir desde el aviso de permisos |
 | D11 | Carpetas por concepto: `domain`, `data`, `platform`, `features` y `shared`, con dependencias en una sola dirección; `domain/` sin Angular, Ionic ni Capacitor | La guía de estilo de Angular pide organizar por concepto y no por tipo; un dominio puro se prueba sin `TestBed` y protege la lógica legal y de plazos de cambios de framework | Más carpetas que una estructura plana; la regla de dependencias se revisa en cada PR (sin herramienta automática en el MVP) |
 | D12 | Alias de rutas en `tsconfig.json`: `@domain/*`, `@data/*`, `@platform/*`, `@shared/*` | Imports legibles y, en un PR, se ve de inmediato si una capa importa algo que no le corresponde | Ninguno relevante: lo resuelve el compilador; no requiere librerías |
+| D13 | El service worker (`@angular/pwa`) se activa solo en la PWA: `enabled: !isDevMode() && !isNative()` | En Android los archivos ya vienen dentro del APK; un service worker ahí no aporta nada y puede servir archivos viejos en caché tras una actualización | La app Android no tiene caché del service worker (no la necesita: funciona sin conexión porque todo está en el APK) |
 
 ## Estructura de carpetas (D11)
 
@@ -84,8 +85,9 @@ Cada `.spec.ts` vive al lado de su archivo (ej. `plazo.spec.ts` junto a `plazo.t
    los tipos llevan `.model.ts`. Ninguna pantalla se llama solo como un tipo (`Pendiente`).
 5. **Imports entre capas con alias** (D12): `import { estado } from '@domain/pendiente/plazo'`.
    Dentro de la misma carpeta se usan rutas relativas. Los archivos raíz (`app.ts`,
-   `app.config.ts`, `app.routes.ts`) importan `features/` con ruta relativa
-   (`./features/inicio/inicio`): son la composición de la app. Una feature jamás importa
+   `app.config.ts`, `app.routes.ts`) son la composición de la app: importan `features/`
+   con ruta relativa (`./features/inicio/inicio`) y cualquier otra capa con su alias
+   (ej. `app.config.ts` usa `@platform/plataforma`). Una feature jamás importa
    de otra feature; si dos pantallas comparten UI va a `shared/`, y si comparten lógica
    a `domain/` o `data/`.
 

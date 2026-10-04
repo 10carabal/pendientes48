@@ -33,8 +33,12 @@ Una rama de Git por tarea (ver `README.md`).
   - Verificación: `openspec validate --strict` pasa y la regla (feature→feature prohibido,
     raíz→features relativo, sin "4 capas") queda igual en `design.md`, `AGENTS.md`, `README.md`
     y `config.yaml`
-- [ ] 0.2 Agregar Capacitor Android y PWA (`@angular/pwa`)
-  - Verificación: corre en un celular Android y la PWA pasa la auditoría de instalación en Lighthouse
+- [x] 0.2 Agregar Capacitor Android y PWA (`@angular/pwa`)
+  - Nota: appId `com.theoceweb.pendientes48`; service worker solo en la PWA (`isNative()`, D13);
+    `platform/plataforma.ts` adelantado desde la 2.2; la raíz puede importar capas con alias
+    (regla 5 de `design.md`); Lighthouse ya no tiene auditoría PWA
+  - Verificación: la app abre en un celular Android con `npx cap run android`; en Chrome,
+    DevTools → Application → Manifest sin errores de instalabilidad y service worker activo
 - [ ] 0.3 Instalar dependencias: `idb-keyval`, `pdfmake`, plugins de Capacitor del `README.md`, `@ionic/pwa-elements`
   - Verificación: `npm ls` lista todas sin errores y `npx cap sync android` termina sin errores
 - [ ] 0.4 Crear los modelos del `design.md` dentro de su concepto en `domain/` (`pendiente.model.ts`, `paciente.model.ts`, `norma.model.ts`; incluye `icsAgregadoEn`)
@@ -61,7 +65,7 @@ Una rama de Git por tarea (ver `README.md`).
   fotos como `Blob`; detección de perfil duplicado; `borrarTodo()`; errores de escritura controlados
   - Verificación: las pruebas de los stores pasan para guardar/leer, perfil duplicado, fallo de escritura
     simulado y `borrarTodo()` dejando IndexedDB vacío
-- [ ] 2.2 🅿️ `platform/notificaciones.ts` (y `platform/plataforma.ts`): programar, cancelar, reprogramar al iniciar y consultar permiso (solo nativo)
+- [ ] 2.2 🅿️ `platform/notificaciones.ts` (usa `platform/plataforma.ts`, creado en la 0.2): programar, cancelar, reprogramar al iniciar y consultar permiso (solo nativo)
   - Verificación: en Android, un pendiente con vencimiento a 2 min dispara la notificación; al
     marcarlo entregado antes, no llega; tras cerrar y abrir la app, el aviso sigue programado
 - [ ] 2.3 🅿️ `platform/compartir.ts` y `platform/calendario-descarga.ts`: copiar texto, compartir PDF, descarga como respaldo en la PWA

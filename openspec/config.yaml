@@ -19,7 +19,7 @@ context: |
   @capacitor/*), features (una carpeta por ruta) y shared (UI sin lógica de negocio).
   Dependencias: features -> shared, data, platform, domain; data -> domain; domain -> nada.
   Alias de imports entre capas: @domain/*, @data/*, @platform/*, @shared/*. Las features no se
-  importan entre sí (lo compartido vive en shared); la raíz app.* importa features con ruta relativa.
+  importan entre sí (lo compartido vive en shared); la raíz app.* es la composición: importa features con ruta relativa y las demás capas con alias.
 
   Restricciones: local-first (sin backend, sin login; datos de salud sensibles, Ley 1581 de 2012);
   la app no es asesoría legal; el contenido legal vive solo en src/assets/data/normas.json y en

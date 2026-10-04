@@ -10,7 +10,7 @@ Herramientas: OpenCode usa `opencode.json`; `.mcp.json` se conserva para compati
   `data` → `domain`; `shared` y `platform` → `domain` (solo tipos); `domain` → nada.
 - `domain/` es TypeScript puro: nunca importa Angular, Ionic ni Capacitor.
 - Solo `platform/` importa `@capacitor/*`; las pantallas no preguntan si están en nativo.
-- Entre capas usa los alias `@domain/*`, `@data/*`, `@platform/*`, `@shared/*`; dentro de la misma carpeta, rutas relativas. La raíz (`app.ts`, `app.config.ts`, `app.routes.ts`) importa `features/` con ruta relativa y una feature nunca importa de otra (lo compartido va a `shared/`).
+- Entre capas usa los alias `@domain/*`, `@data/*`, `@platform/*`, `@shared/*`; dentro de la misma carpeta, rutas relativas. La raíz (`app.ts`, `app.config.ts`, `app.routes.ts`) es la composición: importa `features/` con ruta relativa y cualquier otra capa con su alias y una feature nunca importa de otra (lo compartido va a `shared/`).
 - Cada `.spec.ts` va al lado de su archivo.
 
 ## Git
