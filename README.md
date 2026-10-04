@@ -46,7 +46,7 @@ Regla: si una guía de una herramienta contradice este README o `openspec/config
 
 ## Flujo de trabajo con Git
 - `main` siempre estable; una rama por tarea: `feat/<n.°-tarea>-<nombre>` (ej. `feat/1.1-plazo`)
-- Commits con Conventional Commits en español: `feat: calcular vencimiento de 48 h`
+- Commits con Conventional Commits en ingles: `feat: calculate expiration of 48 h`
 - Al terminar una tarea: push de la rama → pull request → revisión → merge a `main`
 - Secretos (tokens, `.env`) nunca se suben; `.env.example` sí
 
