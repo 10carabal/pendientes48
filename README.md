@@ -29,9 +29,10 @@ no entrega un medicamento completo y queda "pendiente". La app:
 - Archivos sin sufijo `.component` (convención Angular 22)
 - Componentes standalone, Signals para estado, zoneless change detection
 - `provideAppInitializer()` para inicialización asíncrona
-- Carpetas por concepto en capas: `domain/` (TypeScript puro), `data/`, `platform/` (único que usa
+- Carpetas por concepto: `domain/` (TypeScript puro), `data/`, `platform/` (único que usa
   Capacitor), `features/` y `shared/`; imports entre capas con alias `@domain/*`, `@data/*`,
-  `@platform/*`, `@shared/*`. Detalle y reglas en `design.md` (D11 y D12)
+  `@platform/*`, `@shared/*`; una feature nunca importa de otra (lo compartido va a `shared/`).
+  Detalle y reglas en `design.md` (D11 y D12)
 - Decisiones de arquitectura documentadas en `design.md` en el momento en que se toman
 
 ## Herramientas de IA (solo fuentes oficiales o verificadas)
