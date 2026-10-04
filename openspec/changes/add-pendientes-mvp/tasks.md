@@ -20,7 +20,8 @@ Una rama de Git por tarea (ver `README.md`).
     `get_best_practices`, encuentra en Context7 la doc de `@capacitor/local-notifications` y lista
     los issues del repo con GitHub MCP
     - ✅ 2026-10-04: `get_best_practices` ✓ · Context7 resolvió `/ionic-team/capacitor-plugins` ✓ · GitHub `get_me` = 10carabal ✓
-- [ ] 0.1 Crear proyecto Ionic Angular standalone, zoneless, sin sufijo `.component`
+- [x] 0.1 Crear proyecto Ionic Angular standalone, zoneless, sin sufijo `.component`
+  - Nota: `ng new` + `ng add` en lugar de `ionic start`; `src/assets` servido desde `angular.json`
   - Verificación: `ionic serve` muestra la pantalla de inicio vacía
 - [ ] 0.2 Agregar Capacitor Android y PWA (`@angular/pwa`)
   - Verificación: corre en un celular Android y la PWA pasa la auditoría de instalación en Lighthouse
