@@ -51,7 +51,7 @@ Una rama de Git por tarea (ver `README.md`).
   - Verificación: `ng build` compila sin errores con los modelos importados en un archivo de
     prueba; `npx tsc -p tsconfig.spec.json --noEmit` pasa (un unhappy path queda sin cubrir si el
     modelo relaja sus requisitos)
-- [ ] 0.5 Sistema de diseño (`design.md` D14–D16 y sección "Sistema de diseño")
+- [x] 0.5 Sistema de diseño (`design.md` D14–D16 y sección "Sistema de diseño")
   - Independiente de los bloques 1 y 2: puede hacerse en paralelo; el bloque 3 depende de ella
   - `src/theme/tokens.css` con los tokens `--p48-*`; `variables.css` los mapea a Ionic y quita el
     import de `dark.system.css` (D15); `provideIonicAngular({ mode: 'ios' })` (D16)
@@ -62,6 +62,11 @@ Una rama de Git por tarea (ver `README.md`).
   - Verificación: Daniel aprueba `/guia` a 390 px y a 1280 px contra el mockup; Lighthouse ≥ 90 en
     accesibilidad sobre `/guia`; cada par texto/fondo cumple 4,5:1 (bordes de campo 3:1); en un
     build de producción `/guia` no existe (redirige a inicio)
+  - Resultados (2026-10-05): Lighthouse accesibilidad sobre `/guia` = **100/100**; 22/22 pares de
+    contraste ≥ 4,5:1 y borde de campo 3,32:1; `ng build` limpio (inicial 508,87 kB < presupuesto
+    de 550 kB), `ng test` 15/15 y `tsc --noEmit` sin errores; con `ng serve --configuration
+    production`, `/guia` redirige a inicio y no renderiza la guía
+  - ⏳ Pendiente de Daniel antes del merge: aprobar `/guia` a 390 px y a 1280 px contra el mockup
 - [x] 0.6 Ícono y splash (`design.md` D17)
   - Fuentes SVG en `assets/fuente/` → PNG en `assets/` (`icon-only`, `icon-foreground`,
     `icon-background`, `splash`, `splash-dark` = blanco por D15)

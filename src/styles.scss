@@ -1,1 +1,37 @@
-/* You can add global styles to this file, and also import other style files */
+/* Base del sistema de diseño (design.md, sección "Sistema de diseño").
+   Tipografía del sistema, texto base de 18 px e interlineado 1,5.
+   Solo tokens --p48-*: aquí no hay valores sueltos. */
+
+html {
+  font-family: var(--p48-fuente);
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+  background: var(--p48-fondo);
+  color: var(--p48-texto);
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+/* Título de la barra superior, traído a la escala del sistema (20 px, peso 600). */
+ion-title {
+  font-size: var(--p48-tam-subtitulo);
+  font-weight: var(--p48-peso-titulo);
+}
+
+/* Anillo de foco visible (accesibilidad), construido con tokens. */
+:focus-visible {
+  outline: var(--p48-ancho-acento) solid var(--p48-enlace);
+  outline-offset: var(--p48-espacio-1);
+}

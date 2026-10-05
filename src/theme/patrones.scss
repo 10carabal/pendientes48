@@ -1,0 +1,166 @@
+/**
+ * Los 7 patrones del sistema de diseño (design.md, sección "Sistema de diseño"):
+ *   1 · Tres niveles de botón      5 · Etiquetas de estado
+ *   2 · Barra de acento lateral    6 · Campo con borde
+ *   3 · Ícono en círculo           7 · Sombra flotante
+ *   4 · Superficie
+ * Solo tokens --p48-*: ningún color, tamaño ni espaciado suelto.
+ */
+
+/* 1 · Tres niveles de botón --------------------------------------------- */
+.p48-boton-principal,
+.p48-boton-secundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--p48-tam-boton);
+  min-width: var(--p48-tam-tactil);
+  padding: 0 var(--p48-espacio-5);
+  border-radius: var(--p48-radio-superficie);
+  font-family: inherit;
+  font-size: var(--p48-tam-base);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+  cursor: pointer;
+}
+
+.p48-boton-principal {
+  background: var(--p48-accion);
+  color: var(--p48-accion-texto);
+  border: none;
+}
+
+/* El rojo sólido solo dentro de una confirmación (design.md, patrón 7). */
+.p48-boton-principal--destructivo {
+  background: var(--p48-destructivo);
+  color: var(--p48-accion-texto);
+}
+
+.p48-boton-secundario {
+  background: transparent;
+  color: var(--p48-texto);
+  border: 1px solid var(--p48-texto);
+}
+
+.p48-boton-terciario {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--p48-tam-tactil);
+  padding: var(--p48-espacio-2) var(--p48-espacio-3);
+  background: none;
+  border: none;
+  color: var(--p48-enlace);
+  font-family: inherit;
+  font-size: var(--p48-tam-base);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.p48-boton-terciario--destructivo {
+  color: var(--p48-destructivo);
+}
+
+/* 2 · Barra de acento lateral (4 px) ------------------------------------ */
+.p48-barra-acento {
+  border-left: var(--p48-ancho-acento) solid var(--p48-acento-norma);
+}
+
+.p48-barra-acento--alerta {
+  border-left-color: var(--p48-acento-alerta);
+}
+
+.p48-barra-acento--permiso {
+  border-left-color: var(--p48-acento-permiso);
+}
+
+.p48-barra-acento--aviso {
+  border-left-color: var(--p48-acento-aviso);
+}
+
+/* 3 · Ícono pequeño dentro de un círculo -------------------------------- */
+.p48-icono-circulo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--p48-tam-circulo);
+  height: var(--p48-tam-circulo);
+  border-radius: var(--p48-radio-etiqueta);
+  background: var(--p48-superficie);
+  color: var(--p48-texto);
+}
+
+.p48-icono-circulo ion-icon,
+.p48-icono-circulo svg {
+  font-size: var(--p48-tam-icono);
+  width: var(--p48-tam-icono);
+  height: var(--p48-tam-icono);
+}
+
+/* 4 · Superficie: agrupar con fondo y espacio, sin bordes ---------------- */
+.p48-superficie {
+  background: var(--p48-superficie);
+  border-radius: var(--p48-radio-superficie);
+  padding: var(--p48-espacio-4);
+}
+
+/* 5 · Etiqueta de estado: fondo suave + texto oscuro del mismo tono ------- */
+.p48-etiqueta-estado {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--p48-espacio-1) var(--p48-espacio-3);
+  border-radius: var(--p48-radio-etiqueta);
+  font-size: var(--p48-tam-base);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+.p48-etiqueta-estado--en-plazo {
+  background: var(--p48-estado-en-plazo-fondo);
+  color: var(--p48-estado-en-plazo-texto);
+}
+
+.p48-etiqueta-estado--vencido {
+  background: var(--p48-estado-vencido-fondo);
+  color: var(--p48-estado-vencido-texto);
+}
+
+.p48-etiqueta-estado--escalado-eps {
+  background: var(--p48-estado-escalado-eps-fondo);
+  color: var(--p48-estado-escalado-eps-texto);
+}
+
+.p48-etiqueta-estado--escalado-supersalud {
+  background: var(--p48-estado-escalado-supersalud-fondo);
+  color: var(--p48-estado-escalado-supersalud-texto);
+}
+
+.p48-etiqueta-estado--entregado-a-tiempo {
+  background: var(--p48-estado-entregado-a-tiempo-fondo);
+  color: var(--p48-estado-entregado-a-tiempo-texto);
+}
+
+.p48-etiqueta-estado--entregado-tarde {
+  background: var(--p48-estado-entregado-tarde-fondo);
+  color: var(--p48-estado-entregado-tarde-texto);
+}
+
+/* 6 · Campo con borde: el único borde del sistema ------------------------ */
+.p48-campo {
+  width: 100%;
+  min-height: var(--p48-tam-tactil);
+  padding: var(--p48-espacio-2) var(--p48-espacio-3);
+  border: 1px solid var(--p48-borde-campo);
+  border-radius: var(--p48-radio-campo);
+  background: var(--p48-fondo);
+  color: var(--p48-texto);
+  font-family: inherit;
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+/* 7 · Sombra flotante: solo superficies flotantes ------------------------ */
+.p48-sombra-flotante {
+  box-shadow: var(--p48-sombra-flotante);
+}

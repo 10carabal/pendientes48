@@ -5,7 +5,7 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-05** — cierre de 0.4 (PR #17) y QA del change (`/opsx-qa`).
+> Última actualización: **2026-10-05** — cierre de la tarea 0.5 (sistema de diseño) y trazabilidad del QA (#18).
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -15,8 +15,9 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 
 ## Estado
 - **Bloque 0 en progreso:** 0.0 ✅ · 0.1 ✅ · 0.1.1 ✅ · 0.1.2 ✅ · 0.2 ✅ · 0.3 ✅ · **0.4 ✅** ·
-  0.6 ✅ (verificada en el Galaxy S22 y en Chrome) → siguiente **0.5** (sistema de diseño).
-- Repo sano en `main`; PRs #1–#17 mergeados; una rama por tarea; **Daniel revisa y mergea**.
+  **0.5 ✅** (lista; ⏳ Daniel aprueba `/guia` a 390 y 1280 px antes del merge) · 0.6 ✅ (verificada
+  en el Galaxy S22 y en Chrome) → siguiente: bloques 1 y 2.
+- Repo sano en `main`; PRs #1–#18 mergeados; una rama por tarea; **Daniel revisa y mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
   su verificación + PR (decisión de Daniel, 2026-10-04).
@@ -64,6 +65,13 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   WebP y combina `purpose: "any maskable"`; los íconos de la PWA se generan aparte en `public/icons/`.
 - **`capacitor-assets` reformatea `AndroidManifest.xml`** sin cambios reales: restaurarlo con
   `git checkout` antes del commit para no meter ruido.
+- **`http-server --proxy <él mismo>` entra en loop infinito** (miles de `GET /ruta` anidados): no
+  sirve como fallback SPA. Para probar rutas deep-link del build de producción usar
+  `ng serve --configuration production` (compila con `isDevMode()` en false, igual que el dist);
+  su aviso de presupuesto (raw 554,64 kB > 550) no es el canónico — el gate es `ng build`
+  (508,87 kB, limpio).
+- **`openspec validate` exige el ítem:** `npx openspec validate <nombre-del-cambio> --strict`;
+  sin nombre falla con "Nothing to validate".
 
 ## Pendientes conocidos (no bloqueantes)
 - **Identidad visual:** sistema de diseño (D14–D16) e ícono/splash (D17) resueltos; solo quedan las
@@ -76,6 +84,13 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Contenido legal intocable sin Daniel:** `plantillas.md` y `src/assets/data/normas.json`.
 
 ## Registro de actualizaciones
+- **2026-10-05** — **0.5** (sistema de diseño): `src/theme/tokens.css` (tokens `--p48-*`),
+  `variables.css` (mapea a Ionic y quita `dark.system.css`, D15), `patrones.scss` (7 patrones),
+  `styles.scss` (base 18 px, interlineado 1,5), `provideIonicAngular({ mode: 'ios' })` (D16) y
+  `features/guia/` dev-only en `/guia` con wildcard `{ path: '**', redirectTo: '' }` → en
+  producción `/guia` redirige a inicio. Presupuesto inicial subido a 550 kB (documentado en el
+  PR): `ng build` queda en 508,87 kB. Verificación: Lighthouse a11y **100/100**, 22/22 pares de
+  contraste, 15/15 tests; queda ⏳ la aprobación visual de Daniel (390 y 1280 px).
 - **2026-10-05** — **QA del change** (`/opsx-qa`, previo al merge de #17): 0 bloqueantes,
   3 mayores, 13 menores. Decisión de Daniel: los **3 mayores** quedan como notas de trazabilidad
   en `tasks.md` (2.2 reprogramar al editar, 3.2 cancelar todos los avisos, 3.4 precarga de hora);

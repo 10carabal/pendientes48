@@ -1,10 +1,21 @@
 /**
- * Ionic Dark Theme
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
+ * Mapeo de los tokens --p48-* a las variables de theming de Ionic (design.md D14).
+ * Solo modo claro (D15): sin dark.system.css.
+ * Los colores de componentes no viven aquí: cada pantalla usa tokens --p48-*
+ * y las clases de src/theme/patrones.scss.
  */
 
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+:root {
+  --ion-font-family: var(--p48-fuente);
+
+  --ion-background-color: var(--p48-fondo);
+  --ion-background-color-rgb: 255, 255, 255;
+
+  --ion-text-color: var(--p48-texto);
+  --ion-text-color-rgb: 31, 30, 28;
+
+  --ion-toolbar-background: var(--p48-fondo);
+  --ion-toolbar-color: var(--p48-texto);
+
+  --ion-item-background: var(--p48-fondo);
+}
