@@ -5,7 +5,7 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-05** — verificación de la 0.6 en el Galaxy S22 y en Chrome (PWA).
+> Última actualización: **2026-10-05** — cierre de la tarea 0.4 (modelos de `domain/`).
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -14,10 +14,9 @@ norma visible y documentos (copiar, PDF, compartir). Local-first, sin backend. F
 en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 
 ## Estado
-- **Bloque 0 en progreso:** 0.0 ✅ · 0.1 ✅ · 0.1.1 ✅ · 0.1.2 ✅ · 0.2 ✅ · 0.3 ✅ · **0.6 ✅**
-  (verificada en el Galaxy S22 y en Chrome) → siguen **0.4** (modelos en `domain/`) y **0.5**
-  (sistema de diseño).
-- Repo sano en `main`; PRs #1–#15 mergeados; una rama por tarea; **Daniel revisa y mergea**.
+- **Bloque 0 en progreso:** 0.0 ✅ · 0.1 ✅ · 0.1.1 ✅ · 0.1.2 ✅ · 0.2 ✅ · 0.3 ✅ · **0.4 ✅** ·
+  0.6 ✅ (verificada en el Galaxy S22 y en Chrome) → siguiente **0.5** (sistema de diseño).
+- Repo sano en `main`; PRs #1–#16 mergeados; una rama por tarea; **Daniel revisa y mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
   su verificación + PR (decisión de Daniel, 2026-10-04).
@@ -34,6 +33,7 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 | Verificación de 0.2 sin Lighthouse | Lighthouse **eliminó la categoría PWA** → se verificó con DevTools → Application (aceptado por Daniel en PR #11) |
 | La raíz `app.*` importa cualquier capa con alias (regla 5 ampliada, PR #11) | `app.config.ts` debe usar `@platform/plataforma` para registrar el SW |
 | `@types/pdfmake` añadido al stack (0.3; aprobado por Daniel, README sincronizado) | `pdfmake@0.3.11` no trae `.d.ts` y `domain/` necesita sus tipos (`design.md`) |
+| Specs de modelos con `@ts-expect-error` + `tsc -p tsconfig.spec.json --noEmit` en la verificación (0.4, pedido por Daniel) | los modelos son solo tipos: sin esto nada comprobaría que el compilador rechaza datos inválidos (los tipos no validan en runtime) |
 
 ## Lecciones del entorno
 - **`npm ci` siempre** después de un merge que toque `package-lock.json`; sin eso fallan `ng build`,
@@ -76,6 +76,11 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Contenido legal intocable sin Daniel:** `plantillas.md` y `src/assets/data/normas.json`.
 
 ## Registro de actualizaciones
+- **2026-10-05** — **0.4** (modelos de `domain/`): `pendiente.model.ts` (incl. `icsAgregadoEn` y
+  `EstadoPendiente`), `paciente.model.ts`, `norma.model.ts`; `Gestion` reutiliza
+  `Paciente['tipoDocumento']` vía alias `@domain/*`. Specs con fixtures happy y unhappy path
+  (`@ts-expect-error`); verificación ampliada con `tsc --noEmit`. `Preferencias` queda pendiente
+  para su store (2.1).
 - **2026-10-05** — **Verificación de 0.6** (PR #15): en el Galaxy S22, ícono nuevo en el launcher
   y splash blanco con ícono en círculo (capturado con `adb`); en Chrome, manifiesto sin advertencias
   e iconos `any`/`maskable` verificados por HTTP. El favicon de Angular que aún aparecía era la
