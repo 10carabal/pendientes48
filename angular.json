@@ -36,6 +36,7 @@
               }
             ],
             "styles": [
+              "src/theme/tokens.css",
               "src/styles.scss",
               {
                 "input": "node_modules/@ionic/angular/css/core.css"
@@ -69,6 +70,9 @@
               },
               {
                 "input": "src/theme/variables.css"
+              },
+              {
+                "input": "src/theme/patrones.scss"
               }
             ]
           },
@@ -77,7 +81,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
+                  "maximumWarning": "550kB",
                   "maximumError": "1MB"
                 },
                 {

@@ -10,7 +10,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideIonicAngular({}),
+    provideIonicAngular({ mode: 'ios' }),
     provideServiceWorker('ngsw-worker.js', {
       // Solo en la PWA: en Android los archivos ya vienen dentro del APK.
       enabled: !isDevMode() && !isNative(),

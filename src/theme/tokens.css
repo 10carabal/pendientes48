@@ -1,0 +1,77 @@
+/**
+ * Tokens del sistema de diseño "documento limpio" (design.md, D14–D16).
+ * Única fuente de valores visuales: pantallas y componentes solo usan
+ * var(--p48-*) y las clases de src/theme/patrones.scss. Prefijo: --p48-.
+ */
+
+:root {
+  /* Superficies y texto */
+  --p48-fondo: #ffffff;
+  --p48-superficie: #f6f5f3;
+  --p48-texto: #1f1e1c;
+  --p48-texto-secundario: #5f5e5a;
+  --p48-borde-campo: #8f8d88;
+  --p48-enlace: #1d4ed8;
+  --p48-accion: #1f1e1c;
+  --p48-accion-texto: #ffffff;
+  --p48-destructivo: #9b1c1c;
+
+  /* Estados: fondo suave + texto oscuro del mismo tono (nunca gris sobre color) */
+  --p48-estado-en-plazo-fondo: #e8effd;
+  --p48-estado-en-plazo-texto: #1e3a8a;
+  --p48-estado-vencido-fondo: #fdecec;
+  --p48-estado-vencido-texto: #9b1c1c;
+  --p48-estado-escalado-eps-fondo: #fdf0e3;
+  --p48-estado-escalado-eps-texto: #8a4210;
+  /* Los dos estados de queja comparten tono por diseño: la etiqueta dice ante quién */
+  --p48-estado-escalado-supersalud-fondo: var(--p48-estado-escalado-eps-fondo);
+  --p48-estado-escalado-supersalud-texto: var(--p48-estado-escalado-eps-texto);
+  --p48-estado-entregado-a-tiempo-fondo: #e7f5ec;
+  --p48-estado-entregado-a-tiempo-texto: #1f6b3a;
+  --p48-estado-entregado-tarde-fondo: #efeeeb;
+  --p48-estado-entregado-tarde-texto: #4a4945;
+
+  /* Acentos de las barras laterales de 4 px */
+  --p48-acento-norma: #3b6fe0;
+  --p48-acento-alerta: #c53030;
+  --p48-acento-permiso: #c2650f;
+  --p48-acento-aviso: #c9c7c2;
+
+  /* Tipografía: solo del sistema, sin fuentes externas */
+  --p48-fuente: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --p48-tam-titulo: 24px;
+  --p48-tam-subtitulo: 20px;
+  --p48-tam-base: 18px;
+  --p48-peso-titulo: 600;
+  --p48-interlineado: 1.5;
+
+  /* Espaciado */
+  --p48-espacio-1: 4px;
+  --p48-espacio-2: 8px;
+  --p48-espacio-3: 12px;
+  --p48-espacio-4: 16px;
+  --p48-espacio-5: 24px;
+  --p48-espacio-6: 32px;
+
+  /* Esquinas */
+  --p48-radio-superficie: 12px;
+  --p48-radio-campo: 10px;
+  --p48-radio-etiqueta: 999px;
+
+  /* Área táctil mínima y altura de botones */
+  --p48-tam-tactil: 48px;
+  --p48-tam-boton: 56px;
+
+  /* Ícono en círculo (rangos aprobados: círculo 36–44 px, ícono 18–20 px) */
+  --p48-tam-circulo: 40px;
+  --p48-tam-icono: 20px;
+  --p48-ancho-acento: 4px;
+
+  /* Anchos de columna (design.md, "Adaptación por tamaño") */
+  --p48-ancho-inicio: 760px;
+  --p48-ancho-detalle: 1080px;
+
+  /* Sombra flotante: solo superficies flotantes */
+  --p48-sombra-flotante: 0 4px 8px -2px rgba(31, 30, 28, 0.22),
+    0 2px 4px -2px rgba(31, 30, 28, 0.14);
+}
