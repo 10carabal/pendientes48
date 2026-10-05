@@ -99,6 +99,9 @@ Una rama de Git por tarea (ver `README.md`).
 - [ ] 2.2 🅿️ `platform/notificaciones.ts` (usa `platform/plataforma.ts`, creado en la 0.2): programar, cancelar, reprogramar al iniciar y consultar permiso (solo nativo)
   - Verificación: en Android, un pendiente con vencimiento a 2 min dispara la notificación; al
     marcarlo entregado antes, no llega; tras cerrar y abrir la app, el aviso sigue programado
+  - Nota (QA): `design.md · Avisos` y el escenario "Editar un pendiente" de la spec `pendientes`
+    exigen **reprogramar el aviso al editar la hora** (no solo al iniciar) — añadirlo a la tarea y
+    a su verificación (hallazgo mayor 11)
 - [ ] 2.3 🅿️ `platform/compartir.ts` y `platform/calendario-descarga.ts`: copiar texto, compartir PDF, descarga como respaldo en la PWA
   - Verificación: en Android el menú de compartir muestra WhatsApp con el PDF adjunto; en un
     navegador de escritorio el PDF se descarga
@@ -117,6 +120,8 @@ espaciados sueltos), y cada pantalla se verifica a 390 px y a 1280 px contra el 
     los cuatro componentes aparecen en `/guia`
 - [ ] 3.2 🅿️ `features/pacientes`: crear, editar, aviso de duplicado y "Borrar todos mis datos" con doble confirmación
   - Verificación: un duplicado ofrece "Usar el perfil existente"; tras borrar todo, la app vuelve a la primera apertura
+  - Nota (QA): el escenario "Borrar todos mis datos" exige además **cancelar todos los avisos
+    programados** — incluirlo en texto y verificación (hallazgo mayor 12)
 - [ ] 3.3 🅿️ `features/ventanilla`: guía de 3 pasos, norma-card en el paso 2, alternativas del paso 3
   - Verificación: en modo avión la guía se ve completa; con cámara denegada se puede llegar al registro
 - [ ] 3.4 🅿️ `features/pendiente-form`: registro y edición; dirección obligatoria precargada;
@@ -124,6 +129,8 @@ espaciados sueltos), y cada pantalla se verifica a 390 px y a 1280 px contra el 
   mensaje de fallo al guardar; hoja `ayuda-avisos` la primera vez en Android
   - Verificación: no se puede guardar con hora futura ni sin dirección; con una queja registrada
     la hora aparece bloqueada; la hoja de ayuda sale solo en el primer registro
+  - Nota (QA): falta el escenario "Hora de reclamo por defecto" (la hora se precarga con la hora
+    actual) — incluirlo en texto y verificación (hallazgo mayor 10)
 - [ ] 3.5 `features/pendiente-detalle`: contador, estado con etiqueta y color, norma-card, bitácora
   (`bitacoraVista`) con notas manuales, escalera tipo stepper, "Ya me llegó", aviso de permiso
   denegado, botón `.ics` con "Ya agregaste este recordatorio el…", y "Borrar" con confirmación
