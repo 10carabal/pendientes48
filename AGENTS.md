@@ -13,6 +13,11 @@ Herramientas: OpenCode usa `opencode.json`; `.mcp.json` se conserva para compati
 - Entre capas usa los alias `@domain/*`, `@data/*`, `@platform/*`, `@shared/*`; dentro de la misma carpeta, rutas relativas. La raíz (`app.ts`, `app.config.ts`, `app.routes.ts`) es la composición: importa `features/` con ruta relativa y cualquier otra capa con su alias y una feature nunca importa de otra (lo compartido va a `shared/`).
 - Cada `.spec.ts` va al lado de su archivo.
 
+## Sistema de diseño (ver `design.md`, sección "Sistema de diseño")
+- Solo tokens `--p48-*` y clases de `src/theme/patrones.scss`: nunca colores, tamaños ni espaciados sueltos.
+- Ningún texto por debajo de 18 px; un solo botón principal (sólido) por pantalla; el color nunca va solo.
+- Toda pantalla nueva se revisa a 390 px y a 1280 px y sus componentes compartidos se agregan a `/guia`.
+
 ## Git
 - Nunca hagas commit ni push directo a `main`.
 - Una rama por tarea: `feat/<n.° tarea>-<nombre>` (ej. `feat/1.1-plazo`); sin número: `chore/<nombre>` o `docs/<nombre>`.
@@ -26,7 +31,7 @@ Herramientas: OpenCode usa `opencode.json`; `.mcp.json` se conserva para compati
 - `memory.md` (raíz) es la memoria del proceso, basada en `proposal.md`: decisiones de ejecución,
   lecciones del entorno y pendientes conocidos.
 - Al terminar una tarea, feature o cambio relevante, **actualízalo como último paso antes del PR**;
-  solo información con impacto futuro. No dupliques `tasks.md` (progreso), `design.md` (D1–D13)
+  solo información con impacto futuro. No dupliques `tasks.md` (progreso), `design.md` (D1–D16)
   ni contenido legal.
 
 ## Contenido legal
