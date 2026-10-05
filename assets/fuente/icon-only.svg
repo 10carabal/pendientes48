@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Ícono B (D17): cápsula dentro del arco del plazo. Fondo casi negro a sangre: cada sistema aplica su máscara. -->
+  <rect width="1024" height="1024" fill="#1F1E1C"/>
+  <g transform="scale(10.24)"><g fill="none" stroke="#FFFFFF" stroke-linecap="round"><circle cx="50" cy="50" r="34" stroke-width="6" stroke-dasharray="160 54" transform="rotate(-60 50 50)"/><g transform="rotate(-45 50 50)"><rect x="33" y="42" width="34" height="16" rx="8" stroke-width="4.5"/><path d="M41 42 H50 V58 H41 A8 8 0 0 1 41 42 Z" fill="#FFFFFF" stroke="none"/></g></g></g>
+</svg>

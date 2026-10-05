@@ -3,9 +3,9 @@
 > **Cómo se mantiene:** documento vivo basado en [`proposal.md`](openspec/changes/add-pendientes-mvp/proposal.md).
 > El agente que cierra una tarea, feature o cambio relevante lo actualiza como **último paso antes
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
-> progreso (`tasks.md`), las decisiones de diseño (D1–D16 en `design.md`) ni las reglas (`AGENTS.md`).
+> progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-05** — sistema de diseño aprobado (tarea 0.5 planificada).
+> Última actualización: **2026-10-05** — cierre de la tarea 0.6 (ícono y splash).
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -14,9 +14,10 @@ norma visible y documentos (copiar, PDF, compartir). Local-first, sin backend. F
 en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 
 ## Estado
-- **Bloque 0 en progreso:** 0.0 ✅ · 0.1 ✅ · 0.1.1 ✅ · 0.1.2 ✅ · 0.2 ✅ · **0.3 ✅** → siguiente
-  **0.4** (modelos en `domain/`, incluye `icsAgregadoEn`).
-- Repo sano en `main`; PRs #1–#12 mergeados; una rama por tarea; **Daniel revisa y mergea**.
+- **Bloque 0 en progreso:** 0.0 ✅ · 0.1 ✅ · 0.1.1 ✅ · 0.1.2 ✅ · 0.2 ✅ · 0.3 ✅ · **0.6 ✅**
+  (pendiente de verificación en dispositivo) → siguen **0.4** (modelos en `domain/`) y **0.5**
+  (sistema de diseño).
+- Repo sano en `main`; PRs #1–#14 mergeados; una rama por tarea; **Daniel revisa y mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
   su verificación + PR (decisión de Daniel, 2026-10-04).
@@ -50,10 +51,17 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - `npm warn allow-scripts` (esbuild, lmdb, msgpackr…) **no ha bloqueado nada real**; vigilar solo
   si un build falla por binario faltante.
 - Tras cada merge: borrar ramas locales y remotas mergeadas (el remoto debe quedar con solo `main`).
+- **Regenerar ícono o splash:** editar el SVG en `assets/fuente/`, convertirlo a PNG en `assets/` (se
+  usó `sharp`, que llega con `@capacitor/assets`) y correr `npx capacitor-assets generate --android
+  --iconBackgroundColor '#1F1E1C' --splashBackgroundColor '#FFFFFF' --splashBackgroundColorDark
+  '#FFFFFF'`. **No usar `--pwa`:** escribe los íconos fuera de `public/`, los declara PNG siendo
+  WebP y combina `purpose: "any maskable"`; los íconos de la PWA se generan aparte en `public/icons/`.
+- **`capacitor-assets` reformatea `AndroidManifest.xml`** sin cambios reales: restaurarlo con
+  `git checkout` antes del commit para no meter ruido.
 
 ## Pendientes conocidos (no bloqueantes)
-- **Identidad visual:** sistema de diseño aprobado (D14–D16, tarea 0.5); siguen pendientes los
-  íconos de la app (genéricos de Angular), warnings `purpose 'any maskable'` y screenshots del manifest.
+- **Identidad visual:** sistema de diseño (D14–D16) e ícono/splash (D17) resueltos; solo quedan las
+  capturas de pantalla del manifiesto (`screenshots`), que se agregan cuando existan pantallas reales.
 - **Hosting de la PWA** para compartirla por WhatsApp → decidir antes de la tarea 4.2.
 - **`uuid` (3 moderadas en `npm audit`):** dentro de `@capacitor/cli` → `xcode`; es solo la CLI de
   desarrollo, nunca llega a usuarios. El fix de npm rebajaría la CLI a 8.4.3 (peor) → **sin acción**,
@@ -62,6 +70,9 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Contenido legal intocable sin Daniel:** `plantillas.md` y `src/assets/data/normas.json`.
 
 ## Registro de actualizaciones
+- **2026-10-05** — **0.6** (ícono B y splash blanco): fuentes SVG, Android con `@capacitor/assets`,
+  PWA en PNG propios con `any`/`maskable` separados (resuelve la advertencia pendiente desde la 0.2),
+  favicon de Angular reemplazado y `theme-color` a blanco (movido desde la 0.5).
 - **2026-10-05** — Sistema de diseño aprobado por Daniel sobre un mockup (celular + PWA en
   escritorio); se agrega la tarea **0.5** y D14–D16. La tabla de colores de estado se alineó al
   mockup (antes: en plazo verde y Supersalud rojo oscuro, poco distinguibles de otros estados).

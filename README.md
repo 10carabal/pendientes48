@@ -24,6 +24,7 @@ no entrega un medicamento completo y queda "pendiente". La app:
 - Plugins: `@capacitor/local-notifications`, `@capacitor/camera` + `@ionic/pwa-elements`,
   `@capacitor/clipboard`, `@capacitor/share`, `@capacitor/filesystem`
 - Pruebas: unitarias en servicios de dominio (plazos, plantillas)
+- Íconos y splash: `@capacitor/assets` (devDependency) a partir de `assets/` (`design.md` D17)
 
 ## Convenciones
 - Archivos sin sufijo `.component` (convención Angular 22)

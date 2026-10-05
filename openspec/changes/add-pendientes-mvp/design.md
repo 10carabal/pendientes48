@@ -20,6 +20,7 @@
 | D14 | Sistema de diseño propio "documento limpio" (minimalista, inspirado en la estética de herramientas tipo Notion, con valores propios) con tokens en `src/theme/` y patrones de Refactoring UI; mockup aprobado por Daniel el 2026-10-05 | Interfaz elegante y sencilla para adultos mayores; los tokens evitan decisiones visuales en cada pantalla y hacen revisable cada PR | Toda pantalla depende de la tarea 0.5; nada de colores, tamaños ni espaciados sueltos |
 | D15 | Solo modo claro en el MVP; se quita `dark.system.css` | Cada par de colores necesita revisión de contraste; el modo oscuro duplicaría la verificación | Quien use el celular en modo oscuro verá la app en claro (modo oscuro en fase 2) |
 | D16 | Un solo estilo de Ionic en todas las plataformas: `provideIonicAngular({ mode: 'ios' })` | Es el más plano y cercano al estilo buscado; una sola apariencia que verificar en Android, PWA y escritorio | En Android algunos controles no lucen "nativos" de Material |
+| D17 | Identidad: ícono **B** (cápsula dentro del arco del plazo, trazo blanco sobre `#1F1E1C`) y splash **blanco** con el ícono en círculo; fuentes SVG en `assets/fuente/`, Android generado con `@capacitor/assets` y PWA en PNG propios (aprobado por Daniel el 2026-10-05) | La cápsula dice "medicamento" y el arco dice "plazo" a 48 px; el splash blanco no produce salto de color al abrir la app; sin cruz (emblema protegido y apariencia oficial) | Ícono provisional de autor (no de diseñador de marca); cambiarlo exige regenerar con el mismo comando |
 
 ## Estructura de carpetas (D11)
 
@@ -67,6 +68,9 @@ src/app/
   app.ts · app.config.ts · app.routes.ts
 src/assets/data/
   normas.json
+assets/                          # identidad (D17): PNG fuente para @capacitor/assets
+  fuente/                        # SVG editables del ícono y del splash
+public/icons/                    # íconos de la PWA (48, 180, 192, 512)
 src/theme/                       # sistema de diseño (D14): fuera de las capas de src/app
   tokens.css                     # variables --p48-*
   variables.css                  # mapeo de los tokens a las variables de Ionic
