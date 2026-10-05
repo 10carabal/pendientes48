@@ -21,6 +21,10 @@ context: |
   Alias de imports entre capas: @domain/*, @data/*, @platform/*, @shared/*. Las features no se
   importan entre sí (lo compartido vive en shared); la raíz app.* es la composición: importa features con ruta relativa y las demás capas con alias.
 
+  Sistema de diseño (design.md D14-D16): minimalista tipo documento, solo modo claro, Ionic en
+  mode 'ios' en todas las plataformas; solo tokens --p48-* y patrones de src/theme; texto >= 18px;
+  un botón principal por pantalla; pantallas verificadas a 390px y 1280px.
+
   Restricciones: local-first (sin backend, sin login; datos de salud sensibles, Ley 1581 de 2012);
   la app no es asesoría legal; el contenido legal vive solo en src/assets/data/normas.json y en
   las plantillas aprobadas de plantillas.md; accesibilidad: texto base >= 18px, botones grandes,

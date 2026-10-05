@@ -33,6 +33,8 @@ no entrega un medicamento completo y queda "pendiente". La app:
   Capacitor), `features/` y `shared/`; imports entre capas con alias `@domain/*`, `@data/*`,
   `@platform/*`, `@shared/*`; una feature nunca importa de otra (lo compartido va a `shared/`).
   Detalle y reglas en `design.md` (D11 y D12)
+- Sistema de diseño minimalista tipo documento (`design.md` D14–D16): tokens en `src/theme/`,
+  guía de estilo en `/guia` (solo en desarrollo)
 - Decisiones de arquitectura documentadas en `design.md` en el momento en que se toman
 
 ## Herramientas de IA (solo fuentes oficiales o verificadas)

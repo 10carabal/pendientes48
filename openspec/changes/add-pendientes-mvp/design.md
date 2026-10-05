@@ -17,6 +17,9 @@
 | D11 | Carpetas por concepto: `domain`, `data`, `platform`, `features` y `shared`, con dependencias en una sola dirección; `domain/` sin Angular, Ionic ni Capacitor | La guía de estilo de Angular pide organizar por concepto y no por tipo; un dominio puro se prueba sin `TestBed` y protege la lógica legal y de plazos de cambios de framework | Más carpetas que una estructura plana; la regla de dependencias se revisa en cada PR (sin herramienta automática en el MVP) |
 | D12 | Alias de rutas en `tsconfig.json`: `@domain/*`, `@data/*`, `@platform/*`, `@shared/*` | Imports legibles y, en un PR, se ve de inmediato si una capa importa algo que no le corresponde | Ninguno relevante: lo resuelve el compilador; no requiere librerías |
 | D13 | El service worker (`@angular/pwa`) se activa solo en la PWA: `enabled: !isDevMode() && !isNative()` | En Android los archivos ya vienen dentro del APK; un service worker ahí no aporta nada y puede servir archivos viejos en caché tras una actualización | La app Android no tiene caché del service worker (no la necesita: funciona sin conexión porque todo está en el APK) |
+| D14 | Sistema de diseño propio "documento limpio" (minimalista, inspirado en la estética de herramientas tipo Notion, con valores propios) con tokens en `src/theme/` y patrones de Refactoring UI; mockup aprobado por Daniel el 2026-10-05 | Interfaz elegante y sencilla para adultos mayores; los tokens evitan decisiones visuales en cada pantalla y hacen revisable cada PR | Toda pantalla depende de la tarea 0.5; nada de colores, tamaños ni espaciados sueltos |
+| D15 | Solo modo claro en el MVP; se quita `dark.system.css` | Cada par de colores necesita revisión de contraste; el modo oscuro duplicaría la verificación | Quien use el celular en modo oscuro verá la app en claro (modo oscuro en fase 2) |
+| D16 | Un solo estilo de Ionic en todas las plataformas: `provideIonicAngular({ mode: 'ios' })` | Es el más plano y cercano al estilo buscado; una sola apariencia que verificar en Android, PWA y escritorio | En Android algunos controles no lucen "nativos" de Material |
 
 ## Estructura de carpetas (D11)
 
@@ -55,6 +58,7 @@ src/app/
     pendiente-detalle/           # pendiente-detalle.ts, contador.ts, bitacora-lista.ts, escalera.ts
     reclamo/                     # reclamo.ts, vista-previa.ts
     pacientes/
+    guia/                        # guía de estilo /guia, solo en desarrollo (D14)
   shared/                        # UI de presentación, sin lógica de negocio
     norma-card/                  # tarjeta "¿Por qué tienes derecho?"
     ayuda-avisos/                # hoja de ayuda de batería (Android)
@@ -63,6 +67,10 @@ src/app/
   app.ts · app.config.ts · app.routes.ts
 src/assets/data/
   normas.json
+src/theme/                       # sistema de diseño (D14): fuera de las capas de src/app
+  tokens.css                     # variables --p48-*
+  variables.css                  # mapeo de los tokens a las variables de Ionic
+  patrones.scss                  # clases de los 7 patrones (botones, acento, ícono, superficie…)
 ```
 
 Cada `.spec.ts` vive al lado de su archivo (ej. `plazo.spec.ts` junto a `plazo.ts`).
@@ -205,17 +213,80 @@ En la UI, una signal `ahora` se actualiza cada minuto.
 
 ## Etiquetas y colores de estado
 
-| Estado | Etiqueta | Color |
-|---|---|---|
-| `en-plazo` | En plazo | verde |
-| `vencido` | Vencido | rojo |
-| `escalado-eps` | Queja ante EPS | naranja |
-| `escalado-supersalud` | Queja ante Supersalud | rojo oscuro |
-| `entregado-a-tiempo` | Entregado a tiempo | verde oscuro |
-| `entregado-tarde` | Entregado tarde | gris |
+Valores del mockup aprobado (D14). Fondo suave + texto oscuro **del mismo tono** (nunca gris sobre color).
 
-Accesibilidad: el color **nunca** va solo; siempre acompaña la etiqueta de texto, y todos los
-colores pasan contraste (≥ 4.5:1 sobre fondo claro).
+| Estado | Etiqueta | Color | Fondo | Texto |
+|---|---|---|---|---|
+| `en-plazo` | En plazo | azul | `#E8EFFD` | `#1E3A8A` |
+| `vencido` | Vencido | rojo | `#FDECEC` | `#9B1C1C` |
+| `escalado-eps` | Queja ante EPS | naranja | `#FDF0E3` | `#8A4210` |
+| `escalado-supersalud` | Queja ante Supersalud | naranja | `#FDF0E3` | `#8A4210` |
+| `entregado-a-tiempo` | Entregado a tiempo | verde | `#E7F5EC` | `#1F6B3A` |
+| `entregado-tarde` | Entregado tarde | gris | `#EFEEEB` | `#4A4945` |
+
+Accesibilidad: el color **nunca** va solo; siempre acompaña la etiqueta de texto, y cada par
+fondo/texto cumple ≥ 4.5:1. Los dos estados de queja comparten color porque significan lo mismo
+para el usuario ("ya reclamé"); la etiqueta dice ante quién.
+
+## Sistema de diseño (D14–D16)
+
+Referencia visual: mockup aprobado (lienzo privado de Daniel, "Pendientes48 — Mockup sistema de
+diseño": Inicio y Detalle en celular y en escritorio, más el tablero de tokens).
+
+### Principios
+- **Minimalismo por resta:** menos colores, bordes y decoración; nunca texto más pequeño ni más claro.
+- Fondo blanco, texto casi negro, un solo color de enlace. El color aparece solo cuando comunica
+  (estados, alertas, acción principal).
+- Tipografía del sistema (`-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif`):
+  ninguna fuente externa (cargarla de Google contactaría a un tercero, contra la regla local-first).
+- Íconos de línea (Ionicons, ya incluidos en Ionic), pocos y siempre con texto o `aria-label`.
+
+### Tokens (`src/theme/tokens.css`, prefijo `--p48-`)
+
+| Token | Valor | Uso |
+|---|---|---|
+| `--p48-fondo` | `#FFFFFF` | Fondo de pantalla |
+| `--p48-superficie` | `#F6F5F3` | Agrupar contenido (en lugar de bordes) |
+| `--p48-texto` | `#1F1E1C` | Texto principal |
+| `--p48-texto-secundario` | `#5F5E5A` | Texto secundario (6,5:1) |
+| `--p48-borde-campo` | `#8F8D88` | Borde de campos de formulario (3,3:1) |
+| `--p48-enlace` | `#1D4ED8` | Enlaces y botones terciarios |
+| `--p48-accion` | `#1F1E1C` | Botón principal (texto blanco) |
+| `--p48-destructivo` | `#9B1C1C` | Botón terciario destructivo |
+| Estados | tabla anterior | Etiquetas, alertas e íconos de estado |
+| Acentos | norma `#3B6FE0` · alerta `#C53030` · permiso `#C2650F` · aviso `#C9C7C2` | Barras de acento |
+| Tipografía | 24 / 20 / 18 px; peso 600 en títulos; interlineado 1,5 | Ningún texto de la app por debajo de 18 px |
+| Espaciado | 4 · 8 · 12 · 16 · 24 · 32 px | Márgenes y separaciones |
+| Esquinas | 12 px superficies y botones · 10 px campos · 999 px etiquetas | — |
+| Área táctil | mínimo 48 × 48 px; botones principal y secundario de 56 px | — |
+| Sombra flotante | `0 4px 8px -2px rgba(31,30,28,.22), 0 2px 4px -2px rgba(31,30,28,.14)` | Solo superficies flotantes |
+
+### Patrones (de Refactoring UI, "7 Practical Tips for Cheating at Design")
+1. **Jerarquía con peso y color, no con tamaño:** lo secundario cambia de tono, no de tamaño.
+2. **Texto del mismo tono sobre fondos de color:** nunca gris sobre color.
+3. **Sombra desplazada hacia abajo:** solo en superficies flotantes (botón principal flotante, hojas, modales).
+4. **Menos bordes:** separar con espacio y `--p48-superficie`; el único borde es el de los campos.
+5. **Ícono pequeño dentro de un círculo:** el ícono se queda en 18–20 px; el círculo (36–44 px) le da presencia.
+6. **Barra de acento lateral (4 px):** tarjeta de la norma, alerta de vencimiento, aviso de permiso y aviso legal.
+7. **Tres niveles de botón:** principal sólido (**uno por pantalla**), secundario con contorno,
+   terciario como enlace (también el destructivo; el rojo sólido solo dentro de la confirmación).
+
+### Adaptación por tamaño
+- **Celular (PWA y Android):** una columna; el botón principal flota al pie con la sombra del patrón 3.
+- **Escritorio (PWA):** contenido centrado con ancho máximo (Inicio 760 px, Detalle 1080 px); el
+  botón principal sube junto al título (Inicio) o a la columna lateral (Detalle).
+- **Detalle en escritorio:** dos columnas que se apilan solas al faltar espacio (`flex-wrap`):
+  principal (estado, alerta, pasos, bitácora) y lateral (acciones, tarjeta de la norma).
+
+### Principios de experiencia
+- Una tarea por pantalla, con un título que diga qué se hace ahí.
+- Lenguaje sencillo, sin siglas salvo "EPS".
+- Pantallas vacías que explican qué hacer.
+- Confirmación solo antes de acciones destructivas; para lo demás, un aviso breve ("Guardado").
+
+### Guía de estilo
+`features/guia/` en la ruta `/guia`, registrada **solo en desarrollo** (`isDevMode()`). Muestra
+tokens y patrones a 390 px y a 1280 px; desde la 3.1 incluye también los componentes de `shared/`.
 
 ## Bitácora derivada
 

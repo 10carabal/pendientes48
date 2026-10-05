@@ -46,6 +46,18 @@ Una rama de Git por tarea (ver `README.md`).
   - Verificación: `npm ls` lista todas sin errores y `npx cap sync android` termina sin errores
 - [ ] 0.4 Crear los modelos del `design.md` dentro de su concepto en `domain/` (`pendiente.model.ts`, `paciente.model.ts`, `norma.model.ts`; incluye `icsAgregadoEn`)
   - Verificación: `ng build` compila sin errores con los modelos importados en un archivo de prueba
+- [ ] 0.5 Sistema de diseño (`design.md` D14–D16 y sección "Sistema de diseño")
+  - Independiente de los bloques 1 y 2: puede hacerse en paralelo; el bloque 3 depende de ella
+  - `src/theme/tokens.css` con los tokens `--p48-*`; `variables.css` los mapea a Ionic y quita el
+    import de `dark.system.css` (D15); `provideIonicAngular({ mode: 'ios' })` (D16)
+  - `styles.scss`: tipografía del sistema, base de 18 px e interlineado 1,5
+  - `src/theme/patrones.scss`: los 7 patrones (3 niveles de botón, barra de acento, ícono en círculo,
+    superficie, etiquetas de estado, campo con borde, sombra flotante)
+  - `theme-color` de `index.html` y `theme_color`/`background_color` del manifiesto a `#FFFFFF`
+  - `features/guia/` en `/guia`, registrada solo en desarrollo, con todos los tokens y patrones
+  - Verificación: Daniel aprueba `/guia` a 390 px y a 1280 px contra el mockup; Lighthouse ≥ 90 en
+    accesibilidad sobre `/guia`; cada par texto/fondo cumple 4,5:1 (bordes de campo 3:1); en un
+    build de producción `/guia` no existe (redirige a inicio)
 
 ## Bloque 1 — Dominio puro (🅿️ todas en paralelo, sin UI)
 - [ ] 1.1 🅿️ `domain/pendiente/plazo.ts`: `vencimiento`, `estado`, `textoContador`, `validarHoraReclamo` + `plazo.spec.ts`
@@ -79,11 +91,14 @@ Una rama de Git por tarea (ver `README.md`).
   - Verificación: foto tomada y foto de galería quedan de 1280 px o menos; con permiso de cámara
     denegado se ofrece la galería sin error
 
-## Bloque 3 — Pantallas (🅿️ en paralelo cuando 1 y 2 estén listos)
+## Bloque 3 — Pantallas (🅿️ en paralelo cuando 0.5, 1 y 2 estén listos)
+Regla para todo el bloque: solo tokens y patrones del sistema de diseño (sin colores, tamaños ni
+espaciados sueltos), y cada pantalla se verifica a 390 px y a 1280 px contra el mockup aprobado.
 - [ ] 3.1 🅿️ `shared/norma-card` (incluye "Verificado el" y el aviso de no asesoría), `shared/ayuda-avisos`, `shared/estado-chip` y `shared/aviso-legal`
   - Verificación: la tarjeta muestra los 5 elementos de la spec `normas` más el aviso de no
     asesoría y, sin conexión, solo el enlace queda inactivo; `estado-chip` muestra la etiqueta y el
-    color de los 6 estados; `aviso-legal` muestra la línea fija y el modal de primera apertura
+    color de los 6 estados; `aviso-legal` muestra la línea fija y el modal de primera apertura;
+    los cuatro componentes aparecen en `/guia`
 - [ ] 3.2 🅿️ `features/pacientes`: crear, editar, aviso de duplicado y "Borrar todos mis datos" con doble confirmación
   - Verificación: un duplicado ofrece "Usar el perfil existente"; tras borrar todo, la app vuelve a la primera apertura
 - [ ] 3.3 🅿️ `features/ventanilla`: guía de 3 pasos, norma-card en el paso 2, alternativas del paso 3
@@ -118,7 +133,8 @@ Una rama de Git por tarea (ver `README.md`).
   - Verificación: los tres se completan sin errores con el modo avión activo
 - [ ] 4.4 Accesibilidad
   - Verificación: Lighthouse con 90 o más en accesibilidad en inicio, detalle y reclamo; revisión
-    manual de texto base de 18 px o más, una acción principal por pantalla y estados con etiqueta de texto
+    manual de texto base de 18 px o más, una acción principal por pantalla, estados con etiqueta de texto,
+    contraste de 4,5:1 en todo el texto y área táctil de 48 px en todo lo que se toca
 - [ ] 4.5 Prueba con un usuario real (tu mamá o alguien en la fila de un dispensario)
   - Verificación: la persona registra un pendiente y genera una queja sin ayuda; anotar dónde dudó
 - [ ] 4.6 (Opcional) Agregar Playwright MCP para automatizar el flujo 4.2 en el navegador

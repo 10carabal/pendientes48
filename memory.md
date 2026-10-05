@@ -3,9 +3,9 @@
 > **Cómo se mantiene:** documento vivo basado en [`proposal.md`](openspec/changes/add-pendientes-mvp/proposal.md).
 > El agente que cierra una tarea, feature o cambio relevante lo actualiza como **último paso antes
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
-> progreso (`tasks.md`), las decisiones de diseño (D1–D13 en `design.md`) ni las reglas (`AGENTS.md`).
+> progreso (`tasks.md`), las decisiones de diseño (D1–D16 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-04** — cierre de las tareas 0.2 y 0.3.
+> Última actualización: **2026-10-05** — sistema de diseño aprobado (tarea 0.5 planificada).
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -52,8 +52,8 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - Tras cada merge: borrar ramas locales y remotas mergeadas (el remoto debe quedar con solo `main`).
 
 ## Pendientes conocidos (no bloqueantes)
-- **Identidad visual:** íconos genéricos de Angular, warnings `purpose 'any maskable'`, screenshots
-  del manifest y color provisional `#1e3a8a` → resolver cuando se defina el branding.
+- **Identidad visual:** sistema de diseño aprobado (D14–D16, tarea 0.5); siguen pendientes los
+  íconos de la app (genéricos de Angular), warnings `purpose 'any maskable'` y screenshots del manifest.
 - **Hosting de la PWA** para compartirla por WhatsApp → decidir antes de la tarea 4.2.
 - **`uuid` (3 moderadas en `npm audit`):** dentro de `@capacitor/cli` → `xcode`; es solo la CLI de
   desarrollo, nunca llega a usuarios. El fix de npm rebajaría la CLI a 8.4.3 (peor) → **sin acción**,
@@ -62,6 +62,9 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Contenido legal intocable sin Daniel:** `plantillas.md` y `src/assets/data/normas.json`.
 
 ## Registro de actualizaciones
+- **2026-10-05** — Sistema de diseño aprobado por Daniel sobre un mockup (celular + PWA en
+  escritorio); se agrega la tarea **0.5** y D14–D16. La tabla de colores de estado se alineó al
+  mockup (antes: en plazo verde y Supersalud rojo oscuro, poco distinguibles de otros estados).
 - **2026-10-04** — **0.3** (dependencias): `idb-keyval`, `pdfmake` + `@types/pdfmake`, 5 plugins de
   Capacitor y `@ionic/pwa-elements`; `npm ls` y `cap sync` verificados; plugins registrados en
   `android/*.gradle`. Vulnerabilidad `uuid` documentada sin acción.
