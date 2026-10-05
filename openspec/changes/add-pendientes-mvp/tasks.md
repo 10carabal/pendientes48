@@ -53,11 +53,22 @@ Una rama de Git por tarea (ver `README.md`).
   - `styles.scss`: tipografía del sistema, base de 18 px e interlineado 1,5
   - `src/theme/patrones.scss`: los 7 patrones (3 niveles de botón, barra de acento, ícono en círculo,
     superficie, etiquetas de estado, campo con borde, sombra flotante)
-  - `theme-color` de `index.html` y `theme_color`/`background_color` del manifiesto a `#FFFFFF`
   - `features/guia/` en `/guia`, registrada solo en desarrollo, con todos los tokens y patrones
   - Verificación: Daniel aprueba `/guia` a 390 px y a 1280 px contra el mockup; Lighthouse ≥ 90 en
     accesibilidad sobre `/guia`; cada par texto/fondo cumple 4,5:1 (bordes de campo 3:1); en un
     build de producción `/guia` no existe (redirige a inicio)
+- [x] 0.6 Ícono y splash (`design.md` D17)
+  - Fuentes SVG en `assets/fuente/` → PNG en `assets/` (`icon-only`, `icon-foreground`,
+    `icon-background`, `splash`, `splash-dark` = blanco por D15)
+  - Android con `@capacitor/assets` (devDependency aprobada por Daniel): íconos adaptables y splash;
+    `windowSplashScreenBackground` blanco en `styles.xml` para Android 12+
+  - PWA a mano (la herramienta escribe fuera de `public/` y combina `purpose`): `public/icons/` en
+    48, 180, 192 y 512; manifiesto con `any` y `maskable` por separado; favicon y `apple-touch-icon`
+    en `index.html`; `theme-color`, `theme_color` y `background_color` a `#FFFFFF` (movido desde la 0.5)
+  - Verificación: `ng build`, `ng test` y `cap sync` sin errores; el ícono se ve en el Galaxy S22 en
+    la pantalla de inicio y en el splash (fondo blanco, ícono en círculo); la PWA instalada en Chrome
+    muestra el ícono y DevTools → Application → Manifest sin advertencias de íconos
+    - ⏳ Pendiente de Daniel antes del merge: revisión en el Galaxy S22 y en Chrome
 
 ## Bloque 1 — Dominio puro (🅿️ todas en paralelo, sin UI)
 - [ ] 1.1 🅿️ `domain/pendiente/plazo.ts`: `vencimiento`, `estado`, `textoContador`, `validarHoraReclamo` + `plazo.spec.ts`

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2732" height="2732" viewBox="0 0 2732 2732">
+  <!-- Splash (D17): fondo blanco (token p48-fondo) con el ícono en círculo casi negro. También se usa como splash-dark (D15: solo modo claro). -->
+  <rect width="2732" height="2732" fill="#FFFFFF"/>
+  <circle cx="1366" cy="1366" r="260" fill="#1F1E1C"/>
+  <g transform="translate(1366 1366) scale(4) translate(-50 -50)"><g fill="none" stroke="#FFFFFF" stroke-linecap="round"><circle cx="50" cy="50" r="34" stroke-width="6" stroke-dasharray="160 54" transform="rotate(-60 50 50)"/><g transform="rotate(-45 50 50)"><rect x="33" y="42" width="34" height="16" rx="8" stroke-width="4.5"/><path d="M41 42 H50 V58 H41 A8 8 0 0 1 41 42 Z" fill="#FFFFFF" stroke="none"/></g></g></g>
+</svg>

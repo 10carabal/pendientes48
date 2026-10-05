@@ -31,7 +31,7 @@ Herramientas: OpenCode usa `opencode.json`; `.mcp.json` se conserva para compati
 - `memory.md` (raíz) es la memoria del proceso, basada en `proposal.md`: decisiones de ejecución,
   lecciones del entorno y pendientes conocidos.
 - Al terminar una tarea, feature o cambio relevante, **actualízalo como último paso antes del PR**;
-  solo información con impacto futuro. No dupliques `tasks.md` (progreso), `design.md` (D1–D16)
+  solo información con impacto futuro. No dupliques `tasks.md` (progreso), `design.md` (D1–D17)
   ni contenido legal.
 
 ## Contenido legal
