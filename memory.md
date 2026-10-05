@@ -5,7 +5,7 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-05** — cierre de la tarea 0.6 (ícono y splash).
+> Última actualización: **2026-10-05** — verificación de la 0.6 en el Galaxy S22 y en Chrome (PWA).
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -15,9 +15,9 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 
 ## Estado
 - **Bloque 0 en progreso:** 0.0 ✅ · 0.1 ✅ · 0.1.1 ✅ · 0.1.2 ✅ · 0.2 ✅ · 0.3 ✅ · **0.6 ✅**
-  (pendiente de verificación en dispositivo) → siguen **0.4** (modelos en `domain/`) y **0.5**
+  (verificada en el Galaxy S22 y en Chrome) → siguen **0.4** (modelos en `domain/`) y **0.5**
   (sistema de diseño).
-- Repo sano en `main`; PRs #1–#14 mergeados; una rama por tarea; **Daniel revisa y mergea**.
+- Repo sano en `main`; PRs #1–#15 mergeados; una rama por tarea; **Daniel revisa y mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
   su verificación + PR (decisión de Daniel, 2026-10-04).
@@ -46,6 +46,12 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Pruebas en dispositivo:** Galaxy S22 con depuración USB; instalar con `adb install -r <apk>` y
   abrir con `am start -n com.theoceweb.pendientes48/.MainActivity`. El celular y el cable no son
   suficientes: si `adb devices` sale vacío, falta "Depuración USB" + modo MTP.
+- **Un ícono o asset viejo en la PWA casi siempre es caché** del service worker de una build
+  anterior: DevTools → Application → Service Workers → Unregister + **Clear site data** (o probar
+  en incógnito) antes de concluir que el build falló (así pasó con el favicon de Angular en la 0.6).
+- **El splash dura menos de 1 s:** para capturarlo, correr `am start` y `screencap` en la **misma
+  sesión `adb`** (`adb shell 'am start …; screencap …'`) y revisar los tamaños de los PNG; la
+  pantalla del celular debe quedar encendida si no, las capturas salen de la pantalla de carga.
 - **`cap sync` detecta los plugins** instalados y registra los 5 en `android/*.gradle` (archivos
   trackeados: commitear esos cambios junto con `package.json`).
 - `npm warn allow-scripts` (esbuild, lmdb, msgpackr…) **no ha bloqueado nada real**; vigilar solo
@@ -70,6 +76,10 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Contenido legal intocable sin Daniel:** `plantillas.md` y `src/assets/data/normas.json`.
 
 ## Registro de actualizaciones
+- **2026-10-05** — **Verificación de 0.6** (PR #15): en el Galaxy S22, ícono nuevo en el launcher
+  y splash blanco con ícono en círculo (capturado con `adb`); en Chrome, manifiesto sin advertencias
+  e iconos `any`/`maskable` verificados por HTTP. El favicon de Angular que aún aparecía era la
+  caché del SW de la 0.2 → resuelto con Clear site data (quedó como lección).
 - **2026-10-05** — **0.6** (ícono B y splash blanco): fuentes SVG, Android con `@capacitor/assets`,
   PWA en PNG propios con `any`/`maskable` separados (resuelve la advertencia pendiente desde la 0.2),
   favicon de Angular reemplazado y `theme-color` a blanco (movido desde la 0.5).
