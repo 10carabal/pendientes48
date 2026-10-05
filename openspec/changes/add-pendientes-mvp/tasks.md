@@ -44,8 +44,13 @@ Una rama de Git por tarea (ver `README.md`).
     los necesita; aprobado por Daniel, `README.md` sincronizado). Las 3 moderadas de `uuid` en
     `@capacitor/cli` quedan documentadas en `memory.md` sin acción
   - Verificación: `npm ls` lista todas sin errores y `npx cap sync android` termina sin errores
-- [ ] 0.4 Crear los modelos del `design.md` dentro de su concepto en `domain/` (`pendiente.model.ts`, `paciente.model.ts`, `norma.model.ts`; incluye `icsAgregadoEn`)
-  - Verificación: `ng build` compila sin errores con los modelos importados en un archivo de prueba
+- [x] 0.4 Crear los modelos del `design.md` dentro de su concepto en `domain/` (`pendiente.model.ts`, `paciente.model.ts`, `norma.model.ts`; incluye `icsAgregadoEn`)
+  - Nota: `Gestion.tipoDocumento` reutiliza `Paciente['tipoDocumento']` con alias `@domain/*`;
+    `Preferencias` queda para la tarea que cree `data/preferencias-store.ts`; specs con fixtures
+    happy y **unhappy path** con `@ts-expect-error` (pedido por Daniel)
+  - Verificación: `ng build` compila sin errores con los modelos importados en un archivo de
+    prueba; `npx tsc -p tsconfig.spec.json --noEmit` pasa (un unhappy path queda sin cubrir si el
+    modelo relaja sus requisitos)
 - [ ] 0.5 Sistema de diseño (`design.md` D14–D16 y sección "Sistema de diseño")
   - Independiente de los bloques 1 y 2: puede hacerse en paralelo; el bloque 3 depende de ella
   - `src/theme/tokens.css` con los tokens `--p48-*`; `variables.css` los mapea a Ionic y quita el
