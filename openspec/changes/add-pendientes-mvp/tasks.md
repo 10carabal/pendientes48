@@ -81,7 +81,7 @@ Una rama de Git por tarea (ver `README.md`).
     - ⏳ Pendiente de Daniel antes del merge: revisión en el Galaxy S22 y en Chrome
 
 ## Bloque 1 — Dominio puro (🅿️ todas en paralelo, sin UI)
-- [ ] 1.1 🅿️ `domain/pendiente/plazo.ts`: `vencimiento`, `estado`, `textoContador`, `validarHoraReclamo` + `plazo.spec.ts`
+- [x] 1.1 🅿️ `domain/pendiente/plazo.ts`: `vencimiento`, `estado`, `textoContador`, `validarHoraReclamo` + `plazo.spec.ts`
   - Verificación: pruebas pasan para vencimiento con cambio de día y de mes, las 5 reglas de
     `estado()`, las 5 ramas de `textoContador()` y la hora futura rechazada
 - [ ] 1.2 🅿️ `domain/pendiente/bitacora.ts`: `bitacoraVista`, `registrarQueja` + `bitacora.spec.ts`
