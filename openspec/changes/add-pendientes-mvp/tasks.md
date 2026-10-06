@@ -84,10 +84,10 @@ Una rama de Git por tarea (ver `README.md`).
 - [x] 1.1 🅿️ `domain/pendiente/plazo.ts`: `vencimiento`, `estado`, `textoContador`, `validarHoraReclamo` + `plazo.spec.ts`
   - Verificación: pruebas pasan para vencimiento con cambio de día y de mes, las 5 reglas de
     `estado()`, las 5 ramas de `textoContador()` y la hora futura rechazada
-- [ ] 1.2 🅿️ `domain/pendiente/bitacora.ts`: `bitacoraVista`, `registrarQueja` + `bitacora.spec.ts`
+- [x] 1.2 🅿️ `domain/pendiente/bitacora.ts`: `bitacoraVista`, `registrarQueja` + `bitacora.spec.ts`
   - Verificación: pruebas pasan para vencimiento calculado (con y sin entrega previa) y para
     queja registrada dos veces sin duplicar eventos
-- [ ] 1.3 🅿️ `domain/calendario/ics.ts` (generar archivo `.ics`) + `ics.spec.ts`
+- [x] 1.3 🅿️ `domain/calendario/ics.ts` (generar archivo `.ics`) + `ics.spec.ts`
   - Verificación: pruebas pasan para `DTSTART` en UTC y `UID` idéntico en dos generaciones del mismo pendiente
 - [ ] 1.4 🅿️ `domain/reclamo/plantillas.ts` y `plantillas-pdf.ts` con el texto aprobado de `plantillas.md` + `plantillas.spec.ts`
   - ✅ Desbloqueada: plantillas aprobadas el 2026-10-04
