@@ -92,7 +92,7 @@ Una rama de Git por tarea (ver `README.md`).
 - [ ] 1.4 🅿️ `domain/reclamo/plantillas.ts` y `plantillas-pdf.ts` con el texto aprobado de `plantillas.md` + `plantillas.spec.ts`
   - ✅ Desbloqueada: plantillas aprobadas el 2026-10-04
   - Verificación: los 4 casos de prueba de `plantillas.md` pasan y el texto corto no contiene el aviso de no asesoría
-- [ ] 1.5 🅿️ `assets/data/normas.json` + `data/normas-catalogo.ts` con `paraPaso(paso)` + `normas-catalogo.spec.ts`
+- [x] 1.5 🅿️ `assets/data/normas.json` + `data/normas-catalogo.ts` con `paraPaso(paso)` + `normas-catalogo.spec.ts`
   - Verificación: la prueba del criterio de lenguaje sencillo pasa; cada URL abre la fuente oficial
     y `verificadoEl` está actualizado
 

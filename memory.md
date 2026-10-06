@@ -5,7 +5,7 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-05** — cierre de la tarea 0.5 (sistema de diseño) y trazabilidad del QA (#18).
+> Última actualización: **2026-10-06** — cierre del bloque 1 (dominio puro, tareas 1.1–1.5).
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -14,10 +14,12 @@ norma visible y documentos (copiar, PDF, compartir). Local-first, sin backend. F
 en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 
 ## Estado
-- **Bloque 0 en progreso:** 0.0 ✅ · 0.1 ✅ · 0.1.1 ✅ · 0.1.2 ✅ · 0.2 ✅ · 0.3 ✅ · **0.4 ✅** ·
-  **0.5 ✅** (lista; ⏳ Daniel aprueba `/guia` a 390 y 1280 px antes del merge) · 0.6 ✅ (verificada
-  en el Galaxy S22 y en Chrome) → siguiente: bloques 1 y 2.
-- Repo sano en `main`; PRs #1–#18 mergeados; una rama por tarea; **Daniel revisa y mergea**.
+- **Bloque 0 completo:** 0.0 ✅ · 0.1 ✅ · 0.1.1 ✅ · 0.1.2 ✅ · 0.2 ✅ · 0.3 ✅ · 0.4 ✅ · 0.5 ✅
+  (`/guia` aprobado por Daniel, 2026-10-06) · 0.6 ✅ (Galaxy S22 y Chrome).
+- **Bloque 1 (dominio puro) implementado:** 1.1 ✅ · 1.2 ✅ · 1.3 ✅ (PRs #20–#22 apilados + #23 de
+  integración) · 1.4 ✅ (PR #24) · 1.5 ✅ (PR #25) → siguiente: bloques 2 y 3 (en paralelo).
+- Repo sano en `main`; PRs #1–#22 mergeados y #23–#25 abiertos al cerrar este PR; una rama por
+  tarea; **Daniel revisa y mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
   su verificación + PR (decisión de Daniel, 2026-10-04).
@@ -35,6 +37,8 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 | La raíz `app.*` importa cualquier capa con alias (regla 5 ampliada, PR #11) | `app.config.ts` debe usar `@platform/plataforma` para registrar el SW |
 | `@types/pdfmake` añadido al stack (0.3; aprobado por Daniel, README sincronizado) | `pdfmake@0.3.11` no trae `.d.ts` y `domain/` necesita sus tipos (`design.md`) |
 | Specs de modelos con `@ts-expect-error` + `tsc -p tsconfig.spec.json --noEmit` en la verificación (0.4, pedido por Daniel) | los modelos son solo tipos: sin esto nada comprobaría que el compilador rechaza datos inválidos (los tipos no validan en runtime) |
+| Ramas encadenadas + PRs apilados para 1.2–1.4; 1.5 nace de `main` (decisión de Daniel, 2026-10-06) | 1.2–1.4 importan `vencimiento()` de 1.1: apilar evita esperar cada merge; 1.5 no depende del stack |
+| `resolveJsonModule` en `tsconfig.json` para importar `normas.json` (1.5) | `paraPaso()` queda síncrono y testeable con el catálogo empaquetado; un `fetch` obligaría a async y a inyección de Angular |
 
 ## Lecciones del entorno
 - **`npm ci` siempre** después de un merge que toque `package-lock.json`; sin eso fallan `ng build`,
@@ -73,6 +77,18 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **`openspec validate` exige el ítem:** `npx openspec validate <nombre-del-cambio> --strict`;
   sin nombre falla con "Nothing to validate".
 
+- **PRs apilados (stack):** GitHub los mergea contra su **rama base**, no contra `main`. Si la base
+  es otra rama (ej. #21 sobre `feat/1.1-plazo`), el contenido queda ahí y `main` no lo recibe → hay
+  que abrir un PR de integración rama→`main` (pasó con #21/#22 → #23). El estado real se ve con
+  `git log origin/main` + `gh pr list --state all`: todos los PRs dicen MERGED aunque `main` no
+  tenga el contenido.
+- **Specs que imprimen fechas:** construir los instantes con `new Date(año, mes, día, hora, min)`
+  (hora local) y formatear con getters locales: el texto sale idéntico en cualquier zona horaria
+  (así `plantillas.spec.ts` prueba "5 de octubre de 2026 a las 3:15 p. m." sin depender de la TZ).
+- **`funcionpublica.gov.co` bloquea al `webfetch`** (transport error) pero el enlace sí abre:
+  verificar con `Invoke-WebRequest … -UseBasicParsing` (devolvió 200 en la revisión de URLs de
+  `normas.json`, 2026-10-06).
+
 ## Pendientes conocidos (no bloqueantes)
 - **Identidad visual:** sistema de diseño (D14–D16) e ícono/splash (D17) resueltos; solo quedan las
   capturas de pantalla del manifiesto (`screenshots`), que se agregan cuando existan pantallas reales.
@@ -84,6 +100,17 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Contenido legal intocable sin Daniel:** `plantillas.md` y `src/assets/data/normas.json`.
 
 ## Registro de actualizaciones
+- **2026-10-06** — **Bloque 1 (dominio puro) completo**: 1.1 `domain/pendiente/plazo.ts`
+  (`vencimiento`, `estado` con sus 5 reglas, `textoContador` con sus 5 ramas,
+  `validarHoraReclamo`); 1.2 `bitacora.ts` (`bitacoraVista` con el evento derivado `vencido` y
+  `registrarQueja` sin duplicar eventos); 1.3 `calendario/ics.ts` (VEVENT a mano, `UID` fijo,
+  `DTSTART` en UTC, escapado RFC 5545); 1.4 `reclamo/plantillas.ts` + `plantillas-pdf.ts` (los 4
+  casos de `plantillas.md`; texto corto sin el aviso de no asesoría, PDF con pie en todas las
+  hojas y fundamento legal filtrado por paso); 1.5 `data/normas-catalogo.ts` (`paraPaso()` con
+  import estático vía `resolveJsonModule`). Verificación por rama: 42/42–65/65 tests, `tsc`,
+  `ng build` y `openspec validate --strict` en 0; las 3 URLs de `normas.json` abren y
+  `verificadoEl` = 2026-10-04. PRs: #20–#22 apilados, #23 integración, #24 (1.4), #25 (1.5).
+
 - **2026-10-05** — **0.5** (sistema de diseño): `src/theme/tokens.css` (tokens `--p48-*`),
   `variables.css` (mapea a Ionic y quita `dark.system.css`, D15), `patrones.scss` (7 patrones),
   `styles.scss` (base 18 px, interlineado 1,5), `provideIonicAngular({ mode: 'ios' })` (D16) y
