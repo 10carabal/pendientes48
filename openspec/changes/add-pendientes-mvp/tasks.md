@@ -97,7 +97,7 @@ Una rama de Git por tarea (ver `README.md`).
     y `verificadoEl` está actualizado
 
 ## Bloque 2 — Plataforma y persistencia (🅿️ en paralelo)
-- [ ] 2.1 🅿️ `data/`: `app-db.ts` y stores de pacientes, pendientes y preferencias sobre `idb-keyval`;
+- [x] 2.1 🅿️ `data/`: `app-db.ts` y stores de pacientes, pendientes y preferencias sobre `idb-keyval`;
   fotos como `Blob`; detección de perfil duplicado; `borrarTodo()`; errores de escritura controlados
   - Verificación: las pruebas de los stores pasan para guardar/leer, perfil duplicado, fallo de escritura
     simulado y `borrarTodo()` dejando IndexedDB vacío
