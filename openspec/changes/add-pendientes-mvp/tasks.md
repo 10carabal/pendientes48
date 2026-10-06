@@ -84,7 +84,7 @@ Una rama de Git por tarea (ver `README.md`).
 - [x] 1.1 🅿️ `domain/pendiente/plazo.ts`: `vencimiento`, `estado`, `textoContador`, `validarHoraReclamo` + `plazo.spec.ts`
   - Verificación: pruebas pasan para vencimiento con cambio de día y de mes, las 5 reglas de
     `estado()`, las 5 ramas de `textoContador()` y la hora futura rechazada
-- [ ] 1.2 🅿️ `domain/pendiente/bitacora.ts`: `bitacoraVista`, `registrarQueja` + `bitacora.spec.ts`
+- [x] 1.2 🅿️ `domain/pendiente/bitacora.ts`: `bitacoraVista`, `registrarQueja` + `bitacora.spec.ts`
   - Verificación: pruebas pasan para vencimiento calculado (con y sin entrega previa) y para
     queja registrada dos veces sin duplicar eventos
 - [ ] 1.3 🅿️ `domain/calendario/ics.ts` (generar archivo `.ics`) + `ics.spec.ts`
