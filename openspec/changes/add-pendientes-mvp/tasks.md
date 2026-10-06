@@ -101,9 +101,10 @@ Una rama de Git por tarea (ver `README.md`).
   fotos como `Blob`; detección de perfil duplicado; `borrarTodo()`; errores de escritura controlados
   - Verificación: las pruebas de los stores pasan para guardar/leer, perfil duplicado, fallo de escritura
     simulado y `borrarTodo()` dejando IndexedDB vacío
-- [ ] 2.2 🅿️ `platform/notificaciones.ts` (usa `platform/plataforma.ts`, creado en la 0.2): programar, cancelar, reprogramar al iniciar y consultar permiso (solo nativo)
+- [x] 2.2 🅿️ `platform/notificaciones.ts` (usa `platform/plataforma.ts`, creado en la 0.2): programar, cancelar, reprogramar al iniciar y al editar la hora (hallazgo 11), y consultar permiso (solo nativo)
   - Verificación: en Android, un pendiente con vencimiento a 2 min dispara la notificación; al
-    marcarlo entregado antes, no llega; tras cerrar y abrir la app, el aviso sigue programado
+    marcarlo entregado antes, no llega; tras cerrar y abrir la app, el aviso sigue programado;
+    al editar la hora, el aviso se reprograma con un solo pendiente
   - Nota (QA): `design.md · Avisos` y el escenario "Editar un pendiente" de la spec `pendientes`
     exigen **reprogramar el aviso al editar la hora** (no solo al iniciar) — añadirlo a la tarea y
     a su verificación (hallazgo mayor 11)
