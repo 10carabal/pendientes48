@@ -5,7 +5,7 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-06** — cierre del bloque 1 (dominio puro, tareas 1.1–1.5).
+> Última actualización: **2026-10-08** — bloque 2 en marcha (2.1 y 2.2 mergeados; 2.3 lista para su PR).
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -17,9 +17,10 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Bloque 0 completo:** 0.0 ✅ · 0.1 ✅ · 0.1.1 ✅ · 0.1.2 ✅ · 0.2 ✅ · 0.3 ✅ · 0.4 ✅ · 0.5 ✅
   (`/guia` aprobado por Daniel, 2026-10-06) · 0.6 ✅ (Galaxy S22 y Chrome).
 - **Bloque 1 (dominio puro) implementado:** 1.1 ✅ · 1.2 ✅ · 1.3 ✅ (PRs #20–#22 apilados + #23 de
-  integración) · 1.4 ✅ (PR #24) · 1.5 ✅ (PR #25) → siguiente: bloques 2 y 3 (en paralelo).
-- Repo sano en `main`; PRs #1–#22 mergeados y #23–#25 abiertos al cerrar este PR; una rama por
-  tarea; **Daniel revisa y mergea**.
+  integración) · 1.4 ✅ (PR #24) · 1.5 ✅ (PR #25).
+- **Bloque 2 (plataforma y persistencia):** 2.1 ✅ (PR #26) · 2.2 ✅ (PR #27, con smoke real en el
+  S22) · 2.3 código listo (117/117 tests; smoke y PR pendientes) · 2.4 pendiente → `main = 3e66083`.
+- Repo sano en `main`; PRs #1–#27 mergeados; una rama por tarea; **Daniel revisa y mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
   su verificación + PR (decisión de Daniel, 2026-10-04).
@@ -39,6 +40,9 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 | Specs de modelos con `@ts-expect-error` + `tsc -p tsconfig.spec.json --noEmit` en la verificación (0.4, pedido por Daniel) | los modelos son solo tipos: sin esto nada comprobaría que el compilador rechaza datos inválidos (los tipos no validan en runtime) |
 | Ramas encadenadas + PRs apilados para 1.2–1.4; 1.5 nace de `main` (decisión de Daniel, 2026-10-06) | 1.2–1.4 importan `vencimiento()` de 1.1: apilar evita esperar cada merge; 1.5 no depende del stack |
 | `resolveJsonModule` en `tsconfig.json` para importar `normas.json` (1.5) | `paraPaso()` queda síncrono y testeable con el catálogo empaquetado; un `fetch` obligaría a async y a inyección de Angular |
+| En specs, `vi.mock` solo de **paquetes** (`@capacitor/core`, `idb-keyval`…) y el código relativo real se deja correr (2.2/2.3) | `ng test` rechaza `vi.mock` de imports relativos; mockear `@capacitor/core` permite conmutar `isNative()` sin tocar `./plataforma` |
+| Smoke en dispositivo: `server.url` **temporal** (no commitear) + `adb reverse tcp:4200` + `window.__p48` temporal en `app.config.ts` (2.2/2.3) | el S22 estaba en datos móviles (no en la Wi-Fi), el dev server no sirve `/src/*` sueltos y el adaptador aún no está en el bundle; todo se revierte antes del commit |
+| El `.ics` en Android se guarda en `Directory.Documents` con `Filesystem` (2.3) | el WebView ignora `<a download>` (Capacitor no instala DownloadListener, verificado en su fuente): la descarga con `<a>` queda solo para la PWA |
 
 ## Lecciones del entorno
 - **`npm ci` siempre** después de un merge que toque `package-lock.json`; sin eso fallan `ng build`,
@@ -88,6 +92,27 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **`funcionpublica.gov.co` bloquea al `webfetch`** (transport error) pero el enlace sí abre:
   verificar con `Invoke-WebRequest … -UseBasicParsing` (devolvió 200 en la revisión de URLs de
   `normas.json`, 2026-10-06).
+- **`vi.mock` con rutas relativas no funciona** en `ng test` ("Please use Angular TestBed…"); los
+  mocks de **paquetes** sí. Patrón que funciona: `vi.hoisted` + `vi.mock('@capacitor/core')` y
+  dejar que el módulo relativo real (`./plataforma`) delegue en el mock (2.2/2.3).
+- **`npx ng test`/`ng serve` puede quedarse colgado tras imprimir su resultado** (el comando no
+  devolvía el prompt): invocar directo `node node_modules\@angular\cli\bin\ng.js test
+  --watch=false` (y `node node_modules\typescript\bin\tsc …`) devuelve limpio (2.3, 2026-10-07).
+- **El puente de Android entrega las fechas del plugin en formato `Date.toString()`** ("Tue Oct 06
+  17:43:26 GMT-05:00 2026"), no ISO: normalizar en el adaptador (lo hizo `avisosPendientes()`, con
+  prueba); aplica a todo adaptador que lea fechas nativas (2.2).
+- **WebView debugging está activo en los builds debug de Capacitor:** `adb forward tcp:9222
+  localabstract:webview_devtools_remote_<pid>` → `http://127.0.0.1:9222/json` → CDP
+  (`Runtime.evaluate` con `awaitPromise`) para llamar adaptadores por consola; no exige cambios en
+  `MainActivity` (2.2/2.3).
+- **Vite reoptimiza dependencias nuevas y recarga la página** la primera vez que se importan: una
+  evaluación CDP que fuerce ese primer import expira; repetir (o precargar) tras la recarga (2.3).
+- **Túnel USB al dev server:** `adb reverse tcp:4200 tcp:4200` + `server.url: http://127.0.0.1:4200`
+  funciona aunque el celular esté en datos; con IP por Wi-Fi falla si el teléfono no está en la
+  misma red (el primer intento de smoke de 2.2 falló por esto).
+- **Angular en dev no sirve archivos `/src/*` sueltos** (404): solo bundles; para probar un
+  adaptador aún no referenciado por la app, exponerlo temporalmente en `window` desde
+  `app.config.ts` y revertir antes del commit (2.3).
 
 ## Pendientes conocidos (no bloqueantes)
 - **Identidad visual:** sistema de diseño (D14–D16) e ícono/splash (D17) resueltos; solo quedan las
@@ -98,8 +123,25 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   vigilar releases de Capacitor (decisión de Daniel, 2026-10-04).
 - **ESLint:** fuera de alcance del MVP; las convenciones se revisan en cada PR (`proposal.md`).
 - **Contenido legal intocable sin Daniel:** `plantillas.md` y `src/assets/data/normas.json`.
+- **Cableado "reprogramar al iniciar" (quedó de la 2.2):** falta el `provideAppInitializer` que
+  llame `reprogramarAvisos()` con los pendientes abiertos de `listarPendientes()` — ya se puede
+  (2.1 + 2.2 mergeados); va como `chore/` aparte para no ensuciar el PR de 2.3.
 
 ## Registro de actualizaciones
+- **2026-10-08** — **Bloque 2 en marcha**: 2.1 (`data/app-db.ts` + stores de pacientes, pendientes y
+  preferencias sobre `idb-keyval`; fotos como `Blob`; perfil duplicado; `borrarTodo()`; errores de
+  escritura envueltos en `ErrorDeEscritura` con el texto literal de la spec) y 2.2
+  (`platform/notificaciones.ts`: programar/cancelar/reprogramar/consultar permiso, ID numérico
+  int32 del pendiente, vencidos no se reprograman, PWA no-op) → **PRs #26 y #27 mergeados**.
+  Smoke real de 2.2 en el S22: aviso "Ya pasaron las 48 horas" a los 2 min confirmado por Daniel,
+  cancelación sin aviso, persistencia tras matar el proceso y reprogramación al editar la hora
+  (hallazgo 11), más el fix de fechas ISO. 2.3 (`platform/compartir.ts` + `calendario-descarga.ts`:
+  copiar texto; compartir PDF nativo con `files: [file://]` y PWA con Web Share o descarga como
+  respaldo; `.ics` RFC 5545 a mano con escapado y plegado de 75 octetos) compilando con
+  **117/117 tests**, `tsc`/`ng build`/`openspec validate` en 0; faltan el smoke (S22 + Chrome
+  headless) y su PR. 2.4 (cámara) pendiente. Lecciones nuevas arriba (vi.mock, npx→node, WebView sin
+  `<a download>`, adb reverse, fechas del puente).
+
 - **2026-10-06** — **Bloque 1 (dominio puro) completo**: 1.1 `domain/pendiente/plazo.ts`
   (`vencimiento`, `estado` con sus 5 reglas, `textoContador` con sus 5 ramas,
   `validarHoraReclamo`); 1.2 `bitacora.ts` (`bitacoraVista` con el evento derivado `vencido` y
