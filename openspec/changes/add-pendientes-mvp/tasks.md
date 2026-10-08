@@ -108,7 +108,7 @@ Una rama de Git por tarea (ver `README.md`).
   - Nota (QA): `design.md · Avisos` y el escenario "Editar un pendiente" de la spec `pendientes`
     exigen **reprogramar el aviso al editar la hora** (no solo al iniciar) — añadirlo a la tarea y
     a su verificación (hallazgo mayor 11)
-- [ ] 2.3 🅿️ `platform/compartir.ts` y `platform/calendario-descarga.ts`: copiar texto, compartir PDF, descarga como respaldo en la PWA
+- [x] 2.3 🅿️ `platform/compartir.ts` y `platform/calendario-descarga.ts`: copiar texto, compartir PDF, descarga como respaldo en la PWA
   - Verificación: en Android el menú de compartir muestra WhatsApp con el PDF adjunto; en un
     navegador de escritorio el PDF se descarga
 - [ ] 2.4 🅿️ `platform/camara.ts`: tomar foto o elegir de la galería; reducir a 1280 px, JPEG 0.7;
