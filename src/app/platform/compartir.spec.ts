@@ -158,5 +158,25 @@ describe('compartir', () => {
 
       await expect(compartirPdf(new Uint8Array([1]), 'queja.pdf')).resolves.toBe('descargado');
     });
+
+    it('si share() falla o no hay UI, se descarga como respaldo', async () => {
+      capacitor.Capacitor.isNativePlatform.mockReturnValue(false);
+      vi.stubGlobal('navigator', {
+        canShare: vi.fn(() => true),
+        share: vi.fn(() => Promise.reject(new DOMException('cancelado', 'AbortError'))),
+      });
+      stubUrls();
+      click = vi
+        .spyOn(HTMLAnchorElement.prototype, 'click')
+        .mockImplementation(function (this: HTMLAnchorElement) {
+          /* no navega en jsdom */
+        });
+
+      const resultado = await compartirPdf(new Uint8Array([1]), 'queja.pdf');
+
+      expect(resultado).toBe('descargado');
+      expect(click).toHaveBeenCalledTimes(1);
+      expect(fs.Filesystem.writeFile).not.toHaveBeenCalled();
+    });
   });
 });

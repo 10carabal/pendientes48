@@ -19,9 +19,10 @@ export async function copiarTexto(texto: string): Promise<void> {
  * Comparte el PDF con las apps del dispositivo (`reclamos` · "Compartir"):
  * - Android: el menú nativo con el PDF adjunto (WhatsApp, correo…). El archivo
  *   se escribe en caché (el plugin comparte URL `file://`) y se borra al cerrar.
- * - PWA: Web Share con archivos si el navegador lo soporta; si no, se descarga
- *   como respaldo. (El WebView de Android ignora `<a download>`, por eso esa
- *   ruta de descarga solo aplica a la PWA.)
+ * - PWA: Web Share con archivos si el navegador lo soporta y `share` completa;
+ *   si no (sin soporte, sin UI o cancelado), se descarga como respaldo. (El
+ *   WebView de Android ignora `<a download>`, por eso esa ruta de descarga solo
+ *   aplica a la PWA.)
  */
 export async function compartirPdf(
   pdf: Uint8Array,
@@ -49,8 +50,13 @@ export async function compartirPdf(
     { type: 'application/pdf' },
   );
   if (puedeCompartirArchivos(archivo)) {
-    await navigator.share({ files: [archivo] });
-    return 'compartido';
+    try {
+      await navigator.share({ files: [archivo] });
+      return 'compartido';
+    } catch {
+      // Share no completó (navegador sin UI, sin gesto o el usuario lo cerró):
+      // el respaldo de la PWA es descargar el archivo.
+    }
   }
   await descargarArchivo(nombreArchivo, archivo); // File extiende de Blob
   return 'descargado';
