@@ -5,7 +5,7 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-08** — bloque 2 en marcha (2.1 y 2.2 mergeados; 2.3 lista para su PR).
+> Última actualización: **2026-10-08** — cierre de 2.4 (cámara): flujos A/B/C verificados en el S22.
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -19,8 +19,9 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Bloque 1 (dominio puro) implementado:** 1.1 ✅ · 1.2 ✅ · 1.3 ✅ (PRs #20–#22 apilados + #23 de
   integración) · 1.4 ✅ (PR #24) · 1.5 ✅ (PR #25).
 - **Bloque 2 (plataforma y persistencia):** 2.1 ✅ (PR #26) · 2.2 ✅ (PR #27, con smoke real en el
-  S22) · 2.3 código listo (117/117 tests; smoke y PR pendientes) · 2.4 pendiente → `main = 3e66083`.
-- Repo sano en `main`; PRs #1–#27 mergeados; una rama por tarea; **Daniel revisa y mergea**.
+  S22) · 2.3 ✅ (PR #29, smoke Android + escritorio) · 2.4 código + smoke en verde → sale su PR;
+  `main = 9f9a7a3`.
+- Repo sano en `main`; PRs #1–#29 mergeados; una rama por tarea; **Daniel revisa y mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
   su verificación + PR (decisión de Daniel, 2026-10-04).
@@ -43,6 +44,7 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 | En specs, `vi.mock` solo de **paquetes** (`@capacitor/core`, `idb-keyval`…) y el código relativo real se deja correr (2.2/2.3) | `ng test` rechaza `vi.mock` de imports relativos; mockear `@capacitor/core` permite conmutar `isNative()` sin tocar `./plataforma` |
 | Smoke en dispositivo: `server.url` **temporal** (no commitear) + `adb reverse tcp:4200` + `window.__p48` temporal en `app.config.ts` (2.2/2.3) | el S22 estaba en datos móviles (no en la Wi-Fi), el dev server no sirve `/src/*` sueltos y el adaptador aún no está en el bundle; todo se revierte antes del commit |
 | El `.ics` en Android se guarda en `Directory.Documents` con `Filesystem` (2.3) | el WebView ignora `<a download>` (Capacitor no instala DownloadListener, verificado en su fuente): la descarga con `<a>` queda solo para la PWA |
+| Smoke de "permiso denegado": `<uses-permission android:name="android.permission.CAMERA"/>` **temporal** en `AndroidManifest.xml`, revertido antes del commit (igual que `__p48`) | ni la app ni `@capacitor/camera` declaran `CAMERA`: sin declarar, `checkPermissions` responde `granted` y `pm revoke` se niega → sin este build temporal no se puede ejercitar el fallback en dispositivo (2.4) |
 
 ## Lecciones del entorno
 - **`npm ci` siempre** después de un merge que toque `package-lock.json`; sin eso fallan `ng build`,
@@ -113,6 +115,40 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Angular en dev no sirve archivos `/src/*` sueltos** (404): solo bundles; para probar un
   adaptador aún no referenciado por la app, exponerlo temporalmente en `window` desde
   `app.config.ts` y revertir antes del commit (2.3).
+- **`@capacitor/camera` no declara `android.permission.CAMERA`** (solo `<queries>` de intents): la
+  foto se delega en la app de cámara del sistema y, sin el permiso declarado, `checkPermissions`
+  responde **`granted`** → nunca hay diálogo y `pm revoke` se niega. Para verificar el caso
+  "denegado → galería" hay que hacer un build temporal con el permiso (fila de decisiones) (2.4).
+- **`pm revoke` mata el proceso de la app** (Android lo fuerza al revocar un permiso en vivo):
+  mueren el WebView y el forward de CDP y la tarea queda cerrada; relanzar con `am start` y
+  reconectar CDP antes de continuar (2.4).
+- **La app puede morir mientras la cámara externa está encima** (tormenta de LMK con poca RAM):
+  la promesa del plugin se pierde con el proceso y la medición CDP devuelve "proceso reiniciado"
+  → verificar `pidof` antes de medir y reintentar; el resultado nunca llega solo (2.4).
+- **Nunca coordenadas a ciegas: `uiautomator dump` → nodo exacto → tap.** En el S22 el obturador
+  es `desc='Take picture' [408,1809][672,2073]`, el review de la foto vive en la app
+  (`OK [540,2028][1008,2196]`, `Retry [72,2028][540,2196]`) y el `Done` del picker queda en
+  `[833,2082][930,2142]`; un tap fijo a `(540,1880)` quedó ~60 px fuera y dejó el review trabado
+  hasta que alguien tocó la pantalla (2.4).
+- **Los `.Value` de un regex son cadenas:** `($g1 + $g2)/2` **concatena** en vez de sumar y produjo
+  un tap en `(358416, 10311080)` (bounds inválidos); convertir cada grupo con `[int]` antes de
+  operar y validar que el centro caiga dentro de la pantalla antes de tocar (2.4).
+- **`adb shell cat` estropea las comillas tipográficas:** el `’` de "Don’t allow" llega mangled y
+  cualquier regex que lo incluya falla en silencio → matchear solo palabras ASCII (`allow`) o tocar
+  por bounds ya leídos del dump (2.4).
+- **`uiautomator dump` falla con "could not get idle state"** si hay un video pesado de fondo
+  (streaming en pantalla completa): pedirle al dueño del teléfono una ventana libre y comprobar
+  `topResumedActivity` antes de cada paso — además de no interferir con su uso (2.4).
+- **Google Photo Picker:** los tiles salen con `clickable=false` (funciona el tap en el centro de
+  sus bounds), `Done` solo aparece tras seleccionar y el contador muestra "1 photos" (2.4).
+- **`cdp.js` acepta el timeout como 4.º argumento:** procesar la foto de galería puede superar los
+  30 s; medir con 60 s y tratar "colgado" como fallo, no como resultado (2.4).
+- **`svc power stayon true` escribe `settings global stay_on_while_plugged_in`**: para restaurar,
+  `settings delete global stay_on_while_plugged_in` y `settings put system screen_off_timeout
+  60000` (los smokes largos suben ambos) (2.4).
+- **`cap sync` reescribe `android/app/capacitor.build.gradle` y `android/capacitor.settings.gradle`
+  solo por fin de línea** (el diff tras normalizar está vacío): `git checkout --` de esos dos
+  antes del commit para no ensuciar el PR (2.4).
 
 ## Pendientes conocidos (no bloqueantes)
 - **Identidad visual:** sistema de diseño (D14–D16) e ícono/splash (D17) resueltos; solo quedan las
@@ -128,6 +164,19 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   (2.1 + 2.2 mergeados); va como `chore/` aparte para no ensuciar el PR de 2.3.
 
 ## Registro de actualizaciones
+- **2026-10-08** — **2.4** (`platform/camara.ts`): `tomarFoto()` consulta/pide el permiso solo en
+  nativo (`isNative()`) y, si está denegado, va directo a `elegirFoto()`; si el plugin lanza
+  `CameraPermissionDenied` (o `NotAllowedError` en web) cae a la galería, y si el usuario cancela
+  **propaga** el error. La foto se lee con `Filesystem.readFile(uri)` (nativo) o `fetch(webPath)`
+  (web) y se reduce **una sola vez** a ≤1280 px JPEG 0.7 en canvas (`aJpegReducido`, exportada y
+  testeada). 11 pruebas nuevas → **129/129 en el árbol rebased sobre `main`**, con `tsc`,
+  `openspec validate --strict` y `ng build` (508,87 kB) en 0. Smoke en el S22 con `__p48` +
+  manifest temporal de `CAMERA` (ambos revertidos): **A** cámara `960×1280 jpeg`, **B** galería
+  `1280×720 jpeg`, **C** denegado → diálogo "Don’t allow" → picker **sin error** → `1280×720`.
+  Después: build limpio reinstalado, `pm clear`, `screen_off_timeout`/`stay_on` restaurados, sin
+  forwards ni residuos en sdcard. Lecciones nuevas arriba (permiso `CAMERA` ausente, `pm revoke`
+  mata el proceso, LMK con la cámara externa, bounds con `[int]`, comillas de `adb`, picker).
+
 - **2026-10-08** — **Bloque 2 en marcha**: 2.1 (`data/app-db.ts` + stores de pacientes, pendientes y
   preferencias sobre `idb-keyval`; fotos como `Blob`; perfil duplicado; `borrarTodo()`; errores de
   escritura envueltos en `ErrorDeEscritura` con el texto literal de la spec) y 2.2

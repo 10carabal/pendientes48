@@ -111,7 +111,7 @@ Una rama de Git por tarea (ver `README.md`).
 - [x] 2.3 🅿️ `platform/compartir.ts` y `platform/calendario-descarga.ts`: copiar texto, compartir PDF, descarga como respaldo en la PWA
   - Verificación: en Android el menú de compartir muestra WhatsApp con el PDF adjunto; en un
     navegador de escritorio el PDF se descarga
-- [ ] 2.4 🅿️ `platform/camara.ts`: tomar foto o elegir de la galería; reducir a 1280 px, JPEG 0.7;
+- [x] 2.4 🅿️ `platform/camara.ts`: tomar foto o elegir de la galería; reducir a 1280 px, JPEG 0.7;
   manejar permiso denegado
   - Verificación: foto tomada y foto de galería quedan de 1280 px o menos; con permiso de cámara
     denegado se ofrece la galería sin error
