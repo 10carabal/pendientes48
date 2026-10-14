@@ -1,0 +1,29 @@
+@if (visible()) {
+  <div class="hoja-fondo">
+    <section
+      class="hoja-caja p48-sombra-flotante"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ayuda-titulo"
+      (keydown)="atraparFoco($event)"
+      (keydown.escape)="cerrado.emit()"
+    >
+      <h3 id="ayuda-titulo" class="hoja-titulo">¿Cómo asegurar que te llegue el aviso?</h3>
+      <p class="hoja-texto">
+        Tu celular puede atrasar o bloquear los avisos para ahorrar batería. En la página te
+        explicamos en pocos pasos cómo evitarlo.
+      </p>
+      <a class="hoja-enlace" [href]="urlAyuda" target="_blank" rel="noopener noreferrer"
+        >Ver la instrucción para mi celular</a
+      >
+      <button
+        #botonEntendido
+        type="button"
+        class="p48-boton-principal hoja-boton"
+        (click)="cerrado.emit()"
+      >
+        Entendido
+      </button>
+    </section>
+  </div>
+}

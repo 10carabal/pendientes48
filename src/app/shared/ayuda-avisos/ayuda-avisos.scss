@@ -1,0 +1,50 @@
+:host {
+  display: block;
+}
+
+.hoja-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 20; /* constante de capa: no es color, tamaño ni espaciado del sistema */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--p48-scrim);
+}
+
+.hoja-caja {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-4);
+  width: 100%;
+  max-width: var(--p48-ancho-hoja);
+  padding: var(--p48-espacio-5) var(--p48-espacio-4);
+  border-radius: var(--p48-radio-superficie) var(--p48-radio-superficie) 0 0;
+  background: var(--p48-fondo);
+}
+
+.hoja-titulo,
+.hoja-texto {
+  margin: 0;
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.hoja-titulo {
+  font-size: var(--p48-tam-subtitulo);
+  font-weight: var(--p48-peso-titulo);
+}
+
+.hoja-enlace {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--p48-tam-tactil);
+  color: var(--p48-enlace);
+  font-size: var(--p48-tam-base);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+.hoja-boton {
+  width: 100%;
+}

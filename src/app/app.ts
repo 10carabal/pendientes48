@@ -4,6 +4,7 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular';
 @Component({
   selector: 'app-root',
   imports: [IonApp, IonRouterOutlet],
-  template: `<ion-app><ion-router-outlet /></ion-app>`,
+  templateUrl: './app.html',
+  styleUrl: './app.scss',
 })
 export class App {}

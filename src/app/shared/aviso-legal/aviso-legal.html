@@ -1,0 +1,26 @@
+@if (modal()) {
+  <!-- Escape no cierra: el spec exige tocar "Entiendo". -->
+  <div
+    class="aviso-fondo"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="aviso-titulo"
+    (keydown)="atraparFoco($event)"
+  >
+    <div
+      class="aviso-caja p48-superficie p48-sombra-flotante p48-barra-acento p48-barra-acento--aviso"
+    >
+      <p id="aviso-titulo" class="aviso-texto">{{ texto() }}</p>
+      <button
+        #botonEntiendo
+        type="button"
+        class="p48-boton-principal aviso-boton"
+        (click)="entendido.emit()"
+      >
+        Entiendo
+      </button>
+    </div>
+  </div>
+} @else {
+  <p class="aviso-linea p48-barra-acento p48-barra-acento--aviso">{{ texto() }}</p>
+}

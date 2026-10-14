@@ -119,7 +119,7 @@ Una rama de Git por tarea (ver `README.md`).
 ## Bloque 3 — Pantallas (🅿️ en paralelo cuando 0.5, 1 y 2 estén listos)
 Regla para todo el bloque: solo tokens y patrones del sistema de diseño (sin colores, tamaños ni
 espaciados sueltos), y cada pantalla se verifica a 390 px y a 1280 px contra el mockup aprobado.
-- [ ] 3.1 🅿️ `shared/norma-card` (incluye "Verificado el" y el aviso de no asesoría), `shared/ayuda-avisos`, `shared/estado-chip` y `shared/aviso-legal`
+- [x] 3.1 🅿️ `shared/norma-card` (incluye "Verificado el" y el aviso de no asesoría), `shared/ayuda-avisos`, `shared/estado-chip` y `shared/aviso-legal`
   - Verificación: la tarjeta muestra los 5 elementos de la spec `normas` más el aviso de no
     asesoría y, sin conexión, solo el enlace queda inactivo; `estado-chip` muestra la etiqueta y el
     color de los 6 estados; `aviso-legal` muestra la línea fija y el modal de primera apertura;
