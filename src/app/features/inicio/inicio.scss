@@ -1,1 +1,85 @@
-/* Pantalla de espera (tarea 3.7): sin estilos propios todavía. */
+/* Pantalla de inicio (tarea 3.7): lista de pendientes y aviso legal al pie. */
+.inicio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-5);
+  max-width: var(--p48-ancho-inicio); /* 760 px en escritorio (design · "Adaptación por tamaño") */
+  margin: 0 auto;
+  padding: var(--p48-espacio-5) var(--p48-espacio-4) 0;
+}
+
+.inicio-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--p48-espacio-3);
+}
+
+.inicio-titulo h1 {
+  margin: 0;
+  font-size: var(--p48-tam-titulo);
+}
+
+.inicio-parrafo,
+.inicio-detalle,
+.inicio-contador {
+  margin: 0;
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.inicio-detalle {
+  color: var(--p48-texto-secundario);
+}
+
+/* El color del estado vive en la etiqueta (D14): aquí solo énfasis. */
+.inicio-contador {
+  font-weight: var(--p48-peso-titulo);
+}
+
+.inicio-error {
+  margin: 0;
+  padding: var(--p48-espacio-2) var(--p48-espacio-3);
+  color: var(--p48-estado-vencido-texto);
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.inicio-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inicio-tarjeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--p48-espacio-3);
+}
+
+.inicio-datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-1);
+  min-width: 0;
+}
+
+.inicio-medicamento {
+  margin: 0;
+  font-size: var(--p48-tam-subtitulo);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+/* Línea fija al pie (spec `normas`): visible siempre, también al hacer scroll. */
+.inicio-aviso {
+  position: sticky;
+  bottom: 0;
+  background: var(--p48-fondo);
+}
