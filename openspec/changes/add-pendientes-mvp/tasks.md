@@ -147,9 +147,10 @@ espaciados sueltos), y cada pantalla se verifica a 390 px y a 1280 px contra el 
   - Depende de: 1.4, 2.3
   - Verificación: el texto copiado coincide con la plantilla aprobada y no trae el aviso; la nota de
     autorización aparece solo si no autorizó en la farmacia; el PDF trae fundamento legal, bitácora y pie
-- [ ] 3.7 `features/inicio`: lista con estado (etiqueta + color), aviso legal en la primera apertura
-  y luego como línea fija al pie
-  - Verificación: la primera vez exige "Entiendo"; después el aviso queda visible al pie en cada apertura
+- [x] 3.7 `features/inicio`: lista con estado (etiqueta + color), enlace a la pantalla de perfiles,
+  aviso legal en la primera apertura y luego como línea fija al pie
+  - Verificación: la primera vez exige "Entiendo"; después el aviso queda visible al pie en cada
+    apertura; el enlace de la cabecera abre la pantalla de perfiles
 
 ## Bloque 4 — Verificación (la haces tú, en un celular real)
 - [ ] 4.1 Flujo completo en Android: registrar → vence (horaReclamo editada a 47 h 59 min atrás) → notificación → queja EPS → queja Supersalud

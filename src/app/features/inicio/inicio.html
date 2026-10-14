@@ -1,2 +1,55 @@
-<ion-header><ion-toolbar><ion-title>Pendientes48</ion-title></ion-toolbar></ion-header>
-<ion-content class="ion-padding"></ion-content>
+<ion-header>
+  <ion-toolbar><ion-title>Pendientes48</ion-title></ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="inicio">
+    <div class="inicio-titulo">
+      <h1>Sus pendientes</h1>
+      <button type="button" class="p48-boton-terciario" (click)="abrirPacientes()">
+        Ver perfiles
+      </button>
+    </div>
+
+    @if (error(); as e) {
+      <p class="inicio-error p48-barra-acento p48-barra-acento--alerta" role="alert">
+        {{ e }}
+      </p>
+    } @else if (cargando()) {
+      <p class="inicio-parrafo">Cargando…</p>
+    } @else if (pendientes().length === 0) {
+      <div class="p48-superficie inicio-vacio">
+        <p class="inicio-parrafo">
+          Aún no tiene pendientes. Aquí verá cada pendiente con su plazo de 48 horas.
+        </p>
+      </div>
+    } @else {
+      <ul class="inicio-lista">
+        @for (f of filas(); track f.pendiente.id) {
+          <li class="p48-superficie inicio-tarjeta">
+            <div class="inicio-datos">
+              <p class="inicio-medicamento">{{ f.pendiente.medicamentos.join(', ') }}</p>
+              <p class="inicio-detalle">{{ f.pendiente.farmacia }}</p>
+              @if (f.contador) {
+                <p class="inicio-contador">{{ f.contador }}</p>
+              }
+            </div>
+            <app-estado-chip [estado]="f.estado" />
+          </li>
+        }
+      </ul>
+    }
+
+    @if (avisoAceptado() !== null) {
+      <!-- Pegado al pie mientras se hace scroll: el spec exige que el aviso
+           permanezca siempre visible en la pantalla de inicio. -->
+      <div class="inicio-aviso">
+        <app-aviso-legal
+          [texto]="avisoLegal"
+          [modal]="avisoAceptado() === false"
+          (entendido)="aceptarAviso()"
+        />
+      </div>
+    }
+  </div>
+</ion-content>

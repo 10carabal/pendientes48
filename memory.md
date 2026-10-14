@@ -5,8 +5,8 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-14** — cierre de 3.2 (pantalla `pacientes`);
-> bloque 3 en marcha (PR #31 mergeado, `main = dd2630a`).
+> Última actualización: **2026-10-14** — cierre de 3.7 (pantalla `inicio`);
+> bloque 3 en marcha (PRs #31–#32 mergeados, `main = 7306b71`).
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -21,9 +21,10 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   integración) · 1.4 ✅ (PR #24) · 1.5 ✅ (PR #25).
 - **Bloque 2 (plataforma y persistencia) completo:** 2.1 ✅ (PR #26) · 2.2 ✅ (PR #27, smoke real
   en el S22) · 2.3 ✅ (PR #29, smoke Android + escritorio) · 2.4 ✅ (PR #30, flujos A/B/C en el S22).
-- **Bloque 3 (pantallas) en marcha:** orden 3.1 → 3.2 → 3.7 → 3.3 → 3.4 → 3.5 → 3.6; 3.1 ✅ (PR #31
-  mergeado) · 3.2 listo (pantalla `pacientes` + `cancelarTodos()`) → sale su PR (#32).
-- Repo sano en `main` (`dd2630a`); PRs #1–#31 mergeados; una rama por tarea; **Daniel revisa y
+- **Bloque 3 (pantallas) en marcha:** orden 3.1 → 3.2 → 3.7 → 3.3 → 3.4 → 3.5 → 3.6, más **3.8
+  (introducción de la app, aprobada por Daniel el 2026-10-14)**; 3.1 ✅ (PR #31) · 3.2 ✅ (PR #32) ·
+  3.7 listo (pantalla `inicio`) → sale su PR (#33).
+- Repo sano en `main` (`7306b71`); PRs #1–#32 mergeados; una rama por tarea; **Daniel revisa y
   mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
@@ -61,6 +62,7 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 | Trampa de foco propia en `shared/foco-dialogo.ts` para los diálogos, sin `@angular/cdk/a11y` | el CDK no está en el stack del README y no se agregan dependencias en esta fase; la función pura cubre `aviso-legal` y `ayuda-avisos` y la reutilizan las pantallas nuevas (QA mayor M2 de 3.1, 2026-10-13) |
 | `cancelarTodos()` en el adaptador (`getPending()` + `cancel()`), invocado **antes** de `borrarTodo()` | hallazgo mayor 12 (opción B de Daniel): la pantalla no debe conocer los IDs de notificación y el orden evita avisos huérfanos; si el borrado falla tras cancelar, la reprogramación al iniciar (pendiente de 2.2) los restaura (3.2, 2026-10-14) |
 | Botón principal flotante al pie en celular (`fixed` + `--p48-sombra-flotante`, `z-index` bajo los diálogos) y junto al título en escritorio, con corte `@media (min-width: 768px)` | design.md "Adaptación por tamaño" (decisión de Daniel sobre la QA de 3.2, 2026-10-14); `@media` no admite custom properties → el 768 px es constante de maquetación con comentario, **falta que Daniel confirme el número** |
+| Introducción de la app en el **estado vacío de Inicio** + hoja "¿Cómo funciona?" (enlace terciario persistente en la cabecera), como tarea 3.8 tras merge de 3.7 | evita un segundo bloqueo tras el aviso legal (onboarding descartado), ayuda en el momento exacto en que el usuario no tiene nada que hacer y no duplica la guía de 3.3 (decisión de Daniel, 2026-10-14) |
 
 ## Lecciones del entorno
 - **`npm ci` siempre** después de un merge que toque `package-lock.json`; sin eso fallan `ng build`,
@@ -197,6 +199,14 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   IndexedDB con el mismo esquema que `idb-keyval` (DB `pendientes48`, store `datos`) y `put` de
   fixtures → la pantalla se fotografía con listas, diálogos de duplicado y confirmaciones sin tocar
   la app (script `p48-pacientes.js`, 3.2).
+- **La "línea fija al pie" del aviso legal se logra con `position: sticky; bottom: 0` + fondo
+  `--p48-fondo`** dentro del contenido con scroll: `fixed` la saca del flujo y deja un hueco al
+  final; sticky la mantiene visible durante el scroll (spec: "permanece siempre visible") y en su
+  posición natural al llegar al final (3.7, 2026-10-14).
+- **Los scripts de captura CDP se reutilizan por pantalla** (`p48-pacientes.js` → `p48-inicio.js`:
+  sembrar + click por texto + shots). Ojo: `scrollIntoView` sobre el elemento sticky **no hace
+  scroll** si ya está visible → la captura "al pie" salió idéntica a la de scroll y se descarta del
+  PR (3.7, 2026-10-14).
 
 ## Pendientes conocidos (no bloqueantes)
 - **Identidad visual:** sistema de diseño (D14–D16) e ícono/splash (D17) resueltos; solo quedan las
@@ -215,8 +225,26 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Prueba en dispositivo de `cancelarTodos()` (3.2):** en la PWA es no-op y los tests van con el
   plugin mockeado; la cancelación real sobre `LocalNotifications` queda pendiente de ensayo en el
   S22 cuando la pantalla de perfiles se pruebe en Android.
+- **Inicio incompleto a propósito (3.7):** sin botón principal (design.md lo da junto al título →
+  llega con 3.4 cuando exista la ruta del formulario; así no queda un botón muerto), tarjetas sin
+  navegar al detalle (3.5 agrega el enlace) y orden de la lista = orden de claves de IndexedDB (la
+  spec no define orden; candidato a ordenar por vencimiento).
+- **Tarea 3.8 (introducción de la app):** copy de producto por aprobar con Daniel antes de su PR;
+  el enlace a la guía de 3.3 se agrega en la tarea 3.3 (regla: sin rutas aún inexistentes).
 
 ## Registro de actualizaciones
+- **2026-10-14** — **3.7** (`features/inicio/`): pantalla de inicio con lista de pendientes
+  (contador `textoContador` + chip de estado con `computed filas` y reloj `ahora` cada minuto),
+  estado vacío que explica qué ver ahí, enlace "Ver perfiles" a `/pacientes` (prometido en la QA de
+  3.2) y aviso legal modal en la primera apertura → línea fija al pie con `position: sticky` (spec:
+  "permanece siempre visible"). Si la lectura falla, la preferencia se asume no aceptada (el aviso
+  legal jamás se salta en silencio) y la lista muestra `role="alert"`; si persistir el "Entiendo"
+  falla, la próxima apertura vuelve a mostrar el modal. Sin botón principal todavía (llega con 3.4).
+  QA: **1 mayor de trazabilidad** (el enlace a perfiles no estaba en el texto de `tasks.md` →
+  absorbido con precedente 2.2/3.2) resuelto antes del PR, 0 menores. Evidencia: 7 capturas
+  390/1280, 1 descartada por duplicada. Pruebas: **167/167** (+6); `tsc`, `openspec --strict` y
+  `ng build` (518,51 kB) en 0.
+
 - **2026-10-14** — **3.2** (`features/pacientes/`): pantalla de perfiles con crear/editar (7 campos,
   correo opcional), aviso de duplicado con "Usar el perfil existente" / "Seguir editando", y
   "Borrar todos mis datos" con doble confirmación que **cancela todos los avisos programados**
