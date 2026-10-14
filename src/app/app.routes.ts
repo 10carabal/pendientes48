@@ -14,6 +14,10 @@ const rutasDesarrollo: Routes = isDevMode()
 
 export const routes: Routes = [
   { path: '', loadComponent: () => import('./features/inicio/inicio').then((m) => m.Inicio) },
+  {
+    path: 'pacientes',
+    loadComponent: () => import('./features/pacientes/pacientes').then((m) => m.Pacientes),
+  },
   ...rutasDesarrollo,
   { path: '**', redirectTo: '' },
 ];

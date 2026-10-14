@@ -124,10 +124,8 @@ espaciados sueltos), y cada pantalla se verifica a 390 px y a 1280 px contra el 
     asesoría y, sin conexión, solo el enlace queda inactivo; `estado-chip` muestra la etiqueta y el
     color de los 6 estados; `aviso-legal` muestra la línea fija y el modal de primera apertura;
     los cuatro componentes aparecen en `/guia`
-- [ ] 3.2 🅿️ `features/pacientes`: crear, editar, aviso de duplicado y "Borrar todos mis datos" con doble confirmación
-  - Verificación: un duplicado ofrece "Usar el perfil existente"; tras borrar todo, la app vuelve a la primera apertura
-  - Nota (QA): el escenario "Borrar todos mis datos" exige además **cancelar todos los avisos
-    programados** — incluirlo en texto y verificación (hallazgo mayor 12)
+- [x] 3.2 🅿️ `features/pacientes`: crear, editar, aviso de duplicado y "Borrar todos mis datos" con doble confirmación que cancela todos los avisos programados (hallazgo mayor 12)
+  - Verificación: un duplicado ofrece "Usar el perfil existente"; al confirmar el borrado total se cancelan los avisos programados, se vacía el almacén y la app vuelve a la primera apertura
 - [ ] 3.3 🅿️ `features/ventanilla`: guía de 3 pasos, norma-card en el paso 2, alternativas del paso 3
   - Verificación: en modo avión la guía se ve completa; con cámara denegada se puede llegar al registro
 - [ ] 3.4 🅿️ `features/pendiente-form`: registro y edición; dirección obligatoria precargada;

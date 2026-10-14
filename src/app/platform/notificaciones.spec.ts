@@ -2,6 +2,7 @@ import type { ScheduleOptions } from '@capacitor/local-notifications';
 import {
   avisosPendientes,
   cancelarAviso,
+  cancelarTodos,
   permisoAvisos,
   programarAviso,
   reprogramarAvisos,
@@ -99,6 +100,30 @@ describe('notificaciones', () => {
     });
   });
 
+  describe('cancelarTodos()', () => {
+    it('cancela todos los avisos programados (escenario "Borrar todos mis datos")', async () => {
+      cap.getPending.mockResolvedValueOnce({
+        notifications: [
+          { id: 11, schedule: { at: new Date(Date.now() + 60_000) } },
+          { id: 22, schedule: { at: new Date(Date.now() + 120_000) } },
+        ],
+      });
+
+      await cancelarTodos();
+
+      expect(cap.cancel).toHaveBeenCalledWith({ notifications: [{ id: 11 }, { id: 22 }] });
+      expect(cap.schedule).not.toHaveBeenCalled();
+    });
+
+    it('con nada programado no cancela nada', async () => {
+      cap.getPending.mockResolvedValueOnce({ notifications: [] });
+
+      await cancelarTodos();
+
+      expect(cap.cancel).not.toHaveBeenCalled();
+    });
+  });
+
   describe('reprogramarAvisos()', () => {
     it('cancela los avisos de la lista y programa solo los que aún no vencieron', async () => {
       const futuro = enSegundos(600, 'f-1');
@@ -169,10 +194,12 @@ describe('notificaciones', () => {
     it('no toca el plugin de notificaciones', async () => {
       await programarAviso(enSegundos(60));
       await cancelarAviso('pd-1');
+      await cancelarTodos();
       await reprogramarAvisos([enSegundos(60)]);
 
       expect(cap.schedule).not.toHaveBeenCalled();
       expect(cap.cancel).not.toHaveBeenCalled();
+      expect(cap.getPending).not.toHaveBeenCalled();
     });
 
     it('el permiso no aplica y no hay avisos pendientes', async () => {

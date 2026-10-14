@@ -1,0 +1,245 @@
+<ion-header>
+  <ion-toolbar><ion-title>Perfiles de paciente</ion-title></ion-toolbar>
+</ion-header>
+<ion-content>
+  <div class="pacientes">
+    @if (campos(); as formulario) {
+      <form
+        class="pacientes-formulario p48-superficie"
+        (submit)="$event.preventDefault(); guardar()"
+      >
+        <div class="pacientes-titulo">
+          <h1>{{ editandoId() ? 'Editar perfil' : 'Nuevo perfil' }}</h1>
+          <!-- En celular flota al pie (ver .pacientes-principal); en escritorio sube junto al título. -->
+          <button type="submit" class="p48-boton-principal pacientes-principal">Guardar</button>
+        </div>
+        <label class="pacientes-campo">
+          <span class="pacientes-etiqueta">Nombre completo</span>
+          <input
+            class="p48-campo"
+            type="text"
+            autocomplete="name"
+            [value]="formulario.nombre"
+            (input)="actualizar('nombre', $event)"
+          />
+        </label>
+        <div class="pacientes-fila-campos">
+          <label class="pacientes-campo">
+            <span class="pacientes-etiqueta">Tipo de documento</span>
+            <select
+              class="p48-campo"
+              [value]="formulario.tipoDocumento"
+              (input)="actualizar('tipoDocumento', $event)"
+            >
+              @for (t of tiposDocumento; track t) {
+                <option [value]="t">{{ t }}</option>
+              }
+            </select>
+          </label>
+          <label class="pacientes-campo">
+            <span class="pacientes-etiqueta">Número de documento</span>
+            <input
+              class="p48-campo"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              [value]="formulario.numeroDocumento"
+              (input)="actualizar('numeroDocumento', $event)"
+            />
+          </label>
+        </div>
+        <label class="pacientes-campo">
+          <span class="pacientes-etiqueta">EPS</span>
+          <input
+            class="p48-campo"
+            type="text"
+            [value]="formulario.eps"
+            (input)="actualizar('eps', $event)"
+          />
+        </label>
+        <label class="pacientes-campo">
+          <span class="pacientes-etiqueta">Teléfono</span>
+          <input
+            class="p48-campo"
+            type="tel"
+            inputmode="tel"
+            autocomplete="tel"
+            [value]="formulario.telefono"
+            (input)="actualizar('telefono', $event)"
+          />
+        </label>
+        <label class="pacientes-campo">
+          <span class="pacientes-etiqueta">Correo (opcional)</span>
+          <input
+            class="p48-campo"
+            type="email"
+            autocomplete="email"
+            [value]="formulario.correo"
+            (input)="actualizar('correo', $event)"
+          />
+        </label>
+        <label class="pacientes-campo">
+          <span class="pacientes-etiqueta">Dirección</span>
+          <textarea
+            class="p48-campo"
+            rows="2"
+            autocomplete="street-address"
+            [value]="formulario.direccion"
+            (input)="actualizar('direccion', $event)"
+          ></textarea>
+        </label>
+
+        @if (error(); as e) {
+          <p class="pacientes-error p48-barra-acento p48-barra-acento--alerta" role="alert">{{ e }}</p>
+        }
+
+        <div class="pacientes-acciones">
+          <button type="button" class="p48-boton-terciario" (click)="cancelarFormulario()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    } @else {
+      <div class="pacientes-titulo">
+        <h1>Perfiles de paciente</h1>
+        <!-- En celular flota al pie (ver .pacientes-principal); en escritorio sube junto al título. -->
+        <button type="button" class="p48-boton-principal pacientes-principal" (click)="nuevo()">
+          Crear perfil
+        </button>
+      </div>
+      <p class="pacientes-parrafo">
+        Guarde el perfil de cada persona para reutilizarlo en cada pendiente y documento.
+      </p>
+      @if (aviso(); as a) {
+        <p class="pacientes-aviso" role="status">{{ a }}</p>
+      }
+      @if (error(); as e) {
+        <p class="pacientes-error p48-barra-acento p48-barra-acento--alerta" role="alert">{{ e }}</p>
+      }
+
+      @if (cargando()) {
+        <p class="pacientes-parrafo">Cargando…</p>
+      } @else if (pacientes().length === 0) {
+        <div class="p48-superficie pacientes-vacio">
+          <p class="pacientes-parrafo">
+            Aún no tiene perfiles. Cree uno para registrar sus pendientes más rápido.
+          </p>
+        </div>
+      } @else {
+        <ul class="pacientes-lista">
+          @for (p of pacientes(); track p.id) {
+            <li class="p48-superficie pacientes-fila">
+              <div class="pacientes-datos">
+                <p class="pacientes-nombre">{{ p.nombre }}</p>
+                <p class="pacientes-detalle">{{ p.tipoDocumento }} {{ p.numeroDocumento }}</p>
+                <p class="pacientes-detalle">{{ p.eps }}</p>
+              </div>
+              <button type="button" class="p48-boton-terciario" (click)="editar(p)">Editar</button>
+            </li>
+          }
+        </ul>
+      }
+
+      <div class="pacientes-acciones">
+        <button
+          type="button"
+          class="p48-boton-terciario p48-boton-terciario--destructivo"
+          (click)="pedirBorrado()"
+        >
+          Borrar todos mis datos
+        </button>
+      </div>
+    }
+
+    <!-- Diálogo: perfil duplicado (spec `pendientes` · "Perfil duplicado") -->
+    @if (duplicado(); as dup) {
+      <!-- Escape cierra: es una oferta, no un bloqueo. -->
+      <div
+        class="pacientes-fondo"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dup-titulo"
+        (keydown)="atraparFoco($event)"
+        (keydown.escape)="duplicado.set(null)"
+      >
+        <div class="pacientes-caja p48-superficie p48-sombra-flotante">
+          <h2 id="dup-titulo" class="pacientes-titulo-dialogo">Este documento ya existe</h2>
+          <p class="pacientes-parrafo">
+            {{ dup.nombre }} ({{ dup.tipoDocumento }} {{ dup.numeroDocumento }}) ya tiene un perfil
+            guardado. Puede usar ese perfil en lugar de crear otro.
+          </p>
+          <button
+            #botonUsarExistente
+            type="button"
+            class="p48-boton-principal"
+            (click)="usarExistente()"
+          >
+            Usar el perfil existente
+          </button>
+          <button type="button" class="p48-boton-terciario" (click)="duplicado.set(null)">
+            Seguir editando
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- "Borrar todos mis datos": doble confirmación (spec `pendientes`) -->
+    @if (confirmacion() === 1) {
+      <div
+        class="pacientes-fondo"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="borrar-titulo"
+        (keydown)="atraparFoco($event)"
+        (keydown.escape)="cancelarBorrado()"
+      >
+        <div class="pacientes-caja p48-superficie p48-sombra-flotante">
+          <h2 id="borrar-titulo" class="pacientes-titulo-dialogo">¿Borrar todos sus datos?</h2>
+          <p class="pacientes-parrafo">
+            Se borrarán sus perfiles, pendientes, fotos, bitácoras y los avisos programados. Esta
+            acción no se puede deshacer.
+          </p>
+          <button
+            #botonBorrarTodo
+            type="button"
+            class="p48-boton-principal p48-boton-principal--destructivo"
+            (click)="confirmacion.set(2)"
+          >
+            Borrar todo
+          </button>
+          <button type="button" class="p48-boton-secundario" (click)="cancelarBorrado()">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    }
+    @if (confirmacion() === 2) {
+      <div
+        class="pacientes-fondo"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="borrar-titulo"
+        (keydown)="atraparFoco($event)"
+        (keydown.escape)="cancelarBorrado()"
+      >
+        <div class="pacientes-caja p48-superficie p48-sombra-flotante">
+          <h2 id="borrar-titulo" class="pacientes-titulo-dialogo">Última confirmación</h2>
+          <p class="pacientes-parrafo">
+            De verdad desea borrar todo. No hay forma de recuperar estos datos.
+          </p>
+          <button
+            #botonBorrarTodo
+            type="button"
+            class="p48-boton-principal p48-boton-principal--destructivo"
+            (click)="borrarTodos()"
+          >
+            Sí, borrar todo
+          </button>
+          <button type="button" class="p48-boton-secundario" (click)="cancelarBorrado()">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</ion-content>
