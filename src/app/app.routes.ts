@@ -18,6 +18,18 @@ export const routes: Routes = [
     path: 'pacientes',
     loadComponent: () => import('./features/pacientes/pacientes').then((m) => m.Pacientes),
   },
+  {
+    // Estáticas antes de cualquier ruta con parámetro: `pendientes/nuevo` debe
+    // declararse antes que `pendientes/:id` (el detalle llega con la tarea 3.5).
+    path: 'pendientes/nuevo',
+    loadComponent: () =>
+      import('./features/pendiente-form/pendiente-form').then((m) => m.PendienteForm),
+  },
+  {
+    path: 'pendientes/:id/editar',
+    loadComponent: () =>
+      import('./features/pendiente-form/pendiente-form').then((m) => m.PendienteForm),
+  },
   ...rutasDesarrollo,
   { path: '**', redirectTo: '' },
 ];

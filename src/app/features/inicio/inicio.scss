@@ -21,6 +21,24 @@
   font-size: var(--p48-tam-titulo);
 }
 
+.inicio-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--p48-espacio-3);
+}
+
+/* Celular (design.md · "Adaptación por tamaño"): el botón principal flota
+   al pie con la sombra del patrón 3. */
+.inicio-principal {
+  position: fixed;
+  right: var(--p48-espacio-4);
+  bottom: var(--p48-espacio-4);
+  left: var(--p48-espacio-4);
+  z-index: 10; /* constante de capa: bajo la de los diálogos (20) */
+  box-shadow: var(--p48-sombra-flotante);
+}
+
 .inicio-parrafo,
 .inicio-detalle,
 .inicio-contador {
@@ -77,9 +95,26 @@
   line-height: var(--p48-interlineado);
 }
 
-/* Línea fija al pie (spec `normas`): visible siempre, también al hacer scroll. */
+/* Línea fija al pie (spec `normas`): visible siempre, también al hacer scroll.
+   La reserva del botón principal flotante vive dentro del propio pie pegajoso:
+   así la línea legal nunca queda tapada por el botón (el botón ocupa hasta
+   16 px + 56 px desde el borde; la reserva es 96 px). */
 .inicio-aviso {
   position: sticky;
   bottom: 0;
   background: var(--p48-fondo);
+  padding-bottom: calc(var(--p48-espacio-6) * 3);
+}
+
+@media (min-width: 768px) {
+  /* corte celular↔escritorio (design.md · "Adaptación por tamaño"):
+     el botón principal sube junto al título y el pie ya no reserva su espacio. */
+  .inicio-principal {
+    position: static;
+    box-shadow: none;
+  }
+
+  .inicio-aviso {
+    padding-bottom: 0;
+  }
 }

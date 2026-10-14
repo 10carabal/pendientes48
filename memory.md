@@ -5,8 +5,9 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-14** — cierre de 3.7 (pantalla `inicio`);
-> bloque 3 en marcha (PRs #31–#32 mergeados, `main = 7306b71`).
+> Última actualización: **2026-10-14** — **3.4** (`features/pendiente-form/`) cerrada con el primer
+> uso del flujo multiagente; copy de la introducción (3.8) aprobado por Daniel con orden revisado
+> (3.8 al final del bloque); `main = eb338f9`.
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -21,10 +22,12 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   integración) · 1.4 ✅ (PR #24) · 1.5 ✅ (PR #25).
 - **Bloque 2 (plataforma y persistencia) completo:** 2.1 ✅ (PR #26) · 2.2 ✅ (PR #27, smoke real
   en el S22) · 2.3 ✅ (PR #29, smoke Android + escritorio) · 2.4 ✅ (PR #30, flujos A/B/C en el S22).
-- **Bloque 3 (pantallas) en marcha:** orden 3.1 → 3.2 → 3.7 → 3.3 → 3.4 → 3.5 → 3.6, más **3.8
-  (introducción de la app, aprobada por Daniel el 2026-10-14)**; 3.1 ✅ (PR #31) · 3.2 ✅ (PR #32) ·
-  3.7 listo (pantalla `inicio`) → sale su PR (#33).
-- Repo sano en `main` (`7306b71`); PRs #1–#32 mergeados; una rama por tarea; **Daniel revisa y
+- **Bloque 3 (pantallas) en marcha:** 3.1 ✅ (PR #31) · 3.2 ✅ (PR #32) · 3.7 ✅ (PR #33) ·
+  3.4 ✅ (PR #34, flujo multiagente); siguiente **3.3**, con orden **3.4 → 3.3 → 3.5 → 3.6 → 3.8**
+  (reordenado por Daniel el 2026-10-14: la 3.3 termina en "Registrar este pendiente", así que el
+  formulario de la 3.4 debe existir antes; hasta que la 3.3 agregue el botón "Me dejaron un
+  pendiente", el formulario se prueba en `/pendientes/nuevo` o con el botón de Inicio).
+- Repo sano en `main` (`eb338f9`); PRs #1–#33 mergeados; una rama por tarea; **Daniel revisa y
   mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
@@ -34,6 +37,11 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Al finalizar cada fase/tarea:** lanzar la revisión QA (`/opsx-qa`, solo diagnóstico: detecta,
   no resuelve) para que verifique si se logró el objetivo de la verificación de `tasks.md`;
   pasarle los hallazgos a Daniel **antes de abrir el PR**.
+- **Flujo multiagente aprobado por Daniel (2026-10-14):** coordinador (sesión principal) →
+  planificador → implementador → verificador, uno por fase del SDD; invocación con `/flujo`
+  (skill `flujo-multiagente`). Reparte el contexto en ventanas limpias: dossier por rol, correcciones
+  al mismo implementador por `sessionID`, verificador en sesión nueva (ojos frescos), máx. 2 vueltas
+  antes de escalar a Daniel. Detalle y plantillas en la skill; reglas en `AGENTS.md`.
 - **Componentes siempre en tres archivos separados, sin importar el tamaño:**
   `nombre.ts` (clase con `templateUrl`/`styleUrl`) + `nombre.html` (plantilla) +
   `nombre.scss` (estilos). Nunca `template:` ni `styles:` inline. Escalabilidad/mantenibilidad.
@@ -62,7 +70,31 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 | Trampa de foco propia en `shared/foco-dialogo.ts` para los diálogos, sin `@angular/cdk/a11y` | el CDK no está en el stack del README y no se agregan dependencias en esta fase; la función pura cubre `aviso-legal` y `ayuda-avisos` y la reutilizan las pantallas nuevas (QA mayor M2 de 3.1, 2026-10-13) |
 | `cancelarTodos()` en el adaptador (`getPending()` + `cancel()`), invocado **antes** de `borrarTodo()` | hallazgo mayor 12 (opción B de Daniel): la pantalla no debe conocer los IDs de notificación y el orden evita avisos huérfanos; si el borrado falla tras cancelar, la reprogramación al iniciar (pendiente de 2.2) los restaura (3.2, 2026-10-14) |
 | Botón principal flotante al pie en celular (`fixed` + `--p48-sombra-flotante`, `z-index` bajo los diálogos) y junto al título en escritorio, con corte `@media (min-width: 768px)` | design.md "Adaptación por tamaño" (decisión de Daniel sobre la QA de 3.2, 2026-10-14); `@media` no admite custom properties → el 768 px es constante de maquetación con comentario, **falta que Daniel confirme el número** |
-| Introducción de la app en el **estado vacío de Inicio** + hoja "¿Cómo funciona?" (enlace terciario persistente en la cabecera), como tarea 3.8 tras merge de 3.7 | evita un segundo bloqueo tras el aviso legal (onboarding descartado), ayuda en el momento exacto en que el usuario no tiene nada que hacer y no duplica la guía de 3.3 (decisión de Daniel, 2026-10-14) |
+| Introducción de la app en el **estado vacío de Inicio** + hoja "¿Cómo funciona?" (enlace terciario persistente en la cabecera), como tarea 3.8 **al final del bloque 3** (primero iba a salir tras 3.7) | evita un segundo bloqueo tras el aviso legal (onboarding descartado), ayuda en el momento exacto en que el usuario no tiene nada que hacer y no duplica la guía de 3.3; al final del bloque para que el copy no prometa pantallas inexistentes (decisiones de Daniel, 2026-10-14) |
+| Copy de la introducción: **Alternativa 2** (sujeto "la aplicación"), 3ª persona, profesional y sencillo para usuarios de la 3ª edad; aviso **solo al vencer** | la regla "usted" de `design.md` solo aplica a `normas.json`; texto completo en "Copy aprobado de la introducción" más abajo (aprobación de Daniel, 2026-10-14) |
+
+### Copy aprobado de la introducción (3.8 — aprobación de Daniel, 2026-10-14)
+
+Alternativa 2 (sujeto "la aplicación"), 3ª persona, profesional y sencillo. Verbatim, para el
+estado vacío de Inicio (tras la línea "Aún no tiene pendientes", pendiente de confirmar si esa
+línea de 3.7 pasa también a 3ª persona):
+
+> **¿Qué es Pendientes48?** — Pendientes48 es una aplicación que lleva el control de los
+> medicamentos pendientes en la farmacia. Cuenta 48 horas desde el reclamo y muestra al paciente
+> el plazo que le queda.
+>
+> **Qué puede hacer** — Registrar cada pendiente con sus medicamentos, la farmacia y la hora del
+> reclamo · Mostrar el tiempo que queda y la fecha de vencimiento · Avisar al paciente cuando se
+> acaben las 48 horas · Preparar el texto y el PDF para reclamar ante la EPS o Supersalud ·
+> Guardar los datos del paciente para no volver a pedirlos.
+>
+> **Cómo funciona** — 1. El paciente registra su pendiente con la hora del reclamo. 2. La
+> aplicación descuenta las 48 horas y avisa cuando el plazo vence. 3. Si el plazo vence sin
+> entrega, la aplicación prepara la queja ante la EPS o Supersalud.
+
+La hoja "¿Cómo funciona?" repite esas tres secciones (h2 + h3, listas como `<ul>`/`<ol>`), con
+botón **Cerrar** (terciario) + Escape + toque fuera; desde que exista la 3.3 se agrega al pie el
+enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso paso a paso (3.3).
 
 ## Lecciones del entorno
 - **`npm ci` siempre** después de un merge que toque `package-lock.json`; sin eso fallan `ng build`,
@@ -209,6 +241,11 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   PR (3.7, 2026-10-14).
 
 ## Pendientes conocidos (no bloqueantes)
+- **Archivos del flujo multiagente sin commit (2026-10-14):** `.opencode/skills/flujo-multiagente/`,
+  `.opencode/commands/flujo.md` y la sección de `AGENTS.md` quedan en el árbol de
+  `feat/3.4-pendiente-form` a la espera de su propia rama **`chore/flujo-multiagente`** (decisión de
+  Daniel: agregarlos después) → **no incluirlos en el commit de 3.4**, que lleva solo
+  `src/app/features/pendiente-form/` + `app.routes.ts` + `memory.md` + `tasks.md`.
 - **Identidad visual:** sistema de diseño (D14–D16) e ícono/splash (D17) resueltos; solo quedan las
   capturas de pantalla del manifiesto (`screenshots`), que se agregan cuando existan pantallas reales.
 - **Hosting de la PWA** para compartirla por WhatsApp → decidir antes de la tarea 4.2.
@@ -225,14 +262,41 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Prueba en dispositivo de `cancelarTodos()` (3.2):** en la PWA es no-op y los tests van con el
   plugin mockeado; la cancelación real sobre `LocalNotifications` queda pendiente de ensayo en el
   S22 cuando la pantalla de perfiles se pruebe en Android.
-- **Inicio incompleto a propósito (3.7):** sin botón principal (design.md lo da junto al título →
-  llega con 3.4 cuando exista la ruta del formulario; así no queda un botón muerto), tarjetas sin
-  navegar al detalle (3.5 agrega el enlace) y orden de la lista = orden de claves de IndexedDB (la
-  spec no define orden; candidato a ordenar por vencimiento).
-- **Tarea 3.8 (introducción de la app):** copy de producto por aprobar con Daniel antes de su PR;
-  el enlace a la guía de 3.3 se agrega en la tarea 3.3 (regla: sin rutas aún inexistentes).
+- **Inicio incompleto a propósito (3.7):** el botón principal llegó con 3.4 ("Registrar pendiente"
+  a `/pendientes/nuevo`; cuando llegue la guía 3.3 hay que decidir si el rótulo pasa a "Me dejaron
+  un pendiente" y apunta a la guía, para conservar **un solo botón sólido por pantalla** —
+  decisión pendiente de Daniel). Siguen: tarjetas sin navegar al detalle (3.5 agrega el enlace) y
+  orden de la lista = orden de claves de IndexedDB (la spec no define orden; candidato a ordenar
+  por vencimiento).
+- **Tarea 3.8 (introducción de la app):** copy **aprobado** (ver "Copy aprobado de la
+  introducción"); falta confirmar si la línea "Aún no tiene pendientes." (2ª persona, de 3.7)
+  pasa también a 3ª. Como 3.8 va al final del bloque, el enlace a la guía de 3.3 se agrega
+  **en la propia 3.8** (entonces la 3.3 ya existe). Regla vigente: sin botones muertos.
 
 ## Registro de actualizaciones
+- **2026-10-14** — **3.4** (`features/pendiente-form/` + botón de Inicio): pantalla de registro
+  (`/pendientes/nuevo`) y edición (`/pendientes/:id/editar`, estáticas antes del `:id` de 3.5)
+  espejo del patrón de `pacientes`: select de paciente que precarga la dirección, medicamentos en
+  textarea (se parten por salto de línea al guardar), hora `datetime-local` **precargada con la
+  hora actual** (hallazgo mayor 10) validada con la pura `validarHoraReclamo`, farmacia/gestor
+  obligatorios (confirmado por Daniel), comprobante opcional como texto, autorización de domicilio
+  con barra `--aviso` y guardado permitido si "no", y gestión por otra persona con sus 4 datos
+  obligatorios solo con el toggle activo. Guardar: spread del original en edición (preserva
+  bitácora/foto/quejas/ICS/gestión), `ErrorDeEscritura` con el texto aprobado conservando los
+  campos, `programarAviso` con el mismo ID (reprograma al editar) y hoja `ayuda-avisos` la primera
+  vez que se registra en Android — la navegación difiere hasta cerrarla. Queja activa ⇒ hora
+  deshabilitada con nota. **Inicio** gana su botón principal "Registrar pendiente" (flotante al
+  pie sobre reserva de 96 px para no tapar la línea legal sticky; junto al título en ≥768 px).
+  **Primer uso del flujo multiagente** (planificador→implementador→verificador, aprobado por
+  Daniel): QA con 0 bloqueantes y 2 mayores resueltos antes del PR — `isNative()` en la pantalla
+  (nueva `ayudaAvisosAplica()` en `platform/plataforma.ts`, `design.md` prohíbe preguntar
+  plataforma en features) y el botón de Inicio faltante (trazabilidad memory.md↔tasks.md). Texto
+  absorbido en `tasks.md` 3.4: hora por defecto, farmacia/gestor, gestión, aviso programado y
+  botón de Inicio. Pruebas: **186/186** (+19: 17 de `pendiente-form`, 1 de `inicio`, 2 de
+  `plataforma`); `tsc`, `openspec --strict` y `ng build` (518,77 kB; chunk lazy 19,13 kB) en 0.
+  Evidencia: 9 capturas 390/1280 (la hoja `ayuda-avisos` no se puede forzar en web; ya cubierta
+  en 3.1 desde `/guia`).
+
 - **2026-10-14** — **3.7** (`features/inicio/`): pantalla de inicio con lista de pendientes
   (contador `textoContador` + chip de estado con `computed filas` y reloj `ahora` cada minuto),
   estado vacío que explica qué ver ahí, enlace "Ver perfiles" a `/pacientes` (prometido en la QA de
