@@ -6,9 +6,19 @@
   <div class="inicio">
     <div class="inicio-titulo">
       <h1>Sus pendientes</h1>
-      <button type="button" class="p48-boton-terciario" (click)="abrirPacientes()">
-        Ver perfiles
-      </button>
+      <div class="inicio-acciones">
+        <button type="button" class="p48-boton-terciario" (click)="abrirPacientes()">
+          Ver perfiles
+        </button>
+        <!-- En celular flota al pie (ver .inicio-principal); en escritorio sube junto al título. -->
+        <button
+          type="button"
+          class="p48-boton-principal inicio-principal"
+          (click)="abrirRegistro()"
+        >
+          Registrar pendiente
+        </button>
+      </div>
     </div>
 
     @if (error(); as e) {

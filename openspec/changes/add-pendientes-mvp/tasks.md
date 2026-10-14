@@ -128,13 +128,17 @@ espaciados sueltos), y cada pantalla se verifica a 390 px y a 1280 px contra el 
   - Verificación: un duplicado ofrece "Usar el perfil existente"; al confirmar el borrado total se cancelan los avisos programados, se vacía el almacén y la app vuelve a la primera apertura
 - [ ] 3.3 🅿️ `features/ventanilla`: guía de 3 pasos, norma-card en el paso 2, alternativas del paso 3
   - Verificación: en modo avión la guía se ve completa; con cámara denegada se puede llegar al registro
-- [ ] 3.4 🅿️ `features/pendiente-form`: registro y edición; dirección obligatoria precargada;
-  validación de hora futura; hora bloqueada si hay queja; aviso si no autorizó domicilio;
-  mensaje de fallo al guardar; hoja `ayuda-avisos` la primera vez en Android
-  - Verificación: no se puede guardar con hora futura ni sin dirección; con una queja registrada
-    la hora aparece bloqueada; la hoja de ayuda sale solo en el primer registro
-  - Nota (QA): falta el escenario "Hora de reclamo por defecto" (la hora se precarga con la hora
-    actual) — incluirlo en texto y verificación (hallazgo mayor 10)
+- [x] 3.4 🅿️ `features/pendiente-form`: registro y edición; dirección obligatoria precargada;
+  hora de reclamo por defecto con la hora actual (hallazgo mayor 10) y validación de hora futura;
+  farmacia o gestor obligatorios; gestión por otra persona con sus 4 datos obligatorios; hora
+  bloqueada si hay queja; aviso si no autorizó domicilio (se puede guardar igual); mensaje de fallo
+  al guardar; aviso programado al vencer (y reprogramado al editar) con el ID del pendiente; hoja
+  `ayuda-avisos` la primera vez en Android; botón principal de Inicio "Registrar pendiente" al
+  formulario (la 3.3 migrará la entrada a la guía "Me dejaron un pendiente")
+  - Verificación: no se puede guardar con hora futura ni sin dirección ni sin farmacia; la hora se
+    precarga con la hora actual; con una queja registrada la hora aparece bloqueada y al editar se
+    reprograma el aviso; con la gestión activa no se guarda sin sus 4 datos; la hoja de ayuda sale
+    solo en el primer registro; desde Inicio, un toque en "Registrar pendiente" abre el formulario
 - [ ] 3.5 `features/pendiente-detalle`: contador, estado con etiqueta y color, norma-card, bitácora
   (`bitacoraVista`) con notas manuales, escalera tipo stepper, "Ya me llegó", aviso de permiso
   denegado, botón `.ics` con "Ya agregaste este recordatorio el…", y "Borrar" con confirmación

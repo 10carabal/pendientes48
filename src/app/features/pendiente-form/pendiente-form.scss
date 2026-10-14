@@ -1,0 +1,125 @@
+.pendiente-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-5);
+  max-width: var(--p48-ancho-inicio);
+  margin: 0 auto;
+  /* en celular reserva el pie para el botón principal flotante */
+  padding: var(--p48-espacio-5) var(--p48-espacio-4) calc(var(--p48-espacio-6) * 3);
+}
+
+.pendiente-form-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--p48-espacio-3);
+}
+
+.pendiente-form-titulo h1 {
+  margin: 0;
+  font-size: var(--p48-tam-titulo);
+}
+
+/* Celular (design.md · "Adaptación por tamaño"): el botón principal flota
+   al pie con la sombra del patrón 3. */
+.pendiente-form-principal {
+  position: fixed;
+  right: var(--p48-espacio-4);
+  bottom: var(--p48-espacio-4);
+  left: var(--p48-espacio-4);
+  z-index: 10; /* constante de capa: bajo la de la hoja de ayuda */
+  box-shadow: var(--p48-sombra-flotante);
+}
+
+@media (min-width: 768px) {
+  /* corte celular↔escritorio (design.md · "Adaptación por tamaño"):
+     el botón principal sube junto al título. */
+  .pendiente-form {
+    padding-bottom: var(--p48-espacio-6);
+  }
+
+  .pendiente-form-principal {
+    position: static;
+    box-shadow: none;
+  }
+}
+
+.pendiente-form-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-4);
+}
+
+.pendiente-form-bloque,
+.pendiente-form-campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-1);
+}
+
+.pendiente-form-fila-campos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--p48-espacio-3);
+}
+
+.pendiente-form-fila-campos > .pendiente-form-campo {
+  flex: 1 1 var(--p48-espacio-6);
+}
+
+.pendiente-form-etiqueta {
+  font-size: var(--p48-tam-base);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+.pendiente-form-parrafo,
+.pendiente-form-pista,
+.pendiente-form-aviso {
+  margin: 0;
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.pendiente-form-pista {
+  color: var(--p48-texto-secundario);
+}
+
+.pendiente-form-aviso {
+  padding: var(--p48-espacio-2) var(--p48-espacio-3);
+}
+
+.pendiente-form-error,
+.pendiente-form-error-campo {
+  margin: 0;
+  color: var(--p48-estado-vencido-texto);
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.pendiente-form-error {
+  padding: var(--p48-espacio-2) var(--p48-espacio-3);
+}
+
+.pendiente-form-gestion {
+  display: flex;
+  align-items: center;
+  gap: var(--p48-espacio-3);
+  /* el área táctil completa es la fila, no solo la casilla (≥48 px) */
+  min-height: var(--p48-tam-tactil);
+}
+
+.pendiente-form-gestion input {
+  flex: none;
+  width: var(--p48-espacio-5);
+  height: var(--p48-espacio-5);
+  accent-color: var(--p48-accion);
+}
+
+.pendiente-form-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--p48-espacio-3);
+}

@@ -1,0 +1,297 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ editandoId() ? 'Editar pendiente' : 'Registrar pendiente' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <div class="pendiente-form">
+    @if (cargando()) {
+      <p class="pendiente-form-parrafo">Cargando…</p>
+    } @else if (campos(); as f) {
+      <form
+        class="pendiente-form-formulario p48-superficie"
+        (submit)="$event.preventDefault(); guardar()"
+      >
+        <div class="pendiente-form-titulo">
+          <h1>{{ editandoId() ? 'Editar pendiente' : 'Registrar pendiente' }}</h1>
+          <!-- En celular flota al pie (ver .pendiente-form-principal); en escritorio sube junto al título. -->
+          <button type="submit" class="p48-boton-principal pendiente-form-principal">
+            Guardar
+          </button>
+        </div>
+
+        <div class="pendiente-form-bloque">
+          <label class="pendiente-form-campo">
+            <span class="pendiente-form-etiqueta">Paciente</span>
+            <select
+              id="campo-pacienteId"
+              class="p48-campo"
+              [value]="f.pacienteId"
+              [attr.aria-invalid]="errorDe('pacienteId') ? 'true' : null"
+              [attr.aria-describedby]="errorDe('pacienteId') ? 'error-pacienteId' : null"
+              (input)="actualizar('pacienteId', $event)"
+            >
+              <option value="">Seleccione un paciente</option>
+              @for (p of pacientes(); track p.id) {
+                <option [value]="p.id">{{ p.nombre }} ({{ p.tipoDocumento }}
+                  {{ p.numeroDocumento }})</option>
+              }
+            </select>
+          </label>
+          @if (errorDe('pacienteId'); as e) {
+            <p id="error-pacienteId" class="pendiente-form-error-campo" role="alert">{{ e }}</p>
+          }
+          @if (pacientes().length === 0) {
+            <p class="pendiente-form-pista">
+              No tiene perfiles de paciente todavía. Cree uno en la pantalla de perfiles y vuelva
+              aquí.
+            </p>
+          }
+        </div>
+
+        <div class="pendiente-form-bloque">
+          <label class="pendiente-form-campo">
+            <span class="pendiente-form-etiqueta">Dirección de entrega</span>
+            <input
+              id="campo-direccionEntrega"
+              class="p48-campo"
+              type="text"
+              autocomplete="street-address"
+              [value]="f.direccionEntrega"
+              [attr.aria-invalid]="errorDe('direccionEntrega') ? 'true' : null"
+              [attr.aria-describedby]="errorDe('direccionEntrega') ? 'error-direccionEntrega' : null"
+              (input)="actualizar('direccionEntrega', $event)"
+            />
+          </label>
+          @if (errorDe('direccionEntrega'); as e) {
+            <p id="error-direccionEntrega" class="pendiente-form-error-campo" role="alert">
+              {{ e }}
+            </p>
+          }
+        </div>
+
+        <div class="pendiente-form-bloque">
+          <label class="pendiente-form-campo">
+            <span class="pendiente-form-etiqueta">Medicamento</span>
+            <textarea
+              id="campo-medicamentos"
+              class="p48-campo"
+              rows="3"
+              [value]="f.medicamentos"
+              [attr.aria-invalid]="errorDe('medicamentos') ? 'true' : null"
+              [attr.aria-describedby]="errorDe('medicamentos') ? 'error-medicamentos' : null"
+              (input)="actualizar('medicamentos', $event)"
+            ></textarea>
+          </label>
+          @if (errorDe('medicamentos'); as e) {
+            <p id="error-medicamentos" class="pendiente-form-error-campo" role="alert">{{ e }}</p>
+          } @else {
+            <p class="pendiente-form-pista">Separe cada medicamento con un salto de línea.</p>
+          }
+        </div>
+
+        <div class="pendiente-form-bloque">
+          <label class="pendiente-form-campo">
+            <span class="pendiente-form-etiqueta">Farmacia o gestor</span>
+            <input
+              id="campo-farmacia"
+              class="p48-campo"
+              type="text"
+              [value]="f.farmacia"
+              [attr.aria-invalid]="errorDe('farmacia') ? 'true' : null"
+              [attr.aria-describedby]="errorDe('farmacia') ? 'error-farmacia' : null"
+              (input)="actualizar('farmacia', $event)"
+            />
+          </label>
+          @if (errorDe('farmacia'); as e) {
+            <p id="error-farmacia" class="pendiente-form-error-campo" role="alert">{{ e }}</p>
+          }
+        </div>
+
+        <div class="pendiente-form-bloque">
+          <label class="pendiente-form-campo">
+            <span class="pendiente-form-etiqueta">Hora de reclamo</span>
+            <input
+              id="campo-horaReclamo"
+              class="p48-campo"
+              type="datetime-local"
+              [value]="f.horaReclamo"
+              [disabled]="horaBloqueada()"
+              [attr.aria-invalid]="errorDe('horaReclamo') ? 'true' : null"
+              [attr.aria-describedby]="errorDe('horaReclamo') ? 'error-horaReclamo' : null"
+              (input)="actualizar('horaReclamo', $event)"
+            />
+          </label>
+          @if (errorDe('horaReclamo'); as e) {
+            <p id="error-horaReclamo" class="pendiente-form-error-campo" role="alert">{{ e }}</p>
+          }
+          @if (horaBloqueada()) {
+            <!-- Spec "Editar un pendiente": con una queja radicada la hora no puede cambiar. -->
+            <p class="pendiente-form-aviso p48-barra-acento p48-barra-acento--permiso">
+              Hay una queja registrada. La hora de reclamo queda bloqueada para no contradecir un
+              documento ya radicado.
+            </p>
+          }
+        </div>
+
+        <div class="pendiente-form-bloque">
+          <label class="pendiente-form-campo">
+            <span class="pendiente-form-etiqueta">Número de comprobante (opcional)</span>
+            <input
+              id="campo-numeroComprobante"
+              class="p48-campo"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              [value]="f.numeroComprobante"
+              (input)="actualizar('numeroComprobante', $event)"
+            />
+          </label>
+        </div>
+
+        <div class="pendiente-form-bloque">
+          <label class="pendiente-form-campo">
+            <span class="pendiente-form-etiqueta">¿Autorizó la entrega a domicilio?</span>
+            <select
+              id="campo-autorizoDomicilio"
+              class="p48-campo"
+              [value]="f.autorizoDomicilio"
+              (input)="actualizar('autorizoDomicilio', $event)"
+            >
+              <option value="si">Sí</option>
+              <option value="no">No</option>
+            </select>
+          </label>
+          @if (f.autorizoDomicilio === 'no') {
+            <!-- Spec "No autorizó domicilio": aviso, pero se puede registrar igual. -->
+            <p class="pendiente-form-aviso p48-barra-acento p48-barra-acento--aviso" role="status">
+              La entrega a domicilio depende de esa autorización. Puede registrar el pendiente de
+              todos modos.
+            </p>
+          }
+        </div>
+
+        <div class="pendiente-form-bloque">
+          <label class="pendiente-form-gestion">
+            <input type="checkbox" [checked]="f.gestionando" (input)="alternarGestion($event)" />
+            <span class="pendiente-form-etiqueta">Lo gestiono por otra persona</span>
+          </label>
+          @if (f.gestionando) {
+            <!-- Spec "Gestión para un familiar": los 4 datos son obligatorios. -->
+            <p class="pendiente-form-pista">
+              Quien gestiona presenta los documentos en nombre del paciente, en calidad de su
+              parentesco.
+            </p>
+            <label class="pendiente-form-campo">
+              <span class="pendiente-form-etiqueta">Nombre completo de quien gestiona</span>
+              <input
+                id="campo-gestionNombre"
+                class="p48-campo"
+                type="text"
+                autocomplete="off"
+                [value]="f.gestionNombre"
+                [attr.aria-invalid]="errorDe('gestionNombre') ? 'true' : null"
+                [attr.aria-describedby]="errorDe('gestionNombre') ? 'error-gestionNombre' : null"
+                (input)="actualizar('gestionNombre', $event)"
+              />
+            </label>
+            @if (errorDe('gestionNombre'); as e) {
+              <p id="error-gestionNombre" class="pendiente-form-error-campo" role="alert">
+                {{ e }}
+              </p>
+            }
+            <div class="pendiente-form-fila-campos">
+              <label class="pendiente-form-campo">
+                <span class="pendiente-form-etiqueta">Tipo de documento</span>
+                <select
+                  id="campo-gestionTipoDocumento"
+                  class="p48-campo"
+                  [value]="f.gestionTipoDocumento"
+                  [attr.aria-invalid]="errorDe('gestionTipoDocumento') ? 'true' : null"
+                  [attr.aria-describedby]="
+                    errorDe('gestionTipoDocumento') ? 'error-gestionTipoDocumento' : null
+                  "
+                  (input)="actualizar('gestionTipoDocumento', $event)"
+                >
+                  @for (t of tiposDocumento; track t) {
+                    <option [value]="t">{{ t }}</option>
+                  }
+                </select>
+              </label>
+              <label class="pendiente-form-campo">
+                <span class="pendiente-form-etiqueta">Número de documento</span>
+                <input
+                  id="campo-gestionNumeroDocumento"
+                  class="p48-campo"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  [value]="f.gestionNumeroDocumento"
+                  [attr.aria-invalid]="errorDe('gestionNumeroDocumento') ? 'true' : null"
+                  [attr.aria-describedby]="
+                    errorDe('gestionNumeroDocumento') ? 'error-gestionNumeroDocumento' : null
+                  "
+                  (input)="actualizar('gestionNumeroDocumento', $event)"
+                />
+              </label>
+            </div>
+            @if (errorDe('gestionTipoDocumento'); as e) {
+              <p id="error-gestionTipoDocumento" class="pendiente-form-error-campo" role="alert">
+                {{ e }}
+              </p>
+            }
+            @if (errorDe('gestionNumeroDocumento'); as e) {
+              <p id="error-gestionNumeroDocumento" class="pendiente-form-error-campo" role="alert">
+                {{ e }}
+              </p>
+            }
+            <label class="pendiente-form-campo">
+              <span class="pendiente-form-etiqueta">Parentesco</span>
+              <input
+                id="campo-gestionParentesco"
+                class="p48-campo"
+                type="text"
+                autocomplete="off"
+                placeholder="hijo, hija, cuidador…"
+                [value]="f.gestionParentesco"
+                [attr.aria-invalid]="errorDe('gestionParentesco') ? 'true' : null"
+                [attr.aria-describedby]="
+                  errorDe('gestionParentesco') ? 'error-gestionParentesco' : null
+                "
+                (input)="actualizar('gestionParentesco', $event)"
+              />
+            </label>
+            @if (errorDe('gestionParentesco'); as e) {
+              <p id="error-gestionParentesco" class="pendiente-form-error-campo" role="alert">
+                {{ e }}
+              </p>
+            }
+          }
+        </div>
+
+        @if (error(); as e) {
+          <p
+            class="pendiente-form-error p48-barra-acento p48-barra-acento--alerta"
+            role="alert"
+          >
+            {{ e }}
+          </p>
+        }
+
+        <div class="pendiente-form-acciones">
+          <button type="button" class="p48-boton-terciario" (click)="volver()">Cancelar</button>
+        </div>
+      </form>
+    } @else {
+      <p class="pendiente-form-error p48-barra-acento p48-barra-acento--alerta" role="alert">
+        {{ error() }}
+      </p>
+      <div class="pendiente-form-acciones">
+        <button type="button" class="p48-boton-secundario" (click)="volver()">Volver</button>
+      </div>
+    }
+
+    <!-- "Primera ayuda de avisos en Android": se abre tras guardar el primer pendiente. -->
+    <app-ayuda-avisos [visible]="ayudaVisible()" (cerrado)="cerrarAyuda()" />
+  </div>
+</ion-content>

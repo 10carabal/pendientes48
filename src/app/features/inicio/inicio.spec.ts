@@ -186,4 +186,21 @@ describe('Inicio', () => {
 
     expect(navegar).toHaveBeenCalledWith('/pacientes');
   });
+
+  it('el botón principal "Registrar pendiente" abre el formulario y coexiste con la lista', async () => {
+    await set('pendiente:p1', pendiente());
+    await set('preferencias', { avisoLegalAceptado: true, ayudaAvisosVista: false });
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+
+    expect(el.querySelector('.inicio-tarjeta')).toBeTruthy();
+    expect(boton(el, 'Registrar pendiente')).toBeTruthy();
+    // un solo botón sólido en pantalla (el "Entiendo" solo existe en el modal de primera apertura)
+    expect([...el.querySelectorAll('.p48-boton-principal')]).toHaveLength(1);
+
+    boton(el, 'Registrar pendiente').click();
+
+    expect(navegar).toHaveBeenCalledWith('/pendientes/nuevo');
+  });
 });
