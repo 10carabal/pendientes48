@@ -63,8 +63,9 @@ Regla: si una guía de una herramienta contradice este README o `openspec/config
   son datos sensibles (Ley 1581 de 2012).
 - **No es asesoría legal:** aviso visible en la app y en cada PDF; también en la pantalla
   donde se copia el texto corto.
-- **Normas como datos:** el contenido legal vive en `normas.json` y `plantillas`, nunca
-  hardcodeado en componentes.
+- **Normas como datos:** el contenido legal vive en `normas.json`, `plantillas` y las constantes
+  aprobadas de `domain/` (p. ej. `AVISO_NO_ASESORIA`), nunca hardcodeado en componentes: las
+  pantallas lo inyectan por input.
 - **Accesibilidad:** texto base ≥ 18px, botones grandes, una acción principal por pantalla.
 
 ## Glosario de dominio

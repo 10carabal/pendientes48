@@ -9,7 +9,7 @@
 | D3 | `idb-keyval` (IndexedDB) en ambas plataformas | Un solo camino de persistencia; guarda fotos como `Blob` sin el límite de ~5 MB de localStorage | IndexedDB en la PWA puede ser borrado por el navegador; se pide `navigator.storage.persist()` y, si se niega, la app sigue funcionando normalmente |
 | D4 | PDF con `pdfmake` en el dispositivo | Funciona sin conexión; no hay servidor que reciba datos de salud | Diseño del PDF más limitado que HTML→PDF |
 | D5 | Salidas: copiar (corto) + PDF (completo) + compartir. Sin Word | El usuario objetivo no edita `.docx` en el celular; el PDF no se desconfigura | Quien quiera editar lo hace en la vista previa de la app |
-| D6 | El contenido legal vive solo en dos archivos de datos: `normas.json` y las plantillas aprobadas (`plantillas.ts`). Nunca en componentes | El texto aprobado debe quedar literal; generarlo dinámicamente desde `normas.json` produciría frases sin revisión | Si cambia una norma hay que actualizar `normas.json` y, si la cita, la plantilla aprobada |
+| D6 | El contenido legal vive en `normas.json`, en las plantillas aprobadas y, como constantes de texto fijo aprobado por Daniel, en `domain/` (`PIE_PDF` en `reclamo/plantillas-pdf.ts`, `AVISO_NO_ASESORIA` en `norma/aviso.ts`). Nunca hardcodeado en componentes: las pantallas inyectan esas constantes a `shared/` por input (ampliación de 2026-10-13) | El texto aprobado debe quedar literal; generarlo dinámicamente produciría frases sin revisión y el componente no debe decidir qué texto mostrar | Si cambia una norma hay que actualizar `normas.json` y, si la cita, la plantilla; un texto fijo se cambia en su constante y se aprueba |
 | D7 | El plazo cuenta desde la hora de reclamo, 48 horas corridas. La hora es editable, no puede ser futura y se bloquea cuando hay una queja registrada | La Resolución 1604 de 2013 define que las 48 h corren desde que el afiliado reclama; bloquearla evita contradecir un documento ya radicado | Si se registró mal antes de radicar, hay que borrar el pendiente y crearlo de nuevo |
 | D8 | La app no clasifica el riesgo del reclamo ante la Supersalud | La clasificación la hace la Supersalud; adivinarla sería dar asesoría legal | El paso 2 no muestra un plazo de respuesta |
 | D9 | El estado y el evento "venció el plazo" se calculan; nunca se guardan | No dependen de que la app esté abierta al vencer y no pueden quedar inconsistentes | La bitácora de pantalla y la del PDF se arman con una función, no se leen tal cual |
@@ -264,6 +264,7 @@ diseño": Inicio y Detalle en celular y en escritorio, más el tablero de tokens
 | Esquinas | 12 px superficies y botones · 10 px campos · 999 px etiquetas | — |
 | Área táctil | mínimo 48 × 48 px; botones principal y secundario de 56 px | — |
 | Sombra flotante | `0 4px 8px -2px rgba(31,30,28,.22), 0 2px 4px -2px rgba(31,30,28,.14)` | Solo superficies flotantes |
+| Diálogos | modal 440 px · hoja 560 px · scrim `color-mix(--p48-texto 40%, transparent)` | Ancho máximo de cajas modales y fondo atenuado bajo un diálogo (añadidos en 3.1) |
 
 ### Patrones (de Refactoring UI, "7 Practical Tips for Cheating at Design")
 1. **Jerarquía con peso y color, no con tamaño:** lo secundario cambia de tono, no de tamaño.

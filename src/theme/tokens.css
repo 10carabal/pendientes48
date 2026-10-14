@@ -71,6 +71,11 @@
   --p48-ancho-inicio: 760px;
   --p48-ancho-detalle: 1080px;
 
+  /* Diálogos y hojas (modal de aviso, hoja de ayuda) */
+  --p48-ancho-modal: 440px;
+  --p48-ancho-hoja: 560px;
+  --p48-scrim: color-mix(in srgb, var(--p48-texto) 40%, transparent);
+
   /* Sombra flotante: solo superficies flotantes */
   --p48-sombra-flotante: 0 4px 8px -2px rgba(31, 30, 28, 0.22),
     0 2px 4px -2px rgba(31, 30, 28, 0.14);

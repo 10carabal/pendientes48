@@ -1,0 +1,113 @@
+.guia {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-6);
+  max-width: var(--p48-ancho-inicio);
+  margin: 0 auto;
+  padding: var(--p48-espacio-5) var(--p48-espacio-4) var(--p48-espacio-6);
+}
+
+.guia h1 {
+  font-size: var(--p48-tam-titulo);
+  margin: 0;
+}
+
+.guia h2 {
+  font-size: var(--p48-tam-subtitulo);
+  margin: 0;
+}
+
+.guia h3 {
+  font-size: var(--p48-tam-base);
+  margin: 0;
+}
+
+.guia-seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-3);
+}
+
+.guia-parrafo {
+  margin: 0;
+}
+
+.guia-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guia-fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--p48-espacio-3);
+}
+
+.guia-muestra-color {
+  flex: none;
+  width: var(--p48-espacio-6);
+  height: var(--p48-espacio-6);
+  border: 1px solid var(--p48-borde-campo);
+  border-radius: var(--p48-radio-campo);
+}
+
+.guia-muestra-color--barra {
+  width: var(--p48-ancho-acento);
+}
+
+.guia-barra-espacio {
+  flex: none;
+  height: var(--p48-espacio-2);
+  border-radius: var(--p48-radio-etiqueta);
+  background: var(--p48-acento-norma);
+}
+
+.guia-muestra-radio {
+  flex: none;
+  width: var(--p48-espacio-6);
+  height: var(--p48-espacio-6);
+  background: var(--p48-superficie);
+  border: 1px solid var(--p48-borde-campo);
+}
+
+.guia-muestra-tactil {
+  flex: none;
+  width: var(--p48-tam-tactil);
+  height: var(--p48-tam-tactil);
+  background: var(--p48-superficie);
+  border: 1px solid var(--p48-borde-campo);
+  border-radius: var(--p48-radio-campo);
+}
+
+.guia-muestra-boton {
+  flex: none;
+  width: var(--p48-espacio-6);
+  height: var(--p48-tam-boton);
+  background: var(--p48-superficie);
+  border: 1px solid var(--p48-borde-campo);
+  border-radius: var(--p48-radio-superficie);
+}
+
+.guia-tarjeta-acento {
+  background: var(--p48-superficie);
+  border-radius: var(--p48-radio-superficie);
+  padding: var(--p48-espacio-3) var(--p48-espacio-4);
+}
+
+.guia-confirmacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-3);
+}
+
+.guia-reglas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-2);
+  padding-left: var(--p48-espacio-5);
+}

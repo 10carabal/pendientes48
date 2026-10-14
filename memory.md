@@ -5,7 +5,8 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-08** — cierre de 2.4 (cámara): flujos A/B/C verificados en el S22.
+> Última actualización: **2026-10-13** — cierre de 3.1 (primeros componentes `shared/`);
+> bloque 2 completo (PR #30 mergeado, `main = 3afcf6d`).
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -18,13 +19,23 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   (`/guia` aprobado por Daniel, 2026-10-06) · 0.6 ✅ (Galaxy S22 y Chrome).
 - **Bloque 1 (dominio puro) implementado:** 1.1 ✅ · 1.2 ✅ · 1.3 ✅ (PRs #20–#22 apilados + #23 de
   integración) · 1.4 ✅ (PR #24) · 1.5 ✅ (PR #25).
-- **Bloque 2 (plataforma y persistencia):** 2.1 ✅ (PR #26) · 2.2 ✅ (PR #27, con smoke real en el
-  S22) · 2.3 ✅ (PR #29, smoke Android + escritorio) · 2.4 código + smoke en verde → sale su PR;
-  `main = 9f9a7a3`.
-- Repo sano en `main`; PRs #1–#29 mergeados; una rama por tarea; **Daniel revisa y mergea**.
+- **Bloque 2 (plataforma y persistencia) completo:** 2.1 ✅ (PR #26) · 2.2 ✅ (PR #27, smoke real
+  en el S22) · 2.3 ✅ (PR #29, smoke Android + escritorio) · 2.4 ✅ (PR #30, flujos A/B/C en el S22).
+- **Bloque 3 (pantallas) en marcha:** orden 3.1 → 3.2 → 3.7 → 3.3 → 3.4 → 3.5 → 3.6; 3.1 listo
+  (componentes `shared/`) → sale su PR.
+- Repo sano en `main` (`3afcf6d`); PRs #1–#30 mergeados; una rama por tarea; **Daniel revisa y
+  mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
   su verificación + PR (decisión de Daniel, 2026-10-04).
+
+## Proceso (reglas de Daniel)
+- **Al finalizar cada fase/tarea:** lanzar la revisión QA (`/opsx-qa`, solo diagnóstico: detecta,
+  no resuelve) para que verifique si se logró el objetivo de la verificación de `tasks.md`;
+  pasarle los hallazgos a Daniel **antes de abrir el PR**.
+- **Componentes siempre en tres archivos separados, sin importar el tamaño:**
+  `nombre.ts` (clase con `templateUrl`/`styleUrl`) + `nombre.html` (plantilla) +
+  `nombre.scss` (estilos). Nunca `template:` ni `styles:` inline. Escalabilidad/mantenibilidad.
 
 ## Decisiones de ejecución (tomadas durante el proceso, fuera de `design.md`/`tasks.md`)
 
@@ -45,6 +56,9 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 | Smoke en dispositivo: `server.url` **temporal** (no commitear) + `adb reverse tcp:4200` + `window.__p48` temporal en `app.config.ts` (2.2/2.3) | el S22 estaba en datos móviles (no en la Wi-Fi), el dev server no sirve `/src/*` sueltos y el adaptador aún no está en el bundle; todo se revierte antes del commit |
 | El `.ics` en Android se guarda en `Directory.Documents` con `Filesystem` (2.3) | el WebView ignora `<a download>` (Capacitor no instala DownloadListener, verificado en su fuente): la descarga con `<a>` queda solo para la PWA |
 | Smoke de "permiso denegado": `<uses-permission android:name="android.permission.CAMERA"/>` **temporal** en `AndroidManifest.xml`, revertido antes del commit (igual que `__p48`) | ni la app ni `@capacitor/camera` declaran `CAMERA`: sin declarar, `checkPermissions` responde `granted` y `pm revoke` se niega → sin este build temporal no se puede ejercitar el fallback en dispositivo (2.4) |
+| El aviso "Esta app no es asesoría legal" es constante en `domain/norma/aviso.ts` y las pantallas lo pasan a `shared/` por input (decisión de Daniel, 2026-10-13) | la regla prohíbe contenido legal hardcodeado en componentes y `shared → domain` es solo tipos; mismo patrón que `PIE_PDF` en `plantillas-pdf.ts` |
+| `isolate: true` en el target `test` de `angular.json` (builder `@angular/build:unit-test`) | el default es `false` ("alineado con Karma"): todos los specs comparten contexto y dos `vi.mock('idb-keyval')` con fábricas distintas se pisan → flakiness ~50% en specs de `data/` al añadir los specs de 3.1 (2026-10-13) |
+| Trampa de foco propia en `shared/foco-dialogo.ts` para los diálogos, sin `@angular/cdk/a11y` | el CDK no está en el stack del README y no se agregan dependencias en esta fase; la función pura cubre `aviso-legal` y `ayuda-avisos` y la reutilizan las pantallas nuevas (QA mayor M2 de 3.1, 2026-10-13) |
 
 ## Lecciones del entorno
 - **`npm ci` siempre** después de un merge que toque `package-lock.json`; sin eso fallan `ng build`,
@@ -149,6 +163,30 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **`cap sync` reescribe `android/app/capacitor.build.gradle` y `android/capacitor.settings.gradle`
   solo por fin de línea** (el diff tras normalizar está vacío): `git checkout --` de esos dos
   antes del commit para no ensuciar el PR (2.4).
+- **`@angular/build:unit-test` corre SIN aislamiento por defecto** (`isolate: false`, "alineado con
+  la experiencia Karma/Jasmine"): todos los archivos comparten un contexto JS y el `vi.mock` de un
+  paquete con dos fábricas (p. ej. `idb-keyval` en `app-db.spec` y `pendientes-store.spec`) resuelve
+  con la fábrica del primero en ejecutar → `mockRejectedValueOnce` "no aplica" y los datos de un
+  archivo aparecen en otro, con fallo aleatorio. Añadir specs re-particiona el bundle de pruebas y
+  hace visible un leak que antes no salía: los "fallos mágicos" en specs intactos suelen venir de
+  ahí, no del código modificado. Fix: `"isolate": true` en `angular.json` → 2 corridas de 140/140
+  verdes (3.1, 2026-10-13).
+- **`main` puede crecer por runtime compartido de Angular** (máquina de `computed`/señales
+  `UNSET/COMPUTING/ERRORED`, sanitizador `SafeValue`, tabla de propiedades DOM, `NgControlFlow`)
+  hoisted al chunk de entrada al usar inputs de señal y estilos encapsulados: verificar que no sea
+  código de la app buscando marcadores propios ("Ver norma oficial", etc.) en el JS de `main`
+  (3.1: +6,36 kB, cero datos/plantillas legales en `main`, sin duplicación en chunks lazy).
+- **`git stash push -u` puede abortar a mitad en Windows** (permiso denegado al borrar un archivo):
+  queda el stash guardado y el árbol a medias; el `pop` restaura los no-rastreados pero aborta
+  sobre cambios rastreados. Recuperación: verificar `git status` + presencia de archivos →
+  `git checkout -- <rastreados>` → borrar restantes no rastreados → `git stash pop` → recién ahí
+  `git stash drop` (3.1, 2026-10-13).
+- **Chrome headless con `--user-data-dir` repetido se adhiere al singleton y no escribe el
+  screenshot**: un perfil de usuario por ejecución (o matar Chrome antes). Para capturar
+  modales/hojas: CDP con `Page.captureScreenshot` tras pulsar el botón por su texto
+  (`p48-shot.js`); la página larga de la guía cabe con `--window-size=390,8000` (3.1).
+- **Nunca `Get-Process node | Stop-Process` sin filtro**: mató el propio harness y reinició el
+  servidor en medio de la fase 3.1.
 
 ## Pendientes conocidos (no bloqueantes)
 - **Identidad visual:** sistema de diseño (D14–D16) e ícono/splash (D17) resueltos; solo quedan las
@@ -164,6 +202,24 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   (2.1 + 2.2 mergeados); va como `chore/` aparte para no ensuciar el PR de 2.3.
 
 ## Registro de actualizaciones
+- **2026-10-13** — **3.1** (`shared/`): `estado-chip` (etiqueta + color de los 6 estados),
+  `norma-card` (los 5 elementos de la spec + aviso; sin conexión solo el enlace queda inactivo),
+  `aviso-legal` (línea fija al pie + modal de primera apertura con "Entiendo") y `ayuda-avisos`
+  (hoja de batería con enlace a dontkillmyapp.com). El texto del aviso vive en
+  `domain/norma/aviso.ts` (decisión de Daniel) y las pantallas lo pasan por input. `/guia` muestra
+  los 4 componentes; evidencia 390/1280 + modal/hoja. Regla nueva de Daniel aplicada: componentes
+  siempre en `.ts`+`.html`+`.scss` (los 7 del proyecto separados, incluidos `app`, `inicio` y
+  `guia`). **QA de cierre de fase** (0 bloqueantes; 3 mayores aprobados por Daniel y resueltos en
+  el mismo PR): (1) `design.md` D6 + `AGENTS.md` + `README.md` sincronizados con la constante
+  `AVISO_NO_ASESORIA` — el contenido legal también puede vivir como constante aprobada en
+  `domain/`; (2) gestión de foco en los dos diálogos: entrada al abrir, trampa de Tab con
+  `shared/foco-dialogo.ts` (función propia, sin CDK), Escape cierra solo la hoja y el foco vuelve
+  al disparador; (3) tokens `--p48-ancho-modal` (440 px), `--p48-ancho-hoja` (560 px) y
+  `--p48-scrim` en `tokens.css` (el `z-index` queda como constante de capa con comentario).
+  Menores resueltos: fixture local en el spec de `norma-card`, `fechaLegible` con ISO que trae
+  hora, guarda SSR alineada y `aria-labelledby` del diálogo. Pruebas: **147/147** (2 corridas
+  estables con `isolate: true`); `tsc`/`openspec --strict`/`ng build` (518,29 kB) en 0.
+
 - **2026-10-08** — **2.4** (`platform/camara.ts`): `tomarFoto()` consulta/pide el permiso solo en
   nativo (`isNative()`) y, si está denegado, va directo a `elegirFoto()`; si el plugin lanza
   `CameraPermissionDenied` (o `NotAllowedError` en web) cae a la galería, y si el usuario cancela

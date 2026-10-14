@@ -1,0 +1,45 @@
+:host {
+  display: block;
+}
+
+.norma-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-3);
+}
+
+.norma-card p,
+.norma-card h3 {
+  margin: 0;
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.norma-titulo {
+  font-size: var(--p48-tam-subtitulo);
+  font-weight: var(--p48-peso-titulo);
+}
+
+.norma-nombre strong {
+  font-weight: var(--p48-peso-titulo);
+}
+
+.norma-enlace {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--p48-tam-tactil);
+  color: var(--p48-enlace);
+  font-size: var(--p48-tam-base);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+.norma-enlace--inactivo {
+  color: var(--p48-texto-secundario);
+  cursor: default;
+}
+
+.norma-verificado,
+.norma-aviso {
+  color: var(--p48-texto-secundario);
+}

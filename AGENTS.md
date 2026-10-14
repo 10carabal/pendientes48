@@ -36,7 +36,9 @@ Herramientas: OpenCode usa `opencode.json`; `.mcp.json` se conserva para compati
 
 ## Contenido legal
 - No modifiques el texto de `plantillas.md` ni `src/assets/data/normas.json` sin aprobación explícita de Daniel.
-- Ningún componente contiene texto legal; solo se lee de esos dos archivos.
+- Ningún componente contiene texto legal hardcodeado: el texto se lee de esos dos archivos o de
+  las constantes aprobadas en `domain/` (`PIE_PDF`, `AVISO_NO_ASESORIA`), que las pantallas
+  inyectan a los componentes por input (D6, ampliación de 2026-10-13).
 
 ## Datos y secretos
 - Local-first: sin backend, sin login, sin analítica ni envío de datos a terceros.

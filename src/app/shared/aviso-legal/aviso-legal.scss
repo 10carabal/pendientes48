@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+.aviso-linea {
+  margin: 0;
+  padding: var(--p48-espacio-3) var(--p48-espacio-4);
+  color: var(--p48-texto-secundario);
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.aviso-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 20; /* constante de capa: no es color, tamaño ni espaciado del sistema */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--p48-espacio-4);
+  background: var(--p48-scrim);
+}
+
+.aviso-caja {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-5);
+  width: 100%;
+  max-width: var(--p48-ancho-modal);
+  padding: var(--p48-espacio-5);
+}
+
+.aviso-texto {
+  margin: 0;
+  color: var(--p48-texto);
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.aviso-boton {
+  width: 100%;
+}

@@ -1,0 +1,21 @@
+<section class="norma-card p48-superficie p48-barra-acento">
+  <h3 class="norma-titulo">¿Por qué tienes derecho?</h3>
+  <p class="norma-nombre">
+    <strong>{{ norma().nombre }}</strong>
+    @if (norma().articulo) {
+      <span> · {{ norma().articulo }}</span>
+    }
+  </p>
+  <p class="norma-resumen">{{ norma().resumen }}</p>
+  <a
+    class="norma-enlace"
+    [attr.href]="enLinea() ? norma().urlFuente : null"
+    [attr.aria-disabled]="enLinea() ? null : 'true'"
+    [class.norma-enlace--inactivo]="!enLinea()"
+    target="_blank"
+    rel="noopener noreferrer"
+    >Ver norma oficial</a
+  >
+  <p class="norma-verificado">Verificado el {{ verificado() }}</p>
+  <p class="norma-aviso">{{ aviso() }}</p>
+</section>
