@@ -1,0 +1,170 @@
+.pacientes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-5);
+  max-width: var(--p48-ancho-inicio);
+  margin: 0 auto;
+  /* en celular reserva el pie para el botón principal flotante */
+  padding: var(--p48-espacio-5) var(--p48-espacio-4) calc(var(--p48-espacio-6) * 3);
+}
+
+.pacientes-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--p48-espacio-3);
+}
+
+.pacientes-titulo h1 {
+  margin: 0;
+  font-size: var(--p48-tam-titulo);
+}
+
+/* Celular (design.md · "Adaptación por tamaño"): el botón principal flota
+   al pie con la sombra del patrón 3. */
+.pacientes-principal {
+  position: fixed;
+  right: var(--p48-espacio-4);
+  bottom: var(--p48-espacio-4);
+  left: var(--p48-espacio-4);
+  z-index: 10; /* constante de capa: bajo la de los diálogos (20) */
+  box-shadow: var(--p48-sombra-flotante);
+}
+
+@media (min-width: 768px) {
+  /* corte celular↔escritorio (design.md · "Adaptación por tamaño"):
+     el botón principal sube junto al título. */
+  .pacientes {
+    padding-bottom: var(--p48-espacio-6);
+  }
+
+  .pacientes-principal {
+    position: static;
+    box-shadow: none;
+  }
+}
+
+.pacientes-parrafo,
+.pacientes-aviso {
+  margin: 0;
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.pacientes-aviso {
+  color: var(--p48-texto-secundario);
+}
+
+.pacientes-formulario,
+.pacientes-vacio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-4);
+}
+
+.pacientes-fila-campos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--p48-espacio-3);
+}
+
+.pacientes-fila-campos > .pacientes-campo {
+  flex: 1 1 var(--p48-espacio-6);
+}
+
+.pacientes-campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-1);
+}
+
+.pacientes-etiqueta {
+  font-size: var(--p48-tam-base);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+.pacientes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pacientes-fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--p48-espacio-3);
+}
+
+.pacientes-datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-1);
+  min-width: 0;
+}
+
+.pacientes-nombre {
+  margin: 0;
+  font-size: var(--p48-tam-subtitulo);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+.pacientes-detalle {
+  margin: 0;
+  color: var(--p48-texto-secundario);
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.pacientes-error {
+  margin: 0;
+  padding: var(--p48-espacio-2) var(--p48-espacio-3);
+  color: var(--p48-estado-vencido-texto);
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.pacientes-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--p48-espacio-3);
+}
+
+/* Diálogos: mismos tokens que los de `shared/` (duplicado y confirmaciones). */
+.pacientes-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 20; /* constante de capa: no es color, tamaño ni espaciado del sistema */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--p48-espacio-4);
+  background: var(--p48-scrim);
+}
+
+.pacientes-caja {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-4);
+  width: 100%;
+  max-width: var(--p48-ancho-modal);
+  padding: var(--p48-espacio-5);
+}
+
+.pacientes-titulo-dialogo {
+  margin: 0;
+  font-size: var(--p48-tam-subtitulo);
+}
+
+.pacientes-caja .p48-boton-principal,
+.pacientes-caja .p48-boton-secundario {
+  width: 100%;
+}

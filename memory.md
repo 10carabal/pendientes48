@@ -5,8 +5,8 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-13** — cierre de 3.1 (primeros componentes `shared/`);
-> bloque 2 completo (PR #30 mergeado, `main = 3afcf6d`).
+> Última actualización: **2026-10-14** — cierre de 3.2 (pantalla `pacientes`);
+> bloque 3 en marcha (PR #31 mergeado, `main = dd2630a`).
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -21,9 +21,9 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   integración) · 1.4 ✅ (PR #24) · 1.5 ✅ (PR #25).
 - **Bloque 2 (plataforma y persistencia) completo:** 2.1 ✅ (PR #26) · 2.2 ✅ (PR #27, smoke real
   en el S22) · 2.3 ✅ (PR #29, smoke Android + escritorio) · 2.4 ✅ (PR #30, flujos A/B/C en el S22).
-- **Bloque 3 (pantallas) en marcha:** orden 3.1 → 3.2 → 3.7 → 3.3 → 3.4 → 3.5 → 3.6; 3.1 listo
-  (componentes `shared/`) → sale su PR.
-- Repo sano en `main` (`3afcf6d`); PRs #1–#30 mergeados; una rama por tarea; **Daniel revisa y
+- **Bloque 3 (pantallas) en marcha:** orden 3.1 → 3.2 → 3.7 → 3.3 → 3.4 → 3.5 → 3.6; 3.1 ✅ (PR #31
+  mergeado) · 3.2 listo (pantalla `pacientes` + `cancelarTodos()`) → sale su PR (#32).
+- Repo sano en `main` (`dd2630a`); PRs #1–#31 mergeados; una rama por tarea; **Daniel revisa y
   mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
@@ -59,6 +59,8 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 | El aviso "Esta app no es asesoría legal" es constante en `domain/norma/aviso.ts` y las pantallas lo pasan a `shared/` por input (decisión de Daniel, 2026-10-13) | la regla prohíbe contenido legal hardcodeado en componentes y `shared → domain` es solo tipos; mismo patrón que `PIE_PDF` en `plantillas-pdf.ts` |
 | `isolate: true` en el target `test` de `angular.json` (builder `@angular/build:unit-test`) | el default es `false` ("alineado con Karma"): todos los specs comparten contexto y dos `vi.mock('idb-keyval')` con fábricas distintas se pisan → flakiness ~50% en specs de `data/` al añadir los specs de 3.1 (2026-10-13) |
 | Trampa de foco propia en `shared/foco-dialogo.ts` para los diálogos, sin `@angular/cdk/a11y` | el CDK no está en el stack del README y no se agregan dependencias en esta fase; la función pura cubre `aviso-legal` y `ayuda-avisos` y la reutilizan las pantallas nuevas (QA mayor M2 de 3.1, 2026-10-13) |
+| `cancelarTodos()` en el adaptador (`getPending()` + `cancel()`), invocado **antes** de `borrarTodo()` | hallazgo mayor 12 (opción B de Daniel): la pantalla no debe conocer los IDs de notificación y el orden evita avisos huérfanos; si el borrado falla tras cancelar, la reprogramación al iniciar (pendiente de 2.2) los restaura (3.2, 2026-10-14) |
+| Botón principal flotante al pie en celular (`fixed` + `--p48-sombra-flotante`, `z-index` bajo los diálogos) y junto al título en escritorio, con corte `@media (min-width: 768px)` | design.md "Adaptación por tamaño" (decisión de Daniel sobre la QA de 3.2, 2026-10-14); `@media` no admite custom properties → el 768 px es constante de maquetación con comentario, **falta que Daniel confirme el número** |
 
 ## Lecciones del entorno
 - **`npm ci` siempre** después de un merge que toque `package-lock.json`; sin eso fallan `ng build`,
@@ -187,6 +189,14 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   (`p48-shot.js`); la página larga de la guía cabe con `--window-size=390,8000` (3.1).
 - **Nunca `Get-Process node | Stop-Process` sin filtro**: mató el propio harness y reinició el
   servidor en medio de la fase 3.1.
+- **`fakeAsync`/`tick` no existen en este proyecto** (corre sin zone.js: `zone-testing.js is needed…`)
+  y `whenStable` resuelve **antes** de que las cadenas de promesas del constructor se asienten →
+  pantalla "Cargando…" eterno en specs. Patrón: helper `asentar()` que hace `await Promise.resolve()`
+  en bucle (~20 vueltas) + `TestBed.flushEffects()` (3.2, 2026-10-14).
+- **Sembrar datos reales para capturas:** CDP `Runtime.evaluate` con `awaitPromise` abriendo
+  IndexedDB con el mismo esquema que `idb-keyval` (DB `pendientes48`, store `datos`) y `put` de
+  fixtures → la pantalla se fotografía con listas, diálogos de duplicado y confirmaciones sin tocar
+  la app (script `p48-pacientes.js`, 3.2).
 
 ## Pendientes conocidos (no bloqueantes)
 - **Identidad visual:** sistema de diseño (D14–D16) e ícono/splash (D17) resueltos; solo quedan las
@@ -199,9 +209,28 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Contenido legal intocable sin Daniel:** `plantillas.md` y `src/assets/data/normas.json`.
 - **Cableado "reprogramar al iniciar" (quedó de la 2.2):** falta el `provideAppInitializer` que
   llame `reprogramarAvisos()` con los pendientes abiertos de `listarPendientes()` — ya se puede
-  (2.1 + 2.2 mergeados); va como `chore/` aparte para no ensuciar el PR de 2.3.
+  (2.1 + 2.2 mergeados); va como `chore/` aparte para no ensuciar el PR de 2.3. También cubre el
+  borde de 3.2: si "Borrar todos mis datos" cancela los avisos y el vaciado falla, la reprogramación
+  al abrir los restaura.
+- **Prueba en dispositivo de `cancelarTodos()` (3.2):** en la PWA es no-op y los tests van con el
+  plugin mockeado; la cancelación real sobre `LocalNotifications` queda pendiente de ensayo en el
+  S22 cuando la pantalla de perfiles se pruebe en Android.
 
 ## Registro de actualizaciones
+- **2026-10-14** — **3.2** (`features/pacientes/`): pantalla de perfiles con crear/editar (7 campos,
+  correo opcional), aviso de duplicado con "Usar el perfil existente" / "Seguir editando", y
+  "Borrar todos mis datos" con doble confirmación que **cancela todos los avisos programados**
+  (`platform/notificaciones.cancelarTodos()` — hallazgo mayor 12 absorbido en el texto de
+  `tasks.md`, precedente 2.2), vacía el almacén completo (perfiles, pendientes, fotos y
+  preferencias → primera apertura) y navega a inicio. Botón principal flotante al pie en celular y
+  junto al título en escritorio (design.md "Adaptación por tamaño"; decisión de Daniel sobre la QA).
+  QA de cierre en dos pasadas: la primera dictaminó "corregir antes del PR" (1 mayor de trazabilidad
+  + 5 menores) y la segunda verificó **0 mayores/menores**; mensajes no bloqueantes anotados en el
+  PR (breakpoint 768 px, error crudo del plugin, aviso doble en un borde, teclado vs. botón fijo,
+  enlace a `/pacientes` que llega con 3.7). Pruebas: **161/161** (+14 vs. `main`); `tsc`,
+  `openspec --strict` y `ng build` (518,51 kB) en 0. Evidencia: 7 capturas 390/1280 con perfiles
+  sembrados por CDP.
+
 - **2026-10-13** — **3.1** (`shared/`): `estado-chip` (etiqueta + color de los 6 estados),
   `norma-card` (los 5 elementos de la spec + aviso; sin conexión solo el enlace queda inactivo),
   `aviso-legal` (línea fija al pie + modal de primera apertura con "Entiendo") y `ayuda-avisos`

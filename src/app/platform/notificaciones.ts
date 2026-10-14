@@ -69,6 +69,18 @@ export async function cancelarAviso(pendienteId: string): Promise<void> {
 }
 
 /**
+ * "Borrar todos mis datos" (spec `pendientes` · escenario "Borrar todos mis
+ * datos"): cancela todos los avisos programados; no falla si no hay ninguno.
+ * Se invoca antes de vaciar el almacén, para no dejar avisos huérfanos.
+ */
+export async function cancelarTodos(): Promise<void> {
+  if (!isNative()) return;
+  const { notifications } = await LocalNotifications.getPending();
+  if (notifications.length === 0) return;
+  await LocalNotifications.cancel({ notifications: notifications.map((n) => ({ id: n.id })) });
+}
+
+/**
  * "Reprogramación al abrir la app": cancela los avisos de estos pendientes y
  * programa solo los que aún no vencieron.
  */
