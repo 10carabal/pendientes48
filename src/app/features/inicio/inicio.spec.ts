@@ -187,6 +187,23 @@ describe('Inicio', () => {
     expect(navegar).toHaveBeenCalledWith('/pacientes');
   });
 
+  it('la tarjeta de un pendiente navega a su detalle', async () => {
+    await set('pendiente:p1', pendiente());
+    await set('preferencias', { avisoLegalAceptado: true, ayudaAvisosVista: false });
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+
+    // La tarjeta entera es un botón (área táctil de 48 px o más).
+    const tarjeta = el.querySelector<HTMLButtonElement>('button.inicio-tarjeta');
+    expect(tarjeta).toBeTruthy();
+    expect(tarjeta?.textContent).toContain('Losartán 50 mg');
+
+    tarjeta?.click();
+
+    expect(navegar).toHaveBeenCalledWith('/pendientes/p1');
+  });
+
   it('el botón principal "Me dejaron un pendiente" abre la guía y coexiste con la lista', async () => {
     await set('pendiente:p1', pendiente());
     await set('preferencias', { avisoLegalAceptado: true, ayudaAvisosVista: false });

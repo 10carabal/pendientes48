@@ -149,13 +149,20 @@ espaciados sueltos), y cada pantalla se verifica a 390 px y a 1280 px contra el 
     precarga con la hora actual; con una queja registrada la hora aparece bloqueada y al editar se
     reprograma el aviso; con la gestión activa no se guarda sin sus 4 datos; la hoja de ayuda sale
     solo en el primer registro; desde Inicio, un toque en "Registrar pendiente" abre el formulario
-- [ ] 3.5 `features/pendiente-detalle`: contador, estado con etiqueta y color, norma-card, bitácora
-  (`bitacoraVista`) con notas manuales, escalera tipo stepper, "Ya me llegó", aviso de permiso
-  denegado, botón `.ics` con "Ya agregaste este recordatorio el…", y "Borrar" con confirmación
+- [x] 3.5 🅿️ `features/pendiente-detalle`: pantalla con 4 subplanos (`pendiente-detalle`,
+  `contador`, `bitacora-lista`, `escalera`) — contador con `textoContador` y estado derivado,
+  estado con etiqueta y color, DOS `norma-card` (plazo + red alterna en el paso 1, aviso por input),
+  bitácora (`bitacoraVista`) con notas manuales, escalera tipo stepper que **solo registra quejas**
+  (la generación de documentos es 3.6), "Ya me llegó" como único sólido (se oculta al entregar),
+  aviso de permiso solo si está denegado, botón `.ics` en PWA y Android con "Ya agregaste este
+  recordatorio el…", "Borrar" con confirmación, foto y todos los datos del pendiente; la tarjeta de
+  Inicio navega al detalle (`/pendientes/:id`)
   - Depende de: 3.1, 1.1, 1.2, 1.3
-  - Verificación: un pendiente vencido con la app cerrada muestra "Venció el plazo" en la bitácora;
-    el paso 1 sigue visible como "Completado" tras registrar la queja; el segundo toque al `.ics`
-    muestra el aviso; al borrar, desaparece de inicio, su aviso se cancela y la foto se elimina
+  - Verificación: un pendiente vencido con la app cerrada muestra "Venció el plazo" en la bitácora
+    (evento derivado, nunca persistido); el paso 1 sigue visible como "Completado" tras registrar
+    la queja; el segundo toque al `.ics` muestra el aviso; al borrar, desaparece de inicio, su aviso
+    se cancela y la foto se elimina; con la red caída o el almacenamiento lleno la nota escrita se
+    conserva en el campo y el fallo se anuncia; el enlace desde la tarjeta de Inicio abre el detalle
 - [ ] 3.6 `features/reclamo`: vista previa editable, nota de autorización incluida, copiar con aviso
   en pantalla, PDF, compartir
   - Depende de: 1.4, 2.3

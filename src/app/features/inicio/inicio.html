@@ -36,15 +36,22 @@
     } @else {
       <ul class="inicio-lista">
         @for (f of filas(); track f.pendiente.id) {
-          <li class="p48-superficie inicio-tarjeta">
-            <div class="inicio-datos">
-              <p class="inicio-medicamento">{{ f.pendiente.medicamentos.join(', ') }}</p>
-              <p class="inicio-detalle">{{ f.pendiente.farmacia }}</p>
-              @if (f.contador) {
-                <p class="inicio-contador">{{ f.contador }}</p>
-              }
-            </div>
-            <app-estado-chip [estado]="f.estado" />
+          <li>
+            <!-- Toda la tarjeta es un botón: un toque abre el detalle del pendiente. -->
+            <button
+              type="button"
+              class="p48-superficie inicio-tarjeta"
+              (click)="abrirDetalle(f.pendiente.id)"
+            >
+              <span class="inicio-datos">
+                <span class="inicio-medicamento">{{ f.pendiente.medicamentos.join(', ') }}</span>
+                <span class="inicio-detalle">{{ f.pendiente.farmacia }}</span>
+                @if (f.contador) {
+                  <span class="inicio-contador">{{ f.contador }}</span>
+                }
+              </span>
+              <app-estado-chip [estado]="f.estado" />
+            </button>
           </li>
         }
       </ul>

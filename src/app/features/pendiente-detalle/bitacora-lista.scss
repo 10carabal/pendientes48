@@ -1,0 +1,71 @@
+/* Bitácora del pendiente (tarea 3.5): eventos con fecha/hora y nota manual. */
+:host {
+  display: block;
+}
+
+.bitacora-titulo {
+  margin: 0 0 var(--p48-espacio-3);
+  font-size: var(--p48-tam-subtitulo);
+  line-height: var(--p48-interlineado);
+}
+
+.bitacora-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-2);
+  margin: 0 0 var(--p48-espacio-5);
+  padding: 0;
+  list-style: none;
+}
+
+.bitacora-evento {
+  padding: var(--p48-espacio-2) var(--p48-espacio-3);
+  background: var(--p48-superficie);
+  border-radius: var(--p48-radio-superficie);
+}
+
+.bitacora-fecha {
+  margin: 0;
+  color: var(--p48-texto-secundario);
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.bitacora-texto {
+  margin: 0;
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.bitacora-nota {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--p48-espacio-3);
+}
+
+.bitacora-campo {
+  display: flex;
+  flex: 1 1 var(--p48-flex-nota);
+  flex-direction: column;
+  gap: var(--p48-espacio-1);
+  min-width: 0;
+}
+
+.bitacora-etiqueta {
+  font-size: var(--p48-tam-base);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+/* Vacía no ocupa espacio; el nodo sigue en el árbol de accesibilidad. */
+.bitacora-aviso {
+  margin: 0;
+  font-size: var(--p48-tam-base);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+.bitacora-aviso:not(:empty) {
+  margin-top: var(--p48-espacio-3);
+}

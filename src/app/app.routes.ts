@@ -24,8 +24,8 @@ export const routes: Routes = [
     loadComponent: () => import('./features/ventanilla/ventanilla').then((m) => m.Ventanilla),
   },
   {
-    // Estáticas antes de cualquier ruta con parámetro: `pendientes/nuevo` debe
-    // declararse antes que `pendientes/:id` (el detalle llega con la tarea 3.5).
+    // Estáticas antes de cualquier ruta con parámetro: `pendientes/nuevo` y
+    // `pendientes/:id/editar` deben declararse antes que `pendientes/:id`.
     path: 'pendientes/nuevo',
     loadComponent: () =>
       import('./features/pendiente-form/pendiente-form').then((m) => m.PendienteForm),
@@ -34,6 +34,12 @@ export const routes: Routes = [
     path: 'pendientes/:id/editar',
     loadComponent: () =>
       import('./features/pendiente-form/pendiente-form').then((m) => m.PendienteForm),
+  },
+  {
+    // Detalle del pendiente (tarea 3.5): contador, escalera, bitácora y cierre.
+    path: 'pendientes/:id',
+    loadComponent: () =>
+      import('./features/pendiente-detalle/pendiente-detalle').then((m) => m.PendienteDetalle),
   },
   ...rutasDesarrollo,
   { path: '**', redirectTo: '' },
