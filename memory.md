@@ -5,8 +5,8 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-19** — **3.5** (`features/pendiente-detalle/`) QA VERDE en 2
-> pasadas y correcciones aplicadas (249/249); siguiente **3.6** (reclamo); `main = a080c7b`.
+> Última actualización: **2026-10-20** — **3.5 mergeada** (PR #37, `main = 25fb7c8`) y rama
+> **`chore/flujo-multiagente`** abierta con skill + comando + `AGENTS.md`; siguiente **3.6**.
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -22,11 +22,11 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Bloque 2 (plataforma y persistencia) completo:** 2.1 ✅ (PR #26) · 2.2 ✅ (PR #27, smoke real
   en el S22) · 2.3 ✅ (PR #29, smoke Android + escritorio) · 2.4 ✅ (PR #30, flujos A/B/C en el S22).
 - **Bloque 3 (pantallas) en marcha:** 3.1 ✅ (PR #31) · 3.2 ✅ (PR #32) · 3.7 ✅ (PR #33) ·
-  3.4 ✅ (PR #34) · 3.3 ✅ (PR #35, flujo multiagente) · 3.5 ✅ (QA VERDE, PR en preparación con
-  evidencia); orden del bloque **3.4 → 3.3 → 3.5 → 3.6 → 3.8**
+  3.4 ✅ (PR #34) · 3.3 ✅ (PR #35, flujo multiagente) · 3.5 ✅ (PR #37, flujo multiagente);
+  orden del bloque **3.4 → 3.3 → 3.5 → 3.6 → 3.8**
   (reordenado por Daniel el 2026-10-14: la 3.3 termina en "Registrar este pendiente", así que el
   formulario de la 3.4 debía existir antes). Siguiente: **3.6**.
-- Repo sano en `main` (`a080c7b`); PRs #1–#36 mergeados (incluye #36: créditos de desarrollador
+- Repo sano en `main` (`25fb7c8`); PRs #1–#37 mergeados (incluye #36: créditos de desarrollador
   10carabal en README/`package.json`/manifest); una rama por tarea; **Daniel revisa y mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
@@ -262,11 +262,6 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   `--body-file` (sobra texto, pero no falla por argumentos).
 
 ## Pendientes conocidos (no bloqueantes)
-- **Archivos del flujo multiagente sin commit (2026-10-14):** `.opencode/skills/flujo-multiagente/`,
-  `.opencode/commands/flujo.md` y la sección de `AGENTS.md` quedan en el árbol de
-  `feat/3.4-pendiente-form` a la espera de su propia rama **`chore/flujo-multiagente`** (decisión de
-  Daniel: agregarlos después) → **no incluirlos en el commit de 3.4**, que lleva solo
-  `src/app/features/pendiente-form/` + `app.routes.ts` + `memory.md` + `tasks.md`.
 - **Identidad visual:** sistema de diseño (D14–D16) e ícono/splash (D17) resueltos; solo quedan las
   capturas de pantalla del manifiesto (`screenshots`), que se agregan cuando existan pantallas reales.
 - **Hosting de la PWA** para compartirla por WhatsApp → decidir antes de la tarea 4.2.
