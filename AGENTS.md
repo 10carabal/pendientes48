@@ -4,6 +4,18 @@ Contexto del proyecto: `README.md` y `openspec/config.yaml`. Trabajo spec-driven
 (`/opsx-explore`, `/opsx-propose`, `/opsx-qa`, `/opsx-apply`, `/opsx-archive`).
 Herramientas: OpenCode usa `opencode.json`; `.mcp.json` se conserva para compatibilidad con Claude Code.
 
+## Flujo multiagente (skill `flujo-multiagente`, comando `/flujo`)
+- Para tareas de bloque, el **coordinador** (sesión principal) despacha 3 subagentes expertos en
+  una fase del SDD: **Planificador** (`explore`/`propose`: plan + ambigüedades, nunca escribe
+  código), **Implementador** (`apply`: código + tests + 4 gates en verde) y **Verificador**
+  (`qa`, solo detecta: sesión nueva y ojos frescos, nunca recibe el relato del implementador).
+- Cada rol recibe solo su dossier (cláusula de `tasks.md` + escenarios de spec + plan + reglas
+  duras) y devuelve un resumen estructurado. Las correcciones van al mismo implementador
+  (`sessionID`), máx. 2 vueltas; después se escala a Daniel.
+- El cierre lo hace el coordinador: `memory.md` → cláusula y checkbox de `tasks.md` → commit →
+  push → PR con evidencia 390/1280. Plantillas de prompt y gates en
+  `.opencode/skills/flujo-multiagente/SKILL.md`.
+
 ## Arquitectura (ver `design.md`, sección "Estructura de carpetas")
 - Carpetas por concepto, no por tipo: no crees `components/`, `services/` ni `models/`.
 - Dependencias en una sola dirección: `features` → `shared`, `data`, `platform`, `domain`;
