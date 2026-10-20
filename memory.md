@@ -72,6 +72,7 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 | Botón principal flotante al pie en celular (`fixed` + `--p48-sombra-flotante`, `z-index` bajo los diálogos) y junto al título en escritorio, con corte `@media (min-width: 768px)` | design.md "Adaptación por tamaño" (decisión de Daniel sobre la QA de 3.2, 2026-10-14); `@media` no admite custom properties → el 768 px es constante de maquetación con comentario, **falta que Daniel confirme el número** |
 | Introducción de la app en el **estado vacío de Inicio** + hoja "¿Cómo funciona?" (enlace terciario persistente en la cabecera), como tarea 3.8 **al final del bloque 3** (primero iba a salir tras 3.7) | evita un segundo bloqueo tras el aviso legal (onboarding descartado), ayuda en el momento exacto en que el usuario no tiene nada que hacer y no duplica la guía de 3.3; al final del bloque para que el copy no prometa pantallas inexistentes (decisiones de Daniel, 2026-10-14) |
 | Copy de la introducción: **Alternativa 2** (sujeto "la aplicación"), 3ª persona, profesional y sencillo para usuarios de la 3ª edad; aviso **solo al vencer** | la regla "usted" de `design.md` solo aplica a `normas.json`; texto completo en "Copy aprobado de la introducción" más abajo (aprobación de Daniel, 2026-10-14) |
+| **Marca de desarrollador "10carabal"** en README (`## Créditos`), `package.json` (`author`) y `manifest.webmanifest` (`author`); la línea visible al usuario se agrega en la 3.8 | proyecto sin interés económico: la marca debe estar presente sin tocar alcance ni tiempo; fuera de `src/` = cero impacto en bundle/gates (aprobación de Daniel, 2026-10-19) |
 
 ### Copy aprobado de la introducción (3.8 — aprobación de Daniel, 2026-10-14)
 
@@ -272,6 +273,8 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   introducción"); falta confirmar si la línea "Aún no tiene pendientes." (2ª persona, de 3.7)
   pasa también a 3ª. Como 3.8 va al final del bloque, el enlace a la guía de 3.3 se agrega
   **en la propia 3.8** (entonces la 3.3 ya existe). Regla vigente: sin botones muertos.
+  **Agregar también al pie de la hoja la línea de crédito "Pendientes48 fue desarrollada por
+  10carabal."** (decisión de Daniel, 2026-10-19 — ver Decisiones de ejecución).
 
 ## Registro de actualizaciones
 - **2026-10-14** — **3.4** (`features/pendiente-form/` + botón de Inicio): pantalla de registro
