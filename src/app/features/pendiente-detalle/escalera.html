@@ -1,0 +1,118 @@
+<section class="escalera">
+  <h2 class="escalera-titulo">Escalera de reclamo</h2>
+
+  @if (oculta()) {
+    <p class="escalera-parrafo">
+      La escalera de reclamo se habilita cuando venzan las 48 horas.
+    </p>
+  } @else {
+    <ol class="escalera-pasos">
+      <li class="escalera-paso p48-superficie">
+        <div class="escalera-paso-titulo">
+          <span class="p48-icono-circulo" aria-hidden="true">1</span>
+          <h3 class="escalera-paso-nombre">Queja ante la EPS</h3>
+        </div>
+
+        @if (paso1Completado()) {
+          <!-- Spec `reclamos` · "Paso 1 completado": visible como "Completado". -->
+          <p class="escalera-estado">
+            <span class="p48-etiqueta-estado p48-etiqueta-estado--escalado-eps">Completado</span>
+          </p>
+          <p class="escalera-detalle">{{ detallePaso1() }}</p>
+          <button type="button" class="p48-boton-secundario" (click)="abrirDialogo(1)">
+            Corregir queja ante la EPS
+          </button>
+        } @else {
+          <button type="button" class="p48-boton-secundario" (click)="abrirDialogo(1)">
+            Registrar queja ante la EPS
+          </button>
+        }
+
+        <!-- Spec `reclamos` · "Paso 1 disponible": red alterna desde normas.json,
+             con el aviso de no asesoría inyectado por input (D6). -->
+        @if (normaRedAlterna; as n) {
+          <app-norma-card [norma]="n" [aviso]="avisoNoAsesoria" />
+        }
+      </li>
+
+      <li class="escalera-paso p48-superficie">
+        <div class="escalera-paso-titulo">
+          <span class="p48-icono-circulo" aria-hidden="true">2</span>
+          <h3 class="escalera-paso-nombre">Queja ante la Supersalud</h3>
+        </div>
+
+        @if (paso2Completado()) {
+          <p class="escalera-estado">
+            <span class="p48-etiqueta-estado p48-etiqueta-estado--escalado-supersalud">
+              Completado
+            </span>
+          </p>
+          <p class="escalera-detalle">{{ detallePaso2() }}</p>
+          <button type="button" class="p48-boton-secundario" (click)="abrirDialogo(2)">
+            Corregir queja ante la Supersalud
+          </button>
+        } @else if (paso1Completado()) {
+          <!-- Literal aprobado (spec `reclamos` · "Paso 2 disponible"). -->
+          <p class="escalera-parrafo">
+            Si la EPS no responde o no entrega, puedes quejarte ante la Supersalud
+          </p>
+          <button type="button" class="p48-boton-secundario" (click)="abrirDialogo(2)">
+            Registrar queja ante la Supersalud
+          </button>
+        } @else {
+          <!-- Literal aprobado: el paso 2 espera a la queja ante la EPS. -->
+          <p class="escalera-parrafo escalera-parrafo--inactivo">
+            Se habilita cuando registre la queja ante la EPS
+          </p>
+        }
+      </li>
+    </ol>
+  }
+</section>
+
+<!-- Diálogo "Registrar queja": solo registra fecha y radicado (el documento es 3.6). -->
+@if (dialogoPaso(); as paso) {
+  <div
+    class="escalera-fondo"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="queja-titulo"
+    (keydown)="atraparFoco($event)"
+    (keydown.escape)="cerrarDialogo()"
+  >
+    <div class="escalera-caja p48-superficie p48-sombra-flotante">
+      <h2 id="queja-titulo" class="escalera-titulo-dialogo">
+        @if (paso === 1) {
+          Registrar queja ante la EPS
+        } @else {
+          Registrar queja ante la Supersalud
+        }
+      </h2>
+      <label class="escalera-campo">
+        <span class="escalera-etiqueta">Fecha en que radicó la queja</span>
+        <input
+          #campoFecha
+          class="p48-campo"
+          type="date"
+          [value]="fecha()"
+          (input)="escribirFecha($event)"
+        />
+      </label>
+      <label class="escalera-campo">
+        <span class="escalera-etiqueta">Número de radicado (opcional)</span>
+        <input
+          class="p48-campo"
+          type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          [value]="radicado()"
+          (input)="escribirRadicado($event)"
+        />
+      </label>
+      <button type="button" class="p48-boton-principal" (click)="guardar()">Guardar</button>
+      <button type="button" class="p48-boton-terciario" (click)="cerrarDialogo()">
+        Cancelar
+      </button>
+    </div>
+  </div>
+}

@@ -1,0 +1,32 @@
+/* Cabecera del detalle (tarea 3.5): título, contador grande y estado. */
+:host {
+  display: block;
+}
+
+.contador {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-2);
+}
+
+.contador-titulo {
+  margin: 0;
+  font-size: var(--p48-tam-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+.contador-farmacia,
+.contador-fechas {
+  margin: 0;
+  color: var(--p48-texto-secundario);
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+/* El color del estado vive en el chip (D14): aquí solo énfasis. */
+.contador-tiempo {
+  margin: 0;
+  font-size: var(--p48-tam-titulo);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}

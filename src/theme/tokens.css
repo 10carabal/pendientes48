@@ -71,6 +71,14 @@
   --p48-ancho-inicio: 760px;
   --p48-ancho-detalle: 1080px;
 
+  /* Detalle del pendiente (tarea 3.5): foto, columnas del escritorio y campo
+     de nota. Sin valores sueltos en px (D14). */
+  --p48-ancho-foto: 480px;
+  --p48-flex-principal: 640px; /* flex-basis de la columna principal */
+  --p48-flex-lateral: 300px; /* flex-basis de la columna lateral */
+  --p48-ancho-lateral: 380px; /* tope de la columna lateral */
+  --p48-flex-nota: 260px; /* flex-basis del campo de la nota */
+
   /* Diálogos y hojas (modal de aviso, hoja de ayuda) */
   --p48-ancho-modal: 440px;
   --p48-ancho-hoja: 560px;

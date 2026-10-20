@@ -69,6 +69,11 @@ export class Inicio implements OnDestroy {
     void this.router.navigateByUrl('/pacientes').catch(() => undefined);
   }
 
+  /** Abre la pantalla de detalle del pendiente (tarea 3.5). */
+  abrirDetalle(id: string): void {
+    void this.router.navigateByUrl(`/pendientes/${id}`).catch(() => undefined);
+  }
+
   /**
    * Abre la guía "Me dejaron un pendiente" (spec `ventanilla` · "Guía de
    * ventanilla"): desde ahí se llega al formulario de registro.

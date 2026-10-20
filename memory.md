@@ -5,8 +5,8 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-19** — **3.3** (`features/ventanilla/`) cerrada con el flujo
-> multiagente (PR #35); bloque 3: 3.4 ✅ #34 · 3.3 ✅ #35, siguiente **3.5**; `main = de38ac1`.
+> Última actualización: **2026-10-19** — **3.5** (`features/pendiente-detalle/`) QA VERDE en 2
+> pasadas y correcciones aplicadas (249/249); siguiente **3.6** (reclamo); `main = a080c7b`.
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -22,11 +22,12 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Bloque 2 (plataforma y persistencia) completo:** 2.1 ✅ (PR #26) · 2.2 ✅ (PR #27, smoke real
   en el S22) · 2.3 ✅ (PR #29, smoke Android + escritorio) · 2.4 ✅ (PR #30, flujos A/B/C en el S22).
 - **Bloque 3 (pantallas) en marcha:** 3.1 ✅ (PR #31) · 3.2 ✅ (PR #32) · 3.7 ✅ (PR #33) ·
-  3.4 ✅ (PR #34) · 3.3 ✅ (PR #35, flujo multiagente); orden del bloque **3.4 → 3.3 → 3.5 → 3.6 → 3.8**
+  3.4 ✅ (PR #34) · 3.3 ✅ (PR #35, flujo multiagente) · 3.5 ✅ (QA VERDE, PR en preparación con
+  evidencia); orden del bloque **3.4 → 3.3 → 3.5 → 3.6 → 3.8**
   (reordenado por Daniel el 2026-10-14: la 3.3 termina en "Registrar este pendiente", así que el
-  formulario de la 3.4 debía existir antes). Siguiente: **3.5**.
-- Repo sano en `main` (`eb338f9`); PRs #1–#33 mergeados; una rama por tarea; **Daniel revisa y
-  mergea**.
+  formulario de la 3.4 debía existir antes). Siguiente: **3.6**.
+- Repo sano en `main` (`a080c7b`); PRs #1–#36 mergeados (incluye #36: créditos de desarrollador
+  10carabal en README/`package.json`/manifest); una rama por tarea; **Daniel revisa y mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
   su verificación + PR (decisión de Daniel, 2026-10-04).
@@ -40,6 +41,11 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   (skill `flujo-multiagente`). Reparte el contexto en ventanas limpias: dossier por rol, correcciones
   al mismo implementador por `sessionID`, verificador en sesión nueva (ojos frescos), máx. 2 vueltas
   antes de escalar a Daniel. Detalle y plantillas en la skill; reglas en `AGENTS.md`.
+  **Validado en 2 tareas reales (3.4 y 3.3):** en ambas el verificador encontró lo que el
+  implementador no vio (3.4: `isNative()` prohibido en pantallas + botón de Inicio faltante;
+  3.3: live regions creadas con su texto, doble toque que creaba 2 pendientes, copy sin aprobar)
+  — todos resueltos o aprobados por Daniel antes del PR. Las decisiones de copy/alcance se le
+  pasan a Daniel consolidadas en UNA sola pregunta (question tool) tras la QA, no a gotas.
 - **Componentes siempre en tres archivos separados, sin importar el tamaño:**
   `nombre.ts` (clase con `templateUrl`/`styleUrl`) + `nombre.html` (plantilla) +
   `nombre.scss` (estilos). Nunca `template:` ni `styles:` inline. Escalabilidad/mantenibilidad.
@@ -238,6 +244,22 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   sembrar + click por texto + shots). Ojo: `scrollIntoView` sobre el elemento sticky **no hace
   scroll** si ya está visible → la captura "al pie" salió idéntica a la de scroll y se descarta del
   PR (3.7, 2026-10-14).
+- **Los reinicios del servidor matan a los subagentes a mitad** (4 interrupciones en la tarea 3.3,
+  2026-10-16/19): el despacho falla con `aborted` y el trabajo del subagente queda congelado.
+  **Resolución probada:** (1) verificar el estado REAL con `git status` + `ls` de los archivos
+  (los que escribió antes de morir sobreviven); (2) reanudar **la misma sesión** con `sessionID` y
+  un prompt que incluya el dossier de estado verificado — qué existe, qué falta, qué decisiones
+  están cerradas — para que no repita ni improvise; (3) si la sesión no arranca, una nueva con el
+  mismo dossier. En la evidencia funcionó el mismo patrón a mitad: 13 de 14 capturas existían, se
+  pidió **solo** lo faltante con "NO repitas los archivos existentes" y se completó en un intento.
+- **`gh pr comment --attach` falla con "error connecting to uploads.github.com"** en la primera
+  intentona (transitorio, 2026-10-19 en el PR #35): **reintentar el mismo comando funciona**; no
+  es problema de los archivos ni del token.
+- **Los nombres de capturas con acentos/ñ rompen (o ensucian) el attach en PowerShell 5.1**
+  (2026-10-14, `botón.png`): guardar SIEMPRE los screenshots de evidencia con nombres ASCII
+  (`01-inicio-390-boton-flotante.png`); si llegaron con tildes, renombrar con
+  `Rename-Item -LiteralPath` antes de adjuntar. Adjuntar en 2 lotes de ~6-7 archivos con el mismo
+  `--body-file` (sobra texto, pero no falla por argumentos).
 
 ## Pendientes conocidos (no bloqueantes)
 - **Archivos del flujo multiagente sin commit (2026-10-14):** `.opencode/skills/flujo-multiagente/`,
@@ -263,7 +285,7 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   S22 cuando la pantalla de perfiles se pruebe en Android.
 - **Inicio incompleto a propósito (3.7):** el botón principal llegó con 3.4 y **migró con 3.3** a
   "Me dejaron un pendiente" → `/ventanilla` (guía), que conduce al formulario como paso final;
-  quedan: tarjetas sin navegar al detalle (3.5 agrega el enlace) y orden de la lista = orden de
+  las tarjetas **ya navegan al detalle** desde 3.5; queda: orden de la lista = orden de
   claves de IndexedDB (la spec no define orden; candidato a ordenar por vencimiento).
 - **Tarea 3.8 (introducción de la app):** copy **aprobado** (ver "Copy aprobado de la
   introducción"); falta confirmar si la línea "Aún no tiene pendientes." (2ª persona, de 3.7)
@@ -273,6 +295,33 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   10carabal."** (decisión de Daniel, 2026-10-19 — ver Decisiones de ejecución).
 
 ## Registro de actualizaciones
+- **2026-10-19** — **3.5** (`features/pendiente-detalle/` + ruta + enlace desde Inicio): pantalla
+  con **4 subplanos** (`pendiente-detalle` contenedor, `contador`, `bitacora-lista`, `escalera`) por
+  `design.md`. La escalera **solo registra quejas** (paso 1/2 con fecha + radicado vía `registrarQueja`;
+  la generación de documentos queda para 3.6 — decisión de Daniel) y está oculta en `en-plazo`/
+  `entregado` con su línea aprobada. Dos `norma-card` (plazo + red alterna, aviso por input, D6).
+  "Ya me llegó" único sólido, flotante al pie en celular (precedente `inicio-principal`), se oculta al
+  entregar. Todo derivado (estado, evento `vencido`) jamás persistido (D9); guardar siempre
+  `{...pendienteOriginal, cambios}`. `icsAgregadoEn` tras descarga exitosa; 2.º toque → diálogo con
+  copy aprobado. Borrar: `cancelarAviso` → `borrarPendiente` → navegar a `/`. La tarjeta de Inicio
+  pasó a `<button>` que navega a `/pendientes/:id` (ruta declarada DESPUÉS de las estáticas
+  `nuevo`/`:id/editar`, con comentario). Copy nuevo aprobado por Daniel (diálogo borrar, 2.º toque
+  .ics, escalera gris/habilitado, nota, banner de permiso, "Notificaciones activadas", "Corregir
+  queja…"). **QA (flujo multiagente, 2 pasadas):** VERDE con 2 mayores + 3 menores → todos corregidos
+  antes del PR: px sueltos migrados a **5 tokens nuevos** (`--p48-ancho-foto`, `--p48-flex-principal`,
+  `--p48-flex-lateral`, `--p48-ancho-lateral`, `--p48-flex-nota` en `tokens.css`; `design.md` intacto
+  — si hay que documentar la tabla de tokens, requiere aprobación); la nota conserva el texto si el
+  guardado falla (limpiar SOLO en éxito + anuncio de fallo, patrón 3.4); ruta por **suscripción a
+  `paramMap`** con `cargaId` que descarta lecturas tardías (patrón a repetir en rutas con `:id`);
+  live region de "Nota guardada" se reinicia antes de cada guardado (mismo antipatrón corregido en
+  3.3); miembro muerto eliminado; test inestable de contador (`hace()` vs `new Date()` al milisegundo)
+  hecho determinista — lección: **los tests de tiempo deben derivar `ahora` y `horaReclamo` del mismo
+  instante**. Cosmético anotado sin corregir (preexistente): `textoContador` puede decir "Faltan 0 min"
+  en la ventana de <1 min (coherente con D7). Pruebas: **249/249** (+44 vs 205); `tsc`, `openspec
+  --strict` y `ng build` (main 431,11 kB; detalle en chunk lazy 32,79 kB; `tokens.css` sin presupuesto
+  de componente) en 0. El **implementador fue interrumpido por un reinicio** y reanudado con dossier
+  de estado verificado (patrón ya documentado) sin pérdida.
+
 - **2026-10-19** — **3.3** (`features/ventanilla/` + `data/borrador-store.ts`): guía "Me dejaron
   un pendiente" como **pantalla única con 3 pasos en scroll** (no wizard — así "en modo avión la
   guía se ve completa" se cumple por construcción): paso 1 pide el comprobante, paso 2 muestra

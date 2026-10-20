@@ -1,0 +1,209 @@
+<ion-header>
+  <ion-toolbar><ion-title>Detalle del pendiente</ion-title></ion-toolbar>
+</ion-header>
+<ion-content>
+  <div class="detalle">
+    <div class="detalle-principal">
+      <!-- Regiones vivas SIEMPRE presentes (hallazgo menor 2, QA 3.3):
+           el nodo existe antes que su texto. -->
+      <p class="detalle-aviso" role="status">{{ aviso() ?? '' }}</p>
+      <p
+        class="detalle-error"
+        [class.p48-barra-acento]="errorAccion() !== null"
+        [class.p48-barra-acento--alerta]="errorAccion() !== null"
+        role="alert"
+      >{{ errorAccion() ?? '' }}</p>
+
+      @if (cargando()) {
+        <p class="detalle-parrafo">Cargando…</p>
+      } @else if (error(); as e) {
+        <p class="detalle-error p48-barra-acento p48-barra-acento--alerta" role="alert">{{ e }}</p>
+        <button type="button" class="p48-boton-secundario" (click)="volver()">
+          Volver al inicio
+        </button>
+      } @else if (pendiente(); as p) {
+        <!-- 1 · Contador y estado (chip con etiqueta y color, D14). -->
+        <app-contador class="detalle-contador" [pendiente]="p" [ahora]="ahora()" />
+
+        <!-- Aviso de permiso denegado (solo Android: en la PWA no hay permiso). -->
+        @if (permiso() === 'denegado') {
+          <section class="detalle-banner p48-superficie p48-barra-acento p48-barra-acento--permiso">
+            <p class="detalle-parrafo">
+              Los avisos de vencimiento están apagados. Active las notificaciones o agregue el
+              recordatorio a su calendario.
+            </p>
+            <div class="detalle-banner-acciones">
+              <button
+                type="button"
+                class="p48-boton-secundario"
+                (click)="activarNotificaciones()"
+              >
+                Activar notificaciones
+              </button>
+              <button type="button" class="p48-boton-secundario" (click)="agregarRecordatorio()">
+                Agregar a mi calendario
+              </button>
+            </div>
+          </section>
+        }
+
+        <!-- 3 · Datos del pendiente y foto del comprobante (si se pudo leer). -->
+        <section class="detalle-datos p48-superficie">
+          <h2 class="detalle-titulo-seccion">Datos del pendiente</h2>
+          <dl class="detalle-lista">
+            @if (paciente(); as px) {
+              <dt class="detalle-dato">Paciente</dt>
+              <dd class="detalle-valor">
+                {{ px.nombre }} ({{ px.tipoDocumento }} {{ px.numeroDocumento }})
+              </dd>
+            }
+            @if (p.gestion; as g) {
+              <dt class="detalle-dato">Quien gestiona</dt>
+              <dd class="detalle-valor">
+                {{ g.nombre }} ({{ g.tipoDocumento }} {{ g.numeroDocumento }}), de parentesco
+                {{ g.parentesco }}
+              </dd>
+            }
+            <dt class="detalle-dato">Dirección de entrega</dt>
+            <dd class="detalle-valor">{{ p.direccionEntrega }}</dd>
+            <dt class="detalle-dato">Autorizó entrega a domicilio</dt>
+            <dd class="detalle-valor">{{ p.autorizoDomicilio ? 'Sí' : 'No' }}</dd>
+            <dt class="detalle-dato">Hora de reclamo</dt>
+            <dd class="detalle-valor">{{ fechaHora(p.horaReclamo) }}</dd>
+            @if (p.numeroComprobante; as numero) {
+              <dt class="detalle-dato">Número de comprobante</dt>
+              <dd class="detalle-valor">{{ numero }}</dd>
+            }
+          </dl>
+          @if (fotoUrl(); as url) {
+            <img class="detalle-foto" [src]="url" alt="Foto del comprobante de compra" />
+          }
+        </section>
+
+        <!-- 5 · Escalera de reclamo (solo desde el vencimiento). -->
+        <app-escalera
+          class="detalle-escalera"
+          [pendiente]="p"
+          [ahora]="ahora()"
+          (registrar)="registrarQueja($event)"
+        />
+
+        <!-- 6 · Bitácora con notas manuales (el campo lo vacía la pantalla solo si guardó). -->
+        <app-bitacora-lista
+          class="detalle-bitacora"
+          [pendiente]="p"
+          [ahora]="ahora()"
+          [nota]="notaTexto()"
+          (notaChange)="notaTexto.set($event)"
+          [notaGuardada]="notaGuardada()"
+          [guardando]="guardandoNota()"
+          (notaPedida)="agregarNota($event)"
+        />
+      }
+    </div>
+
+    @if (pendiente(); as p) {
+      <!-- 4 y 7 · Acciones y norma del plazo: en escritorio, columna lateral. -->
+      <aside class="detalle-lateral">
+        <div class="detalle-acciones">
+          @if (!p.entregadoEn) {
+            <!-- Único botón sólido de la pantalla: en celular flota al pie. -->
+            <button
+              type="button"
+              class="p48-boton-principal detalle-principal-boton"
+              [disabled]="entregando()"
+              (click)="entregar()"
+            >
+              Ya me llegó
+            </button>
+          }
+          <button
+            type="button"
+            class="p48-boton-secundario"
+            [disabled]="descargando()"
+            (click)="agregarRecordatorio()"
+          >
+            Agregar recordatorio a mi calendario
+          </button>
+          <button type="button" class="p48-boton-terciario" (click)="abrirEdicion()">
+            Editar
+          </button>
+          <button
+            type="button"
+            class="p48-boton-terciario p48-boton-terciario--destructivo"
+            (click)="pedirBorrado()"
+          >
+            Borrar
+          </button>
+        </div>
+        <app-norma-card
+          class="detalle-norma"
+          [norma]="normaPlazo"
+          [aviso]="avisoNoAsesoria"
+        />
+      </aside>
+
+      <!-- "Borrar": confirmación con copy aprobado (solo aquí hay rojo sólido). -->
+      @if (dialogo() === 'borrar') {
+        <div
+          class="detalle-fondo"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="borrar-titulo"
+          (keydown)="atraparFoco($event)"
+          (keydown.escape)="cerrarDialogo()"
+        >
+          <div class="detalle-caja p48-superficie p48-sombra-flotante">
+            <h2 id="borrar-titulo" class="detalle-titulo-dialogo">¿Borrar este pendiente?</h2>
+            <p class="detalle-parrafo">
+              Se cancelará su aviso y se eliminará su foto del comprobante. Esta acción no se puede
+              deshacer.
+            </p>
+            <button
+              #botonBorrar
+              type="button"
+              class="p48-boton-principal p48-boton-principal--destructivo"
+              [disabled]="borrando()"
+              (click)="borrar()"
+            >
+              Borrar
+            </button>
+            <button type="button" class="p48-boton-secundario" (click)="cerrarDialogo()">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Segundo toque al `.ics`: aviso con la fecha de la descarga anterior. -->
+      @if (dialogo() === 'ics') {
+        <div
+          class="detalle-fondo"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ics-titulo"
+          (keydown)="atraparFoco($event)"
+          (keydown.escape)="cerrarDialogo()"
+        >
+          <div class="detalle-caja p48-superficie p48-sombra-flotante">
+            <h2 id="ics-titulo" class="detalle-titulo-dialogo">
+              Ya agregaste este recordatorio el {{ fechaDeIcs() }}
+            </h2>
+            <button
+              #botonDescargar
+              type="button"
+              class="p48-boton-principal"
+              [disabled]="descargando()"
+              (click)="descargarRecordatorioNuevamente()"
+            >
+              Descargar de nuevo
+            </button>
+            <button type="button" class="p48-boton-terciario" (click)="cerrarDialogo()">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</ion-content>

@@ -1,0 +1,41 @@
+<section class="bitacora">
+  <h2 class="bitacora-titulo">Bitácora</h2>
+
+  <ol class="bitacora-lista">
+    @for (evento of eventos(); track evento.tipo + evento.en) {
+      <!-- El evento derivado de vencimiento lleva la barra de acento de alerta (patrón 6). -->
+      <li
+        class="bitacora-evento"
+        [class.p48-barra-acento]="evento.tipo === 'vencido'"
+        [class.p48-barra-acento--alerta]="evento.tipo === 'vencido'"
+      >
+        <p class="bitacora-fecha">{{ etiquetaDe(evento.en) }}</p>
+        <p class="bitacora-texto">{{ evento.texto }}</p>
+      </li>
+    }
+  </ol>
+
+  <form class="bitacora-nota" (submit)="$event.preventDefault(); enviar()">
+    <label class="bitacora-campo">
+      <span class="bitacora-etiqueta">Agregar una nota</span>
+      <input
+        class="p48-campo"
+        type="text"
+        autocomplete="off"
+        placeholder="Ej. Llamé a la línea, dijeron que mañana"
+        [value]="nota()"
+        (input)="escribirNota($event)"
+      />
+    </label>
+    <button
+      type="submit"
+      class="p48-boton-secundario"
+      [disabled]="guardando() || nota().trim() === ''"
+    >
+      Guardar nota
+    </button>
+  </form>
+
+  <!-- Región viva SIEMPRE presente (hallazgo menor 2, QA 3.3). -->
+  <p class="bitacora-aviso" role="status">{{ notaGuardada() ? 'Nota guardada' : '' }}</p>
+</section>

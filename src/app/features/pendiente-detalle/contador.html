@@ -1,0 +1,13 @@
+<header class="contador">
+  <h1 class="contador-titulo">{{ pendiente().medicamentos.join(', ') }}</h1>
+  <p class="contador-farmacia">{{ pendiente().farmacia }}</p>
+
+  <!-- Un pendiente entregado no muestra contador: su estado ya lo dice (D9). -->
+  @if (texto()) {
+    <p class="contador-tiempo">{{ texto() }}</p>
+  }
+
+  <app-estado-chip [estado]="estado()" />
+
+  <p class="contador-fechas">Reclamaste el {{ reclamasteEl() }} · Vence el {{ venceEl() }}</p>
+</header>

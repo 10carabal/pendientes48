@@ -1,0 +1,205 @@
+/* Pantalla de detalle (tarea 3.5): una columna en celular, dos en escritorio. */
+.detalle {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-5);
+  max-width: var(--p48-ancho-detalle); /* 1080 px en escritorio (design · "Adaptación por tamaño") */
+  margin: 0 auto;
+  /* La reserva inferior cubre el botón principal flotante (56 px + 16 px + aire). */
+  padding: var(--p48-espacio-5) var(--p48-espacio-4) calc(var(--p48-espacio-6) * 3);
+}
+
+/* En celular los contenedores no son cajas (display: contents): el orden
+   visual lo fija cada sección con `order`, y en escritorio cada contenedor
+   vuelve a ser una columna (design · "Detalle en escritorio"). */
+.detalle-principal,
+.detalle-lateral {
+  display: contents;
+}
+
+/* Orden celular acordado: contador, banner, datos, acciones, escalera,
+   bitácora y norma. Los bloques sin número (regiones vivas, carga y error)
+   van primero. */
+.detalle-contador {
+  order: 1;
+}
+.detalle-banner {
+  order: 2;
+}
+.detalle-datos {
+  order: 3;
+}
+.detalle-acciones {
+  order: 4;
+}
+.detalle-escalera {
+  order: 5;
+}
+.detalle-bitacora {
+  order: 6;
+}
+.detalle-norma {
+  order: 7;
+}
+
+/* Regiones vivas SIEMPRE en el DOM: vacías no ocupan espacio ni dibujan barra. */
+.detalle-aviso,
+.detalle-error {
+  margin: 0;
+  font-size: var(--p48-tam-base);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+.detalle-error {
+  color: var(--p48-estado-vencido-texto);
+}
+
+.detalle-aviso:not(:empty),
+.detalle-error:not(:empty) {
+  padding: var(--p48-espacio-2) var(--p48-espacio-3);
+  margin-bottom: var(--p48-espacio-2);
+}
+
+.detalle-parrafo {
+  margin: 0;
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+/* 2 · Banner de permiso denegado (patrón 6: barra de acento de permiso). */
+.detalle-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--p48-espacio-3);
+}
+
+.detalle-banner-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--p48-espacio-3);
+}
+
+/* 3 · Datos del pendiente (patrón 4: superficie en lugar de bordes). */
+.detalle-datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-3);
+}
+
+.detalle-titulo-seccion {
+  margin: 0;
+  font-size: var(--p48-tam-subtitulo);
+  line-height: var(--p48-interlineado);
+}
+
+.detalle-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-1);
+  margin: 0;
+}
+
+.detalle-dato {
+  margin: var(--p48-espacio-2) 0 0;
+  color: var(--p48-texto-secundario);
+  font-size: var(--p48-tam-base);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+.detalle-dato:first-child {
+  margin-top: 0;
+}
+
+.detalle-valor {
+  margin: 0;
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.detalle-foto {
+  width: 100%;
+  max-width: var(--p48-ancho-foto);
+  border-radius: var(--p48-radio-superficie);
+}
+
+/* 4 · Acciones: apiladas, con un solo botón sólido. */
+.detalle-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-3);
+}
+
+/* Celular: el botón principal flota al pie con la sombra del patrón 7. */
+.detalle-principal-boton {
+  position: fixed;
+  right: var(--p48-espacio-4);
+  bottom: var(--p48-espacio-4);
+  left: var(--p48-espacio-4);
+  z-index: 10; /* constante de capa: bajo la de los diálogos (20) */
+  box-shadow: var(--p48-sombra-flotante);
+}
+
+/* Diálogos de confirmación (mismo patrón que `pacientes`). */
+.detalle-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--p48-espacio-4);
+  background: var(--p48-scrim);
+}
+
+.detalle-caja {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-3);
+  width: 100%;
+  max-width: var(--p48-ancho-modal);
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.detalle-titulo-dialogo {
+  margin: 0;
+  font-size: var(--p48-tam-subtitulo);
+  line-height: var(--p48-interlineado);
+}
+
+@media (min-width: 768px) {
+  /* Corte celular↔escritorio (design · "Detalle en escritorio"): dos columnas
+     que se apilan solas al faltar espacio (flex-wrap). */
+  .detalle {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding-bottom: var(--p48-espacio-5);
+  }
+
+  .detalle-principal,
+  .detalle-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: var(--p48-espacio-5);
+  }
+
+  .detalle-principal {
+    flex: 1 1 var(--p48-flex-principal);
+    min-width: 0;
+  }
+
+  .detalle-lateral {
+    flex: 1 1 var(--p48-flex-lateral);
+    max-width: var(--p48-ancho-lateral);
+  }
+
+  /* El botón principal sube a la columna lateral (ya no flota). */
+  .detalle-principal-boton {
+    position: static;
+    box-shadow: none;
+  }
+}

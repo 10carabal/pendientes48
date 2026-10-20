@@ -79,6 +79,16 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--p48-espacio-3);
+  /* Reset de botón (la tarjeta entera es tocable): tipografía y color del
+     sistema, sin borde; la superficie la aporta .p48-superficie. */
+  width: 100%;
+  min-height: var(--p48-tam-tactil);
+  border: 0;
+  text-align: left;
+  font-family: var(--p48-fuente);
+  font-size: var(--p48-tam-base);
+  color: var(--p48-texto);
+  cursor: pointer;
 }
 
 .inicio-datos {
