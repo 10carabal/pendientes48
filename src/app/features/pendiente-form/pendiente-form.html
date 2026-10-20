@@ -15,7 +15,11 @@
         <div class="pendiente-form-titulo">
           <h1>{{ editandoId() ? 'Editar pendiente' : 'Registrar pendiente' }}</h1>
           <!-- En celular flota al pie (ver .pendiente-form-principal); en escritorio sube junto al título. -->
-          <button type="submit" class="p48-boton-principal pendiente-form-principal">
+          <button
+            type="submit"
+            class="p48-boton-principal pendiente-form-principal"
+            [disabled]="guardando()"
+          >
             Guardar
           </button>
         </div>

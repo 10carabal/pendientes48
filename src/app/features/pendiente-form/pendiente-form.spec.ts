@@ -1,6 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { ErrorDeEscritura } from '@data/app-db';
+import {
+  guardarBorrador,
+  leerBorrador,
+  limpiarBorrador,
+} from '@data/borrador-store';
 import type { Paciente } from '@domain/paciente/paciente.model';
 import type { Pendiente } from '@domain/pendiente/pendiente.model';
 import { keys, set } from 'idb-keyval';
@@ -177,6 +182,7 @@ function navegarAPrueba(): ReturnType<typeof vi.spyOn> {
 describe('PendienteForm', () => {
   beforeEach(() => {
     memoria.clear();
+    limpiarBorrador(); // el borrador de la guía vive en memoria (spec ventanilla)
     vi.clearAllMocks();
     capacitor.Capacitor.isNativePlatform.mockReturnValue(true);
     memoria.set('paciente:px', paciente);
@@ -435,6 +441,107 @@ describe('PendienteForm', () => {
     expect((el.querySelector('#campo-autorizoDomicilio') as HTMLSelectElement).value).toBe('no');
     expect(pendienteGuardado()).toBeUndefined();
     expect(navegar).not.toHaveBeenCalled();
+  });
+
+  it('con borrador de la guía: el número aparece prellenado y la foto se adjunta al registrar', async () => {
+    const foto = new Blob([new Uint8Array([1])], { type: 'image/jpeg' });
+    guardarBorrador({ foto, numeroComprobante: '7788' });
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+    const navegar = navegarAPrueba();
+
+    expect((el.querySelector('#campo-numeroComprobante') as HTMLInputElement).value).toBe('7788');
+
+    llenar(el);
+    await enviar(fixture);
+
+    const guardado = pendienteGuardado();
+    expect(guardado?.numeroComprobante).toBe('7788');
+    expect(guardado?.fotoComprobanteKey).toBeTruthy();
+    expect([...memoria.keys()].some((c) => c.startsWith('foto:'))).toBe(true); // la foto quedó en IndexedDB
+    expect(leerBorrador()).toEqual({}); // éxito total: el borrador se limpia
+    expect(navegar).toHaveBeenCalledWith('/');
+  });
+
+  it('si guardar la foto del borrador falla, NO se registra nada y se conservan campos y borrador', async () => {
+    const foto = new Blob([new Uint8Array([1])], { type: 'image/jpeg' });
+    guardarBorrador({ foto, numeroComprobante: '7788' });
+    vi.mocked(set).mockRejectedValueOnce(new ErrorDeEscritura('guardar'));
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+    const navegar = navegarAPrueba();
+
+    llenar(el);
+    await enviar(fixture);
+
+    expect(el.textContent).toContain('No se pudo guardar. Libera espacio e intenta de nuevo');
+    expect(pendienteGuardado()).toBeUndefined(); // nunca sin la foto (D5)
+    expect([...memoria.keys()].some((c) => c.startsWith('foto:'))).toBe(false);
+    expect(leerBorrador().foto).toBe(foto); // el borrador queda intacto para reintentar
+    expect((el.querySelector('#campo-direccionEntrega') as HTMLInputElement).value).toBe(
+      'Cra 9 # 8-7',
+    );
+    expect(navegar).not.toHaveBeenCalled();
+  });
+
+  it('al editar el borrador se ignora (no se prellena ni se adjunta ni se toca)', async () => {
+    const foto = new Blob([new Uint8Array([1])], { type: 'image/jpeg' });
+    guardarBorrador({ foto, numeroComprobante: '9999' });
+    memoria.set('pendiente:pd1', pendiente({ horaReclamo: aIsoMinuto(hace(46.5)), numeroComprobante: '1234' }));
+    const fixture = await crear({ id: 'pd1' });
+    const el: HTMLElement = fixture.nativeElement;
+    const navegar = navegarAPrueba();
+
+    expect((el.querySelector('#campo-numeroComprobante') as HTMLInputElement).value).toBe('1234');
+
+    llenar(el);
+    await enviar(fixture);
+
+    expect(pendienteGuardado()?.numeroComprobante).toBe('1234');
+    expect(pendienteGuardado()?.fotoComprobanteKey).toBeUndefined(); // no se adjunta la foto del borrador
+    expect([...memoria.keys()].some((c) => c.startsWith('foto:'))).toBe(false);
+    expect(leerBorrador()).toEqual({ foto, numeroComprobante: '9999' }); // intacto
+    expect(navegar).toHaveBeenCalledWith('/');
+  });
+
+  it('un doble toque en "Guardar" mientras guarda crea UN solo pendiente', async () => {
+    // La primera escritura queda pendiente: ensancha la ventana del doble toque
+    // (hallazgo menor 3, QA 3.3). Al liberarse escribe en el almacén falso,
+    // igual que hace el factory del mock de `idb-keyval`.
+    let liberarEscritura!: () => void;
+    vi.mocked(set).mockImplementationOnce(
+      (clave, valor) =>
+        new Promise<void>((resolver) => {
+          liberarEscritura = () => {
+            memoria.set(clave as string, valor); // la app solo escribe claves string
+            resolver();
+          };
+        }),
+    );
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+    const navegar = navegarAPrueba();
+
+    llenar(el);
+    boton(el, 'Guardar').click(); // primer toque: la escritura queda en curso
+    await asentar();
+    fixture.detectChanges();
+
+    expect(boton(el, 'Guardar').disabled).toBe(true); // el botón se desactiva
+
+    // Segundo toque mientras la primera promesa sigue pendiente (el guard del
+    // método evita la segunda escritura aunque el evento llegue).
+    await fixture.componentInstance.guardar();
+
+    liberarEscritura();
+    await asentar();
+    fixture.detectChanges();
+
+    const guardados = [...memoria.keys()].filter((c) => c.startsWith('pendiente:'));
+    expect(guardados).toHaveLength(1); // UN solo pendiente, no dos
+    expect(navegar).toHaveBeenCalledTimes(1);
+    expect(navegar).toHaveBeenCalledWith('/');
+    expect(boton(el, 'Guardar').disabled).toBe(false); // queda usable de nuevo
   });
 
   it('la hoja de ayuda de avisos se abre la primera vez en Android y se marca al cerrar', async () => {

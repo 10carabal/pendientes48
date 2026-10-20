@@ -8,8 +8,14 @@ import {
 } from '@angular/core';
 import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
+import { leerBorrador, limpiarBorrador } from '@data/borrador-store';
 import { listarPacientes } from '@data/pacientes-store';
-import { guardarPendiente, leerPendiente } from '@data/pendientes-store';
+import {
+  borrarFoto,
+  guardarFoto,
+  guardarPendiente,
+  leerPendiente,
+} from '@data/pendientes-store';
 import { actualizarPreferencias, leerPreferencias } from '@data/preferencias-store';
 import type { Paciente } from '@domain/paciente/paciente.model';
 import type { Pendiente } from '@domain/pendiente/pendiente.model';
@@ -82,6 +88,12 @@ function aDatetimeLocal(fecha: Date): string {
  * aviso si no autorizó el domicilio, datos obligatorios de quien gestiona
  * (escenarios "Gestión para un familiar" y "Datos de quien gestiona
  * incompletos") y la hoja `ayuda-avisos` la primera vez en Android.
+ *
+ * Handoff guía → formulario (decisión Daniel, 2026-10-14; spec `ventanilla`):
+ * en modo registro el formulario retoma el borrador en memoria de la guía
+ * (`@data/borrador-store`): el número anotado aparece prellenado y la foto se
+ * adjunta al guardar; si la foto no se puede guardar, NO se registra nada.
+ * En edición el borrador no se lee ni se toca (el pendiente conserva su foto).
  */
 @Component({
   selector: 'app-pendiente-form',
@@ -103,6 +115,10 @@ export class PendienteForm {
   readonly error = signal<string | null>(null);
   readonly erroresCampo = signal<Partial<Record<keyof Campos, string>>>({});
   readonly ayudaVisible = signal(false);
+  /** Doble toque en "Guardar" (hallazgo menor 3, QA 3.3): mientras la primera
+   *  petición sigue en curso no se crea otro pendiente (cada guardado usa un
+   *  `crypto.randomUUID()` distinto). Espejo de `cargando`. */
+  readonly guardando = signal(false);
 
   /** Con queja registrada la hora queda bloqueada (D7; spec "Editar un pendiente"). */
   readonly horaBloqueada = computed(() => {
@@ -218,13 +234,16 @@ export class PendienteForm {
   }
 
   private camposNuevos(): Campos {
+    // Handoff guía → formulario (spec ventanilla): en registro el borrador
+    // aporta el número anotado; en edición este método no se ejecuta.
+    const borrador = this.editandoId() === null ? leerBorrador() : undefined;
     return {
       pacienteId: '',
       direccionEntrega: '',
       medicamentos: '',
       farmacia: '',
       horaReclamo: aDatetimeLocal(new Date()), // spec "Hora de reclamo por defecto"
-      numeroComprobante: '',
+      numeroComprobante: borrador?.numeroComprobante ?? '',
       autorizoDomicilio: 'si',
       gestionando: false,
       gestionNombre: '',
@@ -278,58 +297,91 @@ export class PendienteForm {
   }
 
   private async guardarCampos(campos: Campos, horaIso: string): Promise<void> {
-    const original = this.pendienteOriginal();
-    const id = this.editandoId() ?? crypto.randomUUID();
-    // En edición se esparce el pendiente original: bitácora, foto, quejas y
-    // `icsAgregadoEn` se conservan tal cual.
-    const pendiente: Pendiente = {
-      ...(original ?? {}),
-      id,
-      pacienteId: campos.pacienteId,
-      gestion: campos.gestionando
-        ? {
-            nombre: campos.gestionNombre.trim(),
-            tipoDocumento: campos.gestionTipoDocumento,
-            numeroDocumento: campos.gestionNumeroDocumento.trim(),
-            parentesco: campos.gestionParentesco.trim(),
-          }
-        : undefined,
-      medicamentos: campos.medicamentos
-        .split('\n')
-        .map((m) => m.trim())
-        .filter((m) => m !== ''),
-      farmacia: campos.farmacia.trim(),
-      horaReclamo: horaIso,
-      numeroComprobante: campos.numeroComprobante.trim() || undefined,
-      autorizoDomicilio: campos.autorizoDomicilio === 'si',
-      direccionEntrega: campos.direccionEntrega.trim(),
-      bitacora: original?.bitacora ?? [
-        { en: new Date().toISOString(), tipo: 'creado', texto: 'Registraste el pendiente' },
-      ],
-    };
-
+    // Doble toque en "Guardar" (hallazgo menor 3, QA 3.3): mientras la primera
+    // petición sigue en curso no se crea otro pendiente.
+    if (this.guardando()) return;
+    this.guardando.set(true);
     try {
-      await guardarPendiente(pendiente);
-    } catch (causa) {
-      // Spec "Fallo al guardar": se muestra el mensaje y el formulario conserva todo.
-      this.error.set(causa instanceof Error ? causa.message : ERROR_GUARDAR);
-      return;
-    }
+      const original = this.pendienteOriginal();
+      const enRegistro = this.editandoId() === null;
+      const id = this.editandoId() ?? crypto.randomUUID();
 
-    // Mismo ID ⇒ reprograma el aviso al editar; en la PWA es un no-op.
-    await programarAviso({ id, vencimiento: vencimiento(horaIso).toISOString() }).catch(
-      () => undefined,
-    );
+      // Handoff guía → formulario (spec ventanilla): solo en registro la foto
+      // del borrador se adjunta; en edición no se lee ni se toca el borrador.
+      const borrador = enRegistro ? leerBorrador() : undefined;
+      let fotoComprobanteKey: string | undefined;
+      if (borrador?.foto !== undefined) {
+        try {
+          fotoComprobanteKey = await guardarFoto(borrador.foto);
+        } catch {
+          // Spec "Fallo al guardar": NO se registra nada sin la foto; el
+          // formulario y el borrador quedan intactos para reintentar.
+          this.error.set(ERROR_GUARDAR);
+          return;
+        }
+      }
 
-    // "Primera ayuda de avisos en Android" (design.md · "Avisos"): solo en el
-    // primer registro, y la navegación termina al cerrar la hoja (marcando la
-    // preferencia). La pantalla pregunta a `platform/` vía `ayudaAvisosAplica()`:
-    // las pantallas nunca llaman `isNative()` directo (design.md · "Avisos").
-    if (this.editandoId() === null && ayudaAvisosAplica() && !(await this.ayudaYaVista())) {
-      this.ayudaVisible.set(true);
-      return;
+      // En edición se esparce el pendiente original: bitácora, foto, quejas y
+      // `icsAgregadoEn` se conservan tal cual.
+      const pendiente: Pendiente = {
+        ...(original ?? {}),
+        id,
+        pacienteId: campos.pacienteId,
+        gestion: campos.gestionando
+          ? {
+              nombre: campos.gestionNombre.trim(),
+              tipoDocumento: campos.gestionTipoDocumento,
+              numeroDocumento: campos.gestionNumeroDocumento.trim(),
+              parentesco: campos.gestionParentesco.trim(),
+            }
+          : undefined,
+        medicamentos: campos.medicamentos
+          .split('\n')
+          .map((m) => m.trim())
+          .filter((m) => m !== ''),
+        farmacia: campos.farmacia.trim(),
+        horaReclamo: horaIso,
+        numeroComprobante: campos.numeroComprobante.trim() || undefined,
+        autorizoDomicilio: campos.autorizoDomicilio === 'si',
+        direccionEntrega: campos.direccionEntrega.trim(),
+        bitacora: original?.bitacora ?? [
+          { en: new Date().toISOString(), tipo: 'creado', texto: 'Registraste el pendiente' },
+        ],
+        ...(fotoComprobanteKey !== undefined ? { fotoComprobanteKey } : {}),
+      };
+
+      try {
+        await guardarPendiente(pendiente);
+      } catch (causa) {
+        // La foto recién guardada no queda huérfana en el almacén.
+        if (fotoComprobanteKey !== undefined) {
+          await borrarFoto(fotoComprobanteKey).catch(() => undefined);
+        }
+        // Spec "Fallo al guardar": se muestra el mensaje y el formulario conserva todo.
+        this.error.set(causa instanceof Error ? causa.message : ERROR_GUARDAR);
+        return;
+      }
+
+      // Éxito total: el borrador de la guía ya viajó al pendiente registrado.
+      if (enRegistro) limpiarBorrador();
+
+      // Mismo ID ⇒ reprograma el aviso al editar; en la PWA es un no-op.
+      await programarAviso({ id, vencimiento: vencimiento(horaIso).toISOString() }).catch(
+        () => undefined,
+      );
+
+      // "Primera ayuda de avisos en Android" (design.md · "Avisos"): solo en el
+      // primer registro, y la navegación termina al cerrar la hoja (marcando la
+      // preferencia). La pantalla pregunta a `platform/` vía `ayudaAvisosAplica()`:
+      // las pantallas nunca llaman `isNative()` directo (design.md · "Avisos").
+      if (this.editandoId() === null && ayudaAvisosAplica() && !(await this.ayudaYaVista())) {
+        this.ayudaVisible.set(true);
+        return;
+      }
+      await this.router.navigateByUrl('/').catch(() => undefined);
+    } finally {
+      this.guardando.set(false); // en todos los caminos: éxito, fallo o cancelación
     }
-    await this.router.navigateByUrl('/').catch(() => undefined);
   }
 
   /** Sin preferencia legible se asume no vista: la ayuda nunca se salta en silencio. */

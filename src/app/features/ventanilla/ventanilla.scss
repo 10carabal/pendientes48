@@ -1,0 +1,108 @@
+/* Guía de ventanilla (tarea 3.3): 3 pasos en scroll y un solo botón sólido. */
+.ventanilla {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-5);
+  max-width: var(--p48-ancho-inicio); /* 760 px en escritorio (design · "Adaptación por tamaño") */
+  margin: 0 auto;
+  /* en celular reserva el pie para el botón principal flotante */
+  padding: var(--p48-espacio-5) var(--p48-espacio-4) calc(var(--p48-espacio-6) * 3);
+}
+
+.ventanilla h1 {
+  margin: 0;
+  font-size: var(--p48-tam-titulo);
+}
+
+.ventanilla-pasos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ventanilla-paso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-3);
+}
+
+.ventanilla-paso-titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--p48-espacio-3);
+}
+
+.ventanilla-paso-titulo h2 {
+  margin: 0;
+  font-size: var(--p48-tam-subtitulo);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+/* El número del paso es texto dentro del patrón 3 (sin íconos). */
+.ventanilla-numero {
+  flex: none;
+  font-size: var(--p48-tam-base);
+  font-weight: var(--p48-peso-titulo);
+}
+
+.ventanilla-parrafo,
+.ventanilla-estado,
+.ventanilla-aviso,
+.ventanilla-etiqueta {
+  margin: 0;
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.ventanilla-estado {
+  font-weight: var(--p48-peso-titulo);
+}
+
+/* Barra y padding solo cuando hay aviso: la región vive vacía sin dejar caja. */
+.ventanilla-aviso-texto {
+  display: block;
+  padding: var(--p48-espacio-2) var(--p48-espacio-3);
+}
+
+.ventanilla-salidas,
+.ventanilla-foto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--p48-espacio-3);
+}
+
+.ventanilla-campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-1);
+}
+
+/* Celular (design.md · "Adaptación por tamaño"): el botón principal flota
+   al pie con la sombra del patrón 7. */
+.ventanilla-principal {
+  position: fixed;
+  right: var(--p48-espacio-4);
+  bottom: var(--p48-espacio-4);
+  left: var(--p48-espacio-4);
+  z-index: 10; /* constante de capa: bajo la de los diálogos (20) */
+  box-shadow: var(--p48-sombra-flotante);
+}
+
+@media (min-width: 768px) {
+  /* corte celular↔escritorio: el botón principal sube y no flota. */
+  .ventanilla {
+    padding-bottom: var(--p48-espacio-6);
+  }
+
+  .ventanilla-principal {
+    position: static;
+    align-self: flex-end;
+    box-shadow: none;
+    width: fit-content;
+  }
+}
