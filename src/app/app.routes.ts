@@ -19,6 +19,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/pacientes/pacientes').then((m) => m.Pacientes),
   },
   {
+    // Guía de la farmacia (tarea 3.3): un solo toque desde el inicio.
+    path: 'ventanilla',
+    loadComponent: () => import('./features/ventanilla/ventanilla').then((m) => m.Ventanilla),
+  },
+  {
     // Estáticas antes de cualquier ruta con parámetro: `pendientes/nuevo` debe
     // declararse antes que `pendientes/:id` (el detalle llega con la tarea 3.5).
     path: 'pendientes/nuevo',

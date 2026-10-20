@@ -5,9 +5,8 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-14** — **3.4** (`features/pendiente-form/`) cerrada con el primer
-> uso del flujo multiagente; copy de la introducción (3.8) aprobado por Daniel con orden revisado
-> (3.8 al final del bloque); `main = eb338f9`.
+> Última actualización: **2026-10-19** — **3.3** (`features/ventanilla/`) cerrada con el flujo
+> multiagente (PR #35); bloque 3: 3.4 ✅ #34 · 3.3 ✅ #35, siguiente **3.5**; `main = de38ac1`.
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -23,10 +22,9 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Bloque 2 (plataforma y persistencia) completo:** 2.1 ✅ (PR #26) · 2.2 ✅ (PR #27, smoke real
   en el S22) · 2.3 ✅ (PR #29, smoke Android + escritorio) · 2.4 ✅ (PR #30, flujos A/B/C en el S22).
 - **Bloque 3 (pantallas) en marcha:** 3.1 ✅ (PR #31) · 3.2 ✅ (PR #32) · 3.7 ✅ (PR #33) ·
-  3.4 ✅ (PR #34, flujo multiagente); siguiente **3.3**, con orden **3.4 → 3.3 → 3.5 → 3.6 → 3.8**
+  3.4 ✅ (PR #34) · 3.3 ✅ (PR #35, flujo multiagente); orden del bloque **3.4 → 3.3 → 3.5 → 3.6 → 3.8**
   (reordenado por Daniel el 2026-10-14: la 3.3 termina en "Registrar este pendiente", así que el
-  formulario de la 3.4 debe existir antes; hasta que la 3.3 agregue el botón "Me dejaron un
-  pendiente", el formulario se prueba en `/pendientes/nuevo` o con el botón de Inicio).
+  formulario de la 3.4 debía existir antes). Siguiente: **3.5**.
 - Repo sano en `main` (`eb338f9`); PRs #1–#33 mergeados; una rama por tarea; **Daniel revisa y
   mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
@@ -262,18 +260,39 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
 - **Prueba en dispositivo de `cancelarTodos()` (3.2):** en la PWA es no-op y los tests van con el
   plugin mockeado; la cancelación real sobre `LocalNotifications` queda pendiente de ensayo en el
   S22 cuando la pantalla de perfiles se pruebe en Android.
-- **Inicio incompleto a propósito (3.7):** el botón principal llegó con 3.4 ("Registrar pendiente"
-  a `/pendientes/nuevo`; cuando llegue la guía 3.3 hay que decidir si el rótulo pasa a "Me dejaron
-  un pendiente" y apunta a la guía, para conservar **un solo botón sólido por pantalla** —
-  decisión pendiente de Daniel). Siguen: tarjetas sin navegar al detalle (3.5 agrega el enlace) y
-  orden de la lista = orden de claves de IndexedDB (la spec no define orden; candidato a ordenar
-  por vencimiento).
+- **Inicio incompleto a propósito (3.7):** el botón principal llegó con 3.4 y **migró con 3.3** a
+  "Me dejaron un pendiente" → `/ventanilla` (guía), que conduce al formulario como paso final;
+  quedan: tarjetas sin navegar al detalle (3.5 agrega el enlace) y orden de la lista = orden de
+  claves de IndexedDB (la spec no define orden; candidato a ordenar por vencimiento).
 - **Tarea 3.8 (introducción de la app):** copy **aprobado** (ver "Copy aprobado de la
   introducción"); falta confirmar si la línea "Aún no tiene pendientes." (2ª persona, de 3.7)
   pasa también a 3ª. Como 3.8 va al final del bloque, el enlace a la guía de 3.3 se agrega
   **en la propia 3.8** (entonces la 3.3 ya existe). Regla vigente: sin botones muertos.
 
 ## Registro de actualizaciones
+- **2026-10-19** — **3.3** (`features/ventanilla/` + `data/borrador-store.ts`): guía "Me dejaron
+  un pendiente" como **pantalla única con 3 pasos en scroll** (no wizard — así "en modo avión la
+  guía se ve completa" se cumple por construcción): paso 1 pide el comprobante, paso 2 muestra
+  `norma-card` con `paraPaso('ventanilla')[0]` + aviso inyectado por input (D6) y solo informa
+  (no colecta datos — decisión de Daniel), paso 3 con las **3 salidas no bloqueantes** (tomar foto
+  / galería / anotar número). Handoff guía→formulario: `data/borrador-store.ts` **en memoria**
+  (ninguna feature importa a otra; ambas usan `@data/*`); el formulario solo en registro prellena
+  `numeroComprobante` y adjunta la foto con `guardarFoto()` — si esto falla, **no se registra nada**
+  (P5 de Daniel) y quedan campos y borrador intactos; éxito → `limpiarBorrador()`. **Inicio** migra
+  su sólido a "Me dejaron un pendiente" → `/ventanilla` (P1; el rótulo "Me dejaron un pendiente"
+  estaba reservado en la spec de ventanilla). Copy nuevo aprobado por Daniel: línea del paso 2 y
+  apoyos ("Pida también el número…", "No se pudo tomar la foto…"). Borrador colgante aceptado para
+  MVP (si cancela el formulario y registra directo, la foto/número viajan con el siguiente registro).
+  **QA (flujo multiagente, 2 pasadas):** VERDE con 3 menores — 2 corregidos antes del PR (live
+  regions `role="status"` siempre en el DOM, no creadas con su texto; señal `guardando` que bloquea
+  el doble toque en "Guardar" y evita 2 pendientes con UUID distintos) + 1 cosmético (SCSS
+  duplicado); el copy se aprobó en lugar de corregirse. Contrato para **3.5**: `fotoComprobanteKey`
+  queda cableada por primera vez — el detalle deberá leerla con `leerFoto()`. Pruebas: **205/205**
+  (+19); `tsc`, `openspec --strict` y `ng build` (main 430,44 kB; cámara/filesystem SOLO en el
+  chunk lazy `ventanilla` 19,77 kB) en 0. Evidencia: 14 archivos 390/1280 incluyendo guía completa,
+  norma-card legible, "Foto lista" con JPEG real por el pipeline del plugin, aviso de rechazo
+  no bloqueante y **guía con red caída** ("farmacia sin señal").
+
 - **2026-10-14** — **3.4** (`features/pendiente-form/` + botón de Inicio): pantalla de registro
   (`/pendientes/nuevo`) y edición (`/pendientes/:id/editar`, estáticas antes del `:id` de 3.5)
   espejo del patrón de `pacientes`: select de paciente que precarga la dirección, medicamentos en

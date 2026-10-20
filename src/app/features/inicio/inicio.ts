@@ -21,9 +21,10 @@ const ERROR_LECTURA = 'No se pudo leer la información. Intenta de nuevo.';
 
 /**
  * Pantalla de inicio (spec `pendientes` · "Plazo de 48 horas"; `normas` ·
- * "Aviso de no asesoría legal"): lista cada pendiente con su contador y su
- * estado (etiqueta + color), ofrece el botón principal "Registrar pendiente"
- * (tarea 3.4) y muestra el aviso legal como modal en la primera apertura y
+ * "Aviso de no asesoría legal"; `ventanilla` · "Guía de ventanilla"): lista
+ * cada pendiente con su contador y su estado (etiqueta + color), ofrece el
+ * botón principal "Me dejaron un pendiente" que abre la guía de la farmacia
+ * (tarea 3.3) y muestra el aviso legal como modal en la primera apertura y
  * como línea fija al pie en cada apertura siguiente.
  */
 @Component({
@@ -68,9 +69,12 @@ export class Inicio implements OnDestroy {
     void this.router.navigateByUrl('/pacientes').catch(() => undefined);
   }
 
-  /** Abre el formulario de registro (spec `pendientes` · "Registro de pendiente"). */
-  abrirRegistro(): void {
-    void this.router.navigateByUrl('/pendientes/nuevo').catch(() => undefined);
+  /**
+   * Abre la guía "Me dejaron un pendiente" (spec `ventanilla` · "Guía de
+   * ventanilla"): desde ahí se llega al formulario de registro.
+   */
+  abrirGuia(): void {
+    void this.router.navigateByUrl('/ventanilla').catch(() => undefined);
   }
 
   /**

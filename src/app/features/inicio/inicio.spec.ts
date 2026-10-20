@@ -187,7 +187,7 @@ describe('Inicio', () => {
     expect(navegar).toHaveBeenCalledWith('/pacientes');
   });
 
-  it('el botón principal "Registrar pendiente" abre el formulario y coexiste con la lista', async () => {
+  it('el botón principal "Me dejaron un pendiente" abre la guía y coexiste con la lista', async () => {
     await set('pendiente:p1', pendiente());
     await set('preferencias', { avisoLegalAceptado: true, ayudaAvisosVista: false });
     const fixture = await crear();
@@ -195,12 +195,12 @@ describe('Inicio', () => {
     const navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
 
     expect(el.querySelector('.inicio-tarjeta')).toBeTruthy();
-    expect(boton(el, 'Registrar pendiente')).toBeTruthy();
+    expect(boton(el, 'Me dejaron un pendiente')).toBeTruthy();
     // un solo botón sólido en pantalla (el "Entiendo" solo existe en el modal de primera apertura)
     expect([...el.querySelectorAll('.p48-boton-principal')]).toHaveLength(1);
 
-    boton(el, 'Registrar pendiente').click();
+    boton(el, 'Me dejaron un pendiente').click();
 
-    expect(navegar).toHaveBeenCalledWith('/pendientes/nuevo');
+    expect(navegar).toHaveBeenCalledWith('/ventanilla');
   });
 });

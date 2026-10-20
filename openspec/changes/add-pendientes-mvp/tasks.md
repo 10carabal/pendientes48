@@ -126,8 +126,18 @@ espaciados sueltos), y cada pantalla se verifica a 390 px y a 1280 px contra el 
     los cuatro componentes aparecen en `/guia`
 - [x] 3.2 🅿️ `features/pacientes`: crear, editar, aviso de duplicado y "Borrar todos mis datos" con doble confirmación que cancela todos los avisos programados (hallazgo mayor 12)
   - Verificación: un duplicado ofrece "Usar el perfil existente"; al confirmar el borrado total se cancelan los avisos programados, se vacía el almacén y la app vuelve a la primera apertura
-- [ ] 3.3 🅿️ `features/ventanilla`: guía de 3 pasos, norma-card en el paso 2, alternativas del paso 3
-  - Verificación: en modo avión la guía se ve completa; con cámara denegada se puede llegar al registro
+- [x] 3.3 🅿️ `features/ventanilla`: guía "Me dejaron un pendiente" en pantalla única con 3 pasos
+  (texto verbatim de la spec), norma-card en el paso 2 (lectura local + aviso inyectado por input),
+  las 3 salidas del paso 3 sin bloquear (tomar foto / galería / anotar número), handoff foto+número
+  al formulario por `data/borrador-store` (en memoria), y el botón sólido de Inicio migra de
+  "Registrar pendiente" a "Me dejaron un pendiente" hacia la guía (el formulario queda como paso
+  final: "Registrar este pendiente")
+  - Verificación: en modo avión la guía se ve completa (la norma viene del JSON empaquetado);
+    con cámara denegada se puede llegar al registro (cae a galería y, si cancela, el aviso es
+    no bloqueante con las 3 salidas y el botón final activos); con la red caída la norma-card
+    muestra resumen y fecha de verificación; el número anotado en la guía llega prellenado al
+    formulario y la foto se adjunta al guardar (si su guardado falla, no se registra nada y
+    quedan los datos intactos)
 - [x] 3.4 🅿️ `features/pendiente-form`: registro y edición; dirección obligatoria precargada;
   hora de reclamo por defecto con la hora actual (hallazgo mayor 10) y validación de hora futura;
   farmacia o gestor obligatorios; gestión por otra persona con sus 4 datos obligatorios; hora

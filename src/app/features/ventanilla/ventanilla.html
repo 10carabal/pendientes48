@@ -1,0 +1,110 @@
+<ion-header>
+  <ion-toolbar><ion-title>Me dejaron un pendiente</ion-title></ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="ventanilla">
+    <h1>Me dejaron un pendiente</h1>
+
+    <!-- Spec "El usuario está en la farmacia": 3 pasos, en orden, en una sola pantalla. -->
+    <ol class="ventanilla-pasos">
+      <li class="ventanilla-paso">
+        <div class="ventanilla-paso-titulo">
+          <span class="p48-icono-circulo ventanilla-numero" aria-hidden="true">1</span>
+          <h2>Pida el comprobante del pendiente con fecha y hora.</h2>
+        </div>
+        <p class="ventanilla-parrafo">{{ apoyoComprobante }}</p>
+      </li>
+
+      <li class="ventanilla-paso">
+        <div class="ventanilla-paso-titulo">
+          <span class="p48-icono-circulo ventanilla-numero" aria-hidden="true">2</span>
+          <h2>Autorice la entrega a domicilio y dé su dirección.</h2>
+        </div>
+        <p class="ventanilla-parrafo">{{ apoyoDomicilio }}</p>
+        <!-- Spec "Paso de autorización a domicilio": la norma desde normas.json,
+             con el aviso de no asesoría inyectado por input (D6). Solo informa:
+             dirección y autorización se recogen en el formulario (3.4). -->
+        @if (norma; as n) {
+          <app-norma-card [norma]="n" [aviso]="avisoNoAsesoria" />
+        }
+      </li>
+
+      <li class="ventanilla-paso">
+        <div class="ventanilla-paso-titulo">
+          <span class="p48-icono-circulo ventanilla-numero" aria-hidden="true">3</span>
+          <h2>Tome una foto del comprobante.</h2>
+        </div>
+        <!-- Spec "Paso de la foto con tres salidas": ninguna es bloqueante. -->
+        <div class="ventanilla-salidas">
+          <button
+            type="button"
+            class="p48-boton-secundario"
+            [disabled]="fotoEnCurso()"
+            (click)="tomarFoto()"
+          >
+            Tomar foto
+          </button>
+          <button
+            type="button"
+            class="p48-boton-secundario"
+            [disabled]="fotoEnCurso()"
+            (click)="elegirFoto()"
+          >
+            Elegir de la galería
+          </button>
+          <button
+            type="button"
+            class="p48-boton-terciario"
+            [attr.aria-expanded]="mostrandoNumero()"
+            [attr.aria-controls]="mostrandoNumero() ? 'ventanilla-numero' : null"
+            (click)="alternarNumero()"
+          >
+            Anote el número del comprobante
+          </button>
+        </div>
+
+        <!-- Regiones vivas SIEMPRE presentes (hallazgo menor 2, QA 3.3): los
+             lectores de pantalla solo anuncian de forma fiable un live region
+             que existe antes que su contenido; aquí el nodo vive y el texto
+             aparece dentro. -->
+        <div class="ventanilla-foto" role="status">
+          @if (fotoLista()) {
+            <p class="ventanilla-estado">Foto lista</p>
+            <button type="button" class="p48-boton-terciario" (click)="quitarFoto()">
+              Quitar foto
+            </button>
+          }
+        </div>
+
+        <p class="ventanilla-aviso" role="status">
+          @if (avisoFoto(); as aviso) {
+            <span class="ventanilla-aviso-texto p48-barra-acento p48-barra-acento--aviso">
+              {{ aviso }}
+            </span>
+          }
+        </p>
+
+        @if (mostrandoNumero()) {
+          <label class="ventanilla-campo">
+            <span class="ventanilla-etiqueta">Número del comprobante</span>
+            <input
+              id="ventanilla-numero"
+              class="p48-campo"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              [value]="numeroComprobante()"
+              (input)="escribirNumero($event)"
+            />
+          </label>
+        }
+      </li>
+    </ol>
+
+    <!-- Único botón sólido de la pantalla (spec "al final se ofrece el botón"). -->
+    <button type="button" class="p48-boton-principal ventanilla-principal" (click)="registrar()">
+      Registrar este pendiente
+    </button>
+  </div>
+</ion-content>
