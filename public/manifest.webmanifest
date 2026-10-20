@@ -8,6 +8,10 @@
   "start_url": "./",
   "theme_color": "#FFFFFF",
   "background_color": "#FFFFFF",
+  "author": {
+    "name": "10carabal",
+    "url": "https://github.com/10carabal"
+  },
   "icons": [
     {
       "src": "icons/icon-192.png",

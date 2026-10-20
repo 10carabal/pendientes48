@@ -76,3 +76,6 @@ Regla: si una guía de una herramienta contradice este README o `openspec/config
 - **Red alterna:** otros gestores o IPS donde se puede reclamar si no se cumple el plazo.
 - **PQRD:** Peticiones, Quejas, Reclamos y Denuncias.
 - **Escalera de reclamo:** paso 1 queja ante la EPS; paso 2 queja ante la Supersalud.
+
+## Créditos
+Desarrollado por [10carabal](https://github.com/10carabal).

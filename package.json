@@ -1,6 +1,7 @@
 {
   "name": "pendientes48",
   "version": "0.0.0",
+  "author": "10carabal <https://github.com/10carabal>",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
