@@ -5,9 +5,9 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-21** — **3.6 mergeada** (PR #39, `main = 6e2c5db`) y **fix de
-> ciclo de vida listo** (`fix/2.1-ciclo-vida-listas`, PR #40, QA VERDE 315/315 + escenarios
-> verificados en navegador); siguiente: **3.8**.
+> Última actualización: **2026-10-21** — **3.6 (PR #39) y fix de ciclo de vida (PR #40) mergeados**;
+> **contador con minutos listo** (`feat/contador-minutos`, PR #41, QA VERDE 315/315 + evidencia
+> en navegador); plan de **3.8** aprobado con Daniel (3 decisiones de copy cerradas); siguiente: **3.8**.
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -27,9 +27,11 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   3.6 ✅ (PR #39 mergeado, `main = 6e2c5db`);
   orden del bloque **3.4 → 3.3 → 3.5 → 3.6 → 3.8**
   (reordenado por Daniel el 2026-10-14: la 3.3 termina en "Registrar este pendiente", así que el
-  formulario de la 3.4 debía existir antes). En paralelo: **`fix/2.1-ciclo-vida-listas`** (PR #40,
-  en revisión) y después sigue **3.8**.
-- Repo sano en `main` (`0c15497`); PRs #1–#38 mergeados (incluye #36: créditos de desarrollador
+  formulario de la 3.4 debía existir antes). **PR #41** (contador con minutos, rama
+  `feat/contador-minutos`) en revisión; después sigue **3.8** (plan aprobado, decisiones de copy
+  cerradas: línea vacía en 3ª persona, label del pie, Cerrar sticky).
+- Repo sano en `main` (`632769c`); PRs #1–#40 mergeados (incluye #39: documentos 3.6; #40:
+  fix de ciclo de vida `ionViewWillEnter`; #36: créditos de desarrollador
   10carabal en README/`package.json`/manifest; #38: flujo multiagente en skill/comando/`AGENTS.md`);
   una rama por tarea; **Daniel revisa y mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
@@ -349,6 +351,21 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   10carabal."** (decisión de Daniel, 2026-10-19 — ver Decisiones de ejecución).
 
 ## Registro de actualizaciones
+- **2026-10-21** — **`feat/contador-minutos`** (PR #41): el contador de 48 h ahora muestra
+  minutos — `textoContador()` pinta `Faltan X h Y min` / `Vencido hace X h Y min` (**Y solo si
+  > 0**, piso en ambas unidades; ramas <1 h, días y entregado intactas) vía la helper privada
+  `horasConMinutos()`. Decisión de Daniel (2026-10-21): opción A + simetría en "Vencido hace" +
+  PR chico **antes** de 3.8. Spec verbatim ajustada (3 líneas THEN/AND en `specs/pendientes/
+  spec.md`) + reglas de `design.md`. **Cero cambios de UI** (pantallas solo interpolan el string).
+  Tests: ~10 aserciones ajustadas + 3 casos nuevos; QA dio ROJO por **1 mayor preexistente**
+  (caso vencido de Inicio en el borde exacto de 1 h: deriva de `Date.now()` entre fábrica y
+  constructor podía pintar "59 min") → micro-vuelta con holgura de 30 s siguiendo el patrón del
+  mismo archivo (ambas direcciones del reloj en verde, probado d ∈ {0…60 s}); 1 menor = la
+  cláusula 3.8 que el coordinador agregó a `tasks.md` (intencional). **315/315**, 4 gates.
+  Evidencia: 3 capturas (chips en Inicio 390, contador del detalle 390/1280). **Lección de
+  capturas:** en el script de sembrado, las constantes de holgura llevan nombre — `30 * m` con
+  `m = 60e3` eran 30 minutos y no 30 s (los "timeouts" de búsqueda eran string mal calculado,
+  no bug de app: mirar SIEMPRE la captura antes de re-ejecutar).
 - **2026-10-21** — **`fix/2.1-ciclo-vida-listas`** (PR #40): `<ion-router-outlet>` re-muestra
   Inicio/Pacientes al volver con "atrás" sin re-ejecutar el constructor → listas stale (reportado
   por Daniel en el S22). Fix: **`ionViewWillEnter()`** (`ViewWillEnter` de `@ionic/angular`) en

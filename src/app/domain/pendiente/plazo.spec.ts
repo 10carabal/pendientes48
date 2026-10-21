@@ -90,12 +90,15 @@ describe('plazo', () => {
   });
 
   describe('textoContador() — las 5 ramas', () => {
-    it('falta 1 h o más: "Faltan X h" con redondeo hacia abajo', () => {
+    it('falta 1 h o más: "Faltan X h Y min" con piso, o "Faltan X h" si Y = 0', () => {
       const p = pendiente(HORA_RECLAMO);
 
       expect(textoContador(p, new Date('2026-10-06T09:00:00.000Z'))).toBe('Faltan 24 h');
-      expect(textoContador(p, new Date('2026-10-07T06:30:00.000Z'))).toBe('Faltan 2 h');
+      expect(textoContador(p, new Date('2026-10-07T06:30:00.000Z'))).toBe('Faltan 2 h 30 min');
       expect(textoContador(p, new Date('2026-10-07T06:59:59.000Z'))).toBe('Faltan 2 h');
+      // Y = 0 exacto: el string sigue siendo sólo de horas.
+      expect(textoContador(p, new Date('2026-10-07T07:00:00.000Z'))).toBe('Faltan 2 h');
+      expect(textoContador(p, new Date('2026-10-07T07:30:00.000Z'))).toBe('Faltan 1 h 30 min');
     });
 
     it('falta menos de 1 h: "Faltan X min"', () => {
@@ -112,11 +115,14 @@ describe('plazo', () => {
       expect(textoContador(p, new Date('2026-10-07T09:59:00.000Z'))).toBe('Vencido hace 59 min');
     });
 
-    it('vencido 1 h o más pero menos de 48 h: "Vencido hace X h"', () => {
+    it('vencido 1 h o más pero menos de 48 h: "Vencido hace X h Y min" o sólo horas', () => {
       const p = pendiente(HORA_RECLAMO);
 
       expect(textoContador(p, new Date('2026-10-07T10:00:00.000Z'))).toBe('Vencido hace 1 h');
-      expect(textoContador(p, new Date('2026-10-09T08:59:00.000Z'))).toBe('Vencido hace 47 h');
+      expect(textoContador(p, new Date('2026-10-07T10:05:00.000Z'))).toBe('Vencido hace 1 h 5 min');
+      expect(textoContador(p, new Date('2026-10-09T08:59:00.000Z'))).toBe(
+        'Vencido hace 47 h 59 min',
+      );
     });
 
     it('vencido 48 h o más: "Vencido hace X días" (días completos de 24 h)', () => {
