@@ -1,0 +1,176 @@
+<!-- Hoja del documento de la queja (tarea 3.6): vista previa editable,
+     copia al portapapeles y PDF con pdfmake. La hoja no pregunta la
+     plataforma en su html: `pdfDirecto` y `etiquetaCompartir` vienen de
+     `platform/`; `avisoAnexo` lo inyecta la pantalla (D6). -->
+<div class="hoja-fondo">
+  <section
+    class="hoja-caja p48-sombra-flotante"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="documento-titulo"
+    (keydown)="atraparFoco($event)"
+    (keydown.escape)="cerrar.emit()"
+  >
+    <h2 id="documento-titulo" class="hoja-titulo">
+      @if (paso() === 1) {
+        Generar queja ante la EPS
+      } @else {
+        Generar queja ante la Supersalud
+      }
+    </h2>
+
+    @if (radicacion(); as r) {
+      <p class="hoja-parrafo">{{ r }}</p>
+    }
+    <p class="hoja-parrafo">{{ APOYO_EDICION }}</p>
+
+    <!-- Nota de autorización: solo cuando el texto del paso 1 la incluye. -->
+    @if (paso() === 1 && !pendiente().autorizoDomicilio) {
+      <p class="hoja-parrafo">{{ notaAutorizacion }}</p>
+    }
+
+    <label class="hoja-etiqueta" for="texto-queja">Texto de la queja</label>
+    <textarea
+      id="texto-queja"
+      class="p48-campo hoja-area"
+      #campoTexto
+      rows="8"
+      [value]="texto()"
+      (input)="escribirTexto($event)"
+    ></textarea>
+
+    <!-- Regiones vivas SIEMPRE en el DOM: el nodo existe antes que su texto. -->
+    <p class="hoja-parrafo" role="status">
+      {{ aviso() || (copiado() ? 'Texto copiado' : '') || recuento() }}
+    </p>
+    <p
+      class="hoja-parrafo"
+      [class.p48-barra-acento]="error() !== ''"
+      [class.p48-barra-acento--alerta]="error() !== ''"
+      role="alert"
+    >{{ error() }}</p>
+
+    @if (sinCambios()) {
+      <p class="hoja-parrafo">Nada por corregir.</p>
+    } @else {
+      <p class="hoja-parrafo">{{ notaCambios }}</p>
+    }
+    <p class="hoja-parrafo">{{ avisoAnexo() }}</p>
+    <!-- Aviso de no asesoría junto a "Copiar texto" (D6, inyectado por la pantalla);
+         el texto copiado NO lo incluye. -->
+    <p class="hoja-parrafo">{{ avisoNoAsesoria() }}</p>
+
+    @if (reemplazando()) {
+      <div class="hoja-herramienta p48-superficie">
+        <label class="hoja-etiqueta" for="reemplazar-buscar">Buscar</label>
+        <input
+          id="reemplazar-buscar"
+          class="p48-campo"
+          type="text"
+          [value]="busqueda()"
+          (input)="escribirBusqueda($event)"
+        />
+        <label class="hoja-etiqueta" for="reemplazar-por">Reemplazar por</label>
+        <input
+          id="reemplazar-por"
+          class="p48-campo"
+          type="text"
+          [value]="reemplazo()"
+          (input)="escribirReemplazo($event)"
+        />
+        <button type="button" class="p48-boton-secundario" (click)="reemplazar()">
+          Reemplazar
+        </button>
+      </div>
+    }
+
+    <!-- 2.º PDF de la misma queja: la pantalla confirma antes de generar. -->
+    @if (confirmandoPdf()) {
+      <div class="hoja-confirmacion p48-superficie">
+        <p id="documento-confirmar" class="hoja-parrafo">
+          Ya habías generado una queja. ¿Generar otra?
+        </p>
+        <button
+          #botonConfirmar
+          type="button"
+          class="p48-boton-secundario"
+          (click)="confirmar.emit()"
+        >
+          Generar otra
+        </button>
+        <button
+          type="button"
+          class="p48-boton-terciario"
+          (click)="cancelarConfirmacion.emit()"
+        >
+          Cancelar
+        </button>
+      </div>
+    }
+
+    <div class="hoja-acciones">
+      <button
+        #botonCompartir
+        type="button"
+        class="p48-boton-principal"
+        [disabled]="ocupado() || confirmandoPdf()"
+        (click)="compartir.emit()"
+      >
+        {{ etiquetaCompartir() }}
+      </button>
+      <!-- "PDF" es descarga directa con `<a download>`: en Android el WebView
+           no la soporta (sin DownloadListener), así que allí solo queda la hoja
+           nativa de compartir, igual que con el PDF editable. `pdfDirecto` lo
+           decide platform/. -->
+      @if (pdfDirecto) {
+        <button
+          #botonPdf
+          type="button"
+          class="p48-boton-secundario"
+          [disabled]="ocupado() || confirmandoPdf()"
+          (click)="descargar.emit()"
+        >
+          PDF
+        </button>
+        <button
+          type="button"
+          class="p48-boton-secundario"
+          [disabled]="ocupado()"
+          (click)="abrirPdfEditable()"
+        >
+          PDF editable
+        </button>
+      }
+      <button
+        type="button"
+        class="p48-boton-secundario"
+        [disabled]="ocupado()"
+        (click)="copiar.emit(texto())"
+      >
+        Copiar texto
+      </button>
+      <button type="button" class="p48-boton-terciario" (click)="abrirReemplazo()">
+        {{ reemplazando() ? 'Ocultar herramienta' : 'Reemplazar…' }}
+      </button>
+      <button type="button" class="p48-boton-terciario" (click)="cerrar.emit()">
+        Cerrar
+      </button>
+    </div>
+
+    <!-- Subdiálogo del PDF editable (solo web; en Android nunca se abre):
+         el copy lo compone la hoja y llega por input. -->
+    @if (pdfEditableAbierto()) {
+      <app-doc-pdf
+        [avisoNoAsesoria]="avisoNoAsesoria()"
+        [etiquetaCompartir]="etiquetaCompartir()"
+        [textoEditable]="textoEditable"
+        [generando]="generandoPdf()"
+        [compartiendo]="compartiendo()"
+        [error]="error()"
+        (descargarEditable)="descargarEditable.emit(texto())"
+        (compartir)="compartirEditable.emit(texto())"
+        (cerrar)="cerrarPdfEditable()"
+      />
+    }
+  </section>
+</div>

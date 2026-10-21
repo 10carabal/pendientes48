@@ -74,6 +74,9 @@
               {
                 "input": "src/theme/patrones.scss"
               }
+            ],
+            "allowedCommonJsDependencies": [
+              "pdfmake"
             ]
           },
           "configurations": {

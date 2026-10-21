@@ -72,6 +72,18 @@ function puedeCompartirArchivos(archivo: File): boolean {
   }
 }
 
+/**
+ * Si esta plataforma puede entregar un PDF compartido (la etiqueta del botón
+ * lo distingue de una descarga simple). Android siempre, con la hoja nativa;
+ * la PWA, solo si el navegador soporta Web Share con archivos. Existe para que
+ * la hoja del documento no pregunte plataforma directo (design.md).
+ */
+export function comparteArchivosPdf(): boolean {
+  if (isNative()) return true;
+  const archivo = new File([''], 'queja.pdf', { type: 'application/pdf' });
+  return puedeCompartirArchivos(archivo);
+}
+
 /** base64 para escribir binario en el Filesystem nativo (el soporte de Blob es solo web). */
 function aBase64(bytes: Uint8Array): string {
   let bin = '';

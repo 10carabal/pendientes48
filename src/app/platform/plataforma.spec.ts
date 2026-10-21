@@ -5,7 +5,7 @@ const capacitor = vi.hoisted(() => ({
 
 vi.mock('@capacitor/core', () => capacitor);
 
-import { ayudaAvisosAplica, isNative } from './plataforma';
+import { ayudaAvisosAplica, isNative, pdfDirectoAplica } from './plataforma';
 
 describe('plataforma', () => {
   beforeEach(() => {
@@ -21,5 +21,13 @@ describe('plataforma', () => {
 
     expect(isNative()).toBe(true);
     expect(ayudaAvisosAplica()).toBe(true);
+  });
+
+  it('el PDF directo (descarga con <a download>) aplica solo en la PWA', () => {
+    expect(pdfDirectoAplica()).toBe(true);
+
+    capacitor.Capacitor.isNativePlatform.mockReturnValue(true);
+
+    expect(pdfDirectoAplica()).toBe(false);
   });
 });

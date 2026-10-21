@@ -1,8 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router, type ParamMap } from '@angular/router';
 import { ErrorDeEscritura } from '@data/app-db';
+import { AVISO_NO_ASESORIA } from '@domain/norma/aviso';
 import type { Paciente } from '@domain/paciente/paciente.model';
 import type { Pendiente } from '@domain/pendiente/pendiente.model';
+import { NOTA_AUTORIZACION_DOMICILIO, textoCorto } from '@domain/reclamo/plantillas';
+import { PIE_PDF } from '@domain/reclamo/plantillas-pdf';
 import { keys, set, get } from 'idb-keyval';
 import { BehaviorSubject, of, type Observable } from 'rxjs';
 import { PendienteDetalle } from './pendiente-detalle';
@@ -26,7 +29,24 @@ const cap = vi.hoisted(() => ({
 const fs = vi.hoisted(() => ({
   Directory: { Documents: 'DOCUMENTS', Cache: 'CACHE' },
   Encoding: { UTF8: 'UTF-8' },
-  Filesystem: { writeFile: vi.fn((_opciones: unknown) => Promise.resolve({ uri: 'archivo' })) },
+  Filesystem: {
+    writeFile: vi.fn((_opciones: unknown) => Promise.resolve({ uri: 'archivo' })),
+    deleteFile: vi.fn((_opciones: unknown) => Promise.resolve()),
+  },
+}));
+
+const clipboard = vi.hoisted(() => ({
+  Clipboard: { write: vi.fn((_opciones: { string: string }) => Promise.resolve()) },
+}));
+
+const share = vi.hoisted(() => ({
+  Share: { share: vi.fn((_opciones: unknown) => Promise.resolve()) },
+}));
+
+/** pdfmake se reemplaza por su interfaz: el documento capturado es la prueba. */
+const pdf = vi.hoisted(() => ({
+  docs: [] as Array<{ footer?: unknown } & Record<string, unknown>>,
+  createPdf: vi.fn(),
 }));
 
 vi.mock('idb-keyval', () => ({
@@ -49,6 +69,12 @@ vi.mock('idb-keyval', () => ({
 vi.mock('@capacitor/core', () => capacitor);
 vi.mock('@capacitor/local-notifications', () => ({ LocalNotifications: cap }));
 vi.mock('@capacitor/filesystem', () => fs);
+vi.mock('@capacitor/clipboard', () => clipboard);
+vi.mock('@capacitor/share', () => share);
+vi.mock('pdfmake/build/pdfmake', () => ({
+  default: { addVirtualFileSystem: vi.fn(), createPdf: pdf.createPdf },
+}));
+vi.mock('pdfmake/build/vfs_fonts', () => ({ default: {} }));
 
 const paciente: Paciente = {
   id: 'px',
@@ -161,6 +187,35 @@ function stubearUrls(): void {
   });
 }
 
+/** Pendiente vencido con la queja de la EPS ya registrada (puerta del paso 3). */
+function conQueja(sobrescribe: Partial<Pendiente> = {}): Pendiente {
+  return pendiente({
+    id: 'pv',
+    horaReclamo: hace(49),
+    quejaEps: { radicadaEn: hace(2), radicado: 'PQR-123' },
+    bitacora: [
+      { en: hace(49), tipo: 'creado', texto: 'Registraste el pendiente' },
+      { en: hace(2), tipo: 'queja-eps', texto: 'Queja ante la EPS (radicado n.° PQR-123)' },
+    ],
+    ...sobrescribe,
+  });
+}
+
+/** Toca el paso 3 de la escalera y deja la hoja lista (con su foco). */
+async function abrirHoja(fixture: ComponentFixture<PendienteDetalle>): Promise<void> {
+  boton(fixture.nativeElement, 'Generar queja ante la EPS').click();
+  fixture.detectChanges();
+  TestBed.flushEffects();
+  fixture.detectChanges();
+}
+
+/** La hoja del documento abierta, buscada por su propio contenedor. */
+function hoja(el: HTMLElement): HTMLElement {
+  const dialogo = el.querySelector('.hoja-fondo [role="dialog"]') as HTMLElement | null;
+  expect(dialogo, 'la hoja del documento está abierta').toBeTruthy();
+  return dialogo as HTMLElement;
+}
+
 describe('PendienteDetalle', () => {
   beforeEach(() => {
     memoria.clear();
@@ -168,6 +223,13 @@ describe('PendienteDetalle', () => {
     capacitor.Capacitor.isNativePlatform.mockReturnValue(true);
     cap.checkPermissions.mockResolvedValue({ display: 'denied' } as never);
     cap.requestPermissions.mockResolvedValue({ display: 'granted' } as never);
+    pdf.docs = [];
+    pdf.createPdf.mockImplementation((doc) => {
+      pdf.docs.push(doc);
+      return {
+        getBlob: () => Promise.resolve(new Blob(['pdf'], { type: 'application/pdf' })),
+      };
+    });
     memoria.set('paciente:px', paciente);
     stubearUrls();
     enlaces = [];
@@ -688,6 +750,7 @@ describe('PendienteDetalle', () => {
       'Ya me llegó',
       'Agregar recordatorio a mi calendario',
       'Editar',
+      'Regenerar documento',
       'Borrar',
       'Registrar queja ante la EPS',
       'Registrar queja ante la Supersalud',
@@ -713,5 +776,450 @@ describe('PendienteDetalle', () => {
     );
     expect(pendienteGuardado()?.entregadoEn).toBeUndefined();
     expect(boton(el, 'Ya me llegó')).toBeTruthy(); // la pantalla sigue usable
+  });
+
+  /* — Tarea 3.6 · hoja del documento, copia, PDF y compartir — — — — — — */
+
+  it('el paso 3 abre la hoja con la plantilla aprobada y el aviso en pantalla', async () => {
+    const p = conQueja();
+    memoria.set('pendiente:pv', p);
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    await abrirHoja(fixture);
+    const dialogo = hoja(el);
+
+    expect(dialogo.textContent).toContain('Generar queja ante la EPS');
+    expect(dialogo.textContent).toContain('Nada por corregir.');
+    expect(dialogo.textContent).toContain(AVISO_NO_ASESORIA);
+    // Con domicilio autorizado en la farmacia no sale la nota del paso 1.
+    expect(dialogo.textContent).not.toContain(NOTA_AUTORIZACION_DOMICILIO);
+    const area = dialogo.querySelector('textarea') as HTMLTextAreaElement;
+    expect(area.value).toBe(textoCorto({ paso: 1, paciente, pendiente: p }));
+    // Único sólido de la hoja abierta: su acción de compartir.
+    expect(dialogo.querySelectorAll('.p48-boton-principal')).toHaveLength(1);
+  });
+
+  it('la nota de autorización aparece en la vista previa si NO autorizó el domicilio', async () => {
+    memoria.set('pendiente:pv', conQueja({ autorizoDomicilio: false }));
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    await abrirHoja(fixture);
+    expect(hoja(el).textContent).toContain(NOTA_AUTORIZACION_DOMICILIO);
+  });
+
+  it('"Copiar texto" copia la plantilla sin el aviso y anuncia "Texto copiado"', async () => {
+    const p = conQueja();
+    memoria.set('pendiente:pv', p);
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    await abrirHoja(fixture);
+    boton(el, 'Copiar texto').click();
+    await asentar();
+    fixture.detectChanges();
+
+    expect(clipboard.Clipboard.write).toHaveBeenCalledTimes(1);
+    const escrito = clipboard.Clipboard.write.mock.calls[0][0].string;
+    expect(escrito).toBe(textoCorto({ paso: 1, paciente, pendiente: p }));
+    expect(escrito).not.toContain(AVISO_NO_ASESORIA);
+    expect(hoja(el).querySelector('[role="status"]')?.textContent).toContain('Texto copiado');
+  });
+
+  it('cada acción anuncia lo suyo: tras "PDF descargado", copiar anuncia "Texto copiado"', async () => {
+    capacitor.Capacitor.isNativePlatform.mockReturnValue(false);
+    const p = conQueja();
+    memoria.set('pendiente:pv', p);
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    await abrirHoja(fixture);
+    boton(el, 'PDF').click();
+    await asentar();
+    fixture.detectChanges();
+    expect(hoja(el).querySelector('[role="status"]')?.textContent).toContain('PDF descargado');
+
+    // La copia reemplaza el aviso del PDF (el aviso tenía prioridad en la región viva).
+    boton(el, 'Copiar texto').click();
+    await asentar();
+    fixture.detectChanges();
+    const estado = () => hoja(el).querySelector('[role="status"]')?.textContent ?? '';
+    expect(estado()).toContain('Texto copiado');
+    expect(estado()).not.toContain('PDF descargado');
+
+    // Y al revés: el 2.º PDF (confirmado) reemplaza "Texto copiado".
+    boton(el, 'PDF').click();
+    fixture.detectChanges();
+    boton(el, 'Generar otra').click();
+    await asentar();
+    fixture.detectChanges();
+    expect(estado()).toContain('PDF descargado');
+    expect(estado()).not.toContain('Texto copiado');
+    expect(pdf.docs).toHaveLength(2);
+  });
+
+  it('en la PWA "PDF" genera con pdfmake: fundamento legal, bitácora, foto y pie', async () => {
+    capacitor.Capacitor.isNativePlatform.mockReturnValue(false);
+    const p = conQueja({ fotoComprobanteKey: 'foto-abc' });
+    memoria.set('pendiente:pv', p);
+    memoria.set('foto:foto-abc', new Blob(['foto'], { type: 'image/jpeg' }));
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    await abrirHoja(fixture);
+    boton(el, 'PDF').click();
+    await asentar();
+    fixture.detectChanges();
+
+    expect(pdf.docs).toHaveLength(1);
+    const documento = JSON.stringify(pdf.docs[0]);
+    expect(documento).toContain('Con fundamento en el artículo 131');
+    expect(documento).toContain('Anexo 1. Bitácora');
+    expect(documento).toContain('data:image/jpeg;base64,');
+    expect(pdf.docs[0].footer).toBe(PIE_PDF);
+    expect(enlaces[0]?.download).toBe('queja-eps-pv.pdf');
+    expect(hoja(el).querySelector('[role="status"]')?.textContent).toContain('PDF descargado');
+  });
+
+  it('compartir usa la hoja nativa con el PDF y lo borra de la caché al terminar', async () => {
+    const p = conQueja();
+    memoria.set('pendiente:pv', p);
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    await abrirHoja(fixture);
+    boton(el, 'Descargar y compartir').click();
+    await asentar();
+    fixture.detectChanges();
+
+    expect(pdf.docs).toHaveLength(1);
+    const escritura = fs.Filesystem.writeFile.mock.calls.at(-1)?.[0] as {
+      path: string;
+      directory: string;
+    };
+    expect(escritura.path).toBe('queja-eps-pv.pdf');
+    expect(escritura.directory).toBe('CACHE');
+    expect(share.Share.share).toHaveBeenCalledTimes(1);
+    const opciones = share.Share.share.mock.calls[0][0] as { files: string[] };
+    expect(opciones.files).toEqual(['archivo']);
+    expect(fs.Filesystem.deleteFile).toHaveBeenCalledTimes(1);
+    // Compartido: la hoja nativa ya fue el feedback, sin error.
+    expect(hoja(el).querySelector('[role="alert"]')?.textContent?.trim()).toBe('');
+  });
+
+  it('el 2.º PDF de la misma queja pide confirmación antes de generar', async () => {
+    capacitor.Capacitor.isNativePlatform.mockReturnValue(false);
+    memoria.set('pendiente:pv', conQueja());
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    await abrirHoja(fixture);
+    boton(el, 'PDF').click();
+    await asentar();
+    fixture.detectChanges();
+    expect(pdf.docs).toHaveLength(1);
+
+    boton(el, 'PDF').click();
+    fixture.detectChanges();
+    expect(hoja(el).textContent).toContain('Ya habías generado una queja. ¿Generar otra?');
+    expect(pdf.docs).toHaveLength(1); // aún no genera nada
+
+    boton(el, 'Generar otra').click();
+    await asentar();
+    fixture.detectChanges();
+    expect(pdf.docs).toHaveLength(2);
+    expect(hoja(el).textContent).not.toContain('¿Generar otra?');
+  });
+
+  it('cancelar la confirmación del 2.º PDF no vuelve a generar', async () => {
+    capacitor.Capacitor.isNativePlatform.mockReturnValue(false);
+    memoria.set('pendiente:pv', conQueja());
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    await abrirHoja(fixture);
+    boton(el, 'PDF').click();
+    await asentar();
+    fixture.detectChanges();
+
+    boton(el, 'PDF').click();
+    fixture.detectChanges();
+    expect(hoja(el).textContent).toContain('¿Generar otra?');
+
+    boton(el, 'Cancelar').click();
+    fixture.detectChanges();
+    expect(hoja(el).textContent).not.toContain('¿Generar otra?');
+    expect(pdf.docs).toHaveLength(1);
+    expect(boton(el, 'PDF').disabled).toBe(false);
+  });
+
+  it('un doble toque en "PDF" genera UNA sola vez', async () => {
+    capacitor.Capacitor.isNativePlatform.mockReturnValue(false);
+    memoria.set('pendiente:pv', conQueja());
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+    await abrirHoja(fixture);
+
+    let liberarPdf!: (b: Blob) => void;
+    pdf.createPdf.mockImplementationOnce(
+      () => ({
+        getBlob: () =>
+          new Promise<Blob>((resolver) => {
+            liberarPdf = resolver;
+          }),
+      }),
+    );
+
+    boton(el, 'PDF').click();
+    fixture.detectChanges();
+    expect(boton(el, 'PDF').disabled).toBe(true); // el botón se desactiva
+    await fixture.componentInstance.pedirPdf('descargar'); // segundo toque
+    liberarPdf(new Blob(['pdf'], { type: 'application/pdf' }));
+    await asentar();
+    fixture.detectChanges();
+
+    expect(pdf.createPdf).toHaveBeenCalledTimes(1);
+  });
+
+  it('el PDF editable web descarga el texto corregido con su nombre editable', async () => {
+    capacitor.Capacitor.isNativePlatform.mockReturnValue(false);
+    memoria.set('pendiente:pv', conQueja());
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+    await abrirHoja(fixture);
+
+    const area = hoja(el).querySelector('textarea') as HTMLTextAreaElement;
+    area.value = 'Cuerpo corregido por la persona';
+    area.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+
+    boton(el, 'PDF editable').click();
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    fixture.detectChanges();
+    const doc = el.querySelector('.doc-fondo') as HTMLElement;
+    expect(doc).toBeTruthy();
+    expect(doc.textContent).toContain('Esta versión es editable');
+
+    boton(doc, 'Descargar PDF editable').click();
+    await asentar();
+    fixture.detectChanges();
+
+    expect(pdf.docs).toHaveLength(1);
+    expect(JSON.stringify(pdf.docs[0])).toContain('Cuerpo corregido por la persona');
+    expect(pdf.docs[0].footer).toBe(PIE_PDF);
+    expect(enlaces[0]?.download).toBe('queja-eps-pv-editable.pdf');
+  });
+
+  it('re-registrar la queja permite generar el PDF nuevo sin confirmar', async () => {
+    capacitor.Capacitor.isNativePlatform.mockReturnValue(false);
+    memoria.set('pendiente:pv', conQueja());
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    await abrirHoja(fixture);
+    boton(el, 'PDF').click();
+    await asentar();
+    fixture.detectChanges();
+    expect(pdf.docs).toHaveLength(1);
+
+    // La hoja se cierra, se corrige la queja y se vuelve a abrir.
+    boton(el, 'Cerrar').click();
+    fixture.detectChanges();
+    boton(el, 'Corregir queja ante la EPS').click();
+    fixture.detectChanges();
+    boton(el, 'Guardar').click();
+    await asentar();
+    fixture.detectChanges();
+
+    await abrirHoja(fixture);
+    boton(el, 'PDF').click();
+    await asentar();
+    fixture.detectChanges();
+
+    expect(pdf.docs).toHaveLength(2); // otra queja: sin panel de confirmación
+    expect(hoja(el).textContent).not.toContain('¿Generar otra?');
+  });
+
+  it('en Android la hoja solo ofrece compartir y copiar (sin descarga directa)', async () => {
+    memoria.set('pendiente:pv', conQueja());
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    await abrirHoja(fixture);
+    expect(boton(el, 'Descargar y compartir')).toBeTruthy();
+    expect(boton(el, 'Copiar texto')).toBeTruthy();
+    expect([...el.querySelectorAll('.hoja-fondo button')].some((b) => b.textContent?.trim() === 'PDF')).toBe(
+      false,
+    );
+    expect(
+      [...el.querySelectorAll('.hoja-fondo button')].some(
+        (b) => b.textContent?.trim() === 'PDF editable',
+      ),
+    ).toBe(false);
+  });
+
+  it('una queja con fecha futura bloquea el paso 3 y anuncia su fecha', async () => {
+    const futura = new Date(Date.now() + 24 * 3_600_000).toISOString();
+    memoria.set('pendiente:pv', conQueja({ quejaEps: { radicadaEn: futura } }));
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    expect(boton(el, 'Generar queja ante la EPS').disabled).toBe(true);
+    expect(el.querySelector('.escalera-aviso')?.textContent).toContain(
+      'Tu queja ante la EPS es para el',
+    );
+    expect(el.querySelector('.hoja-fondo')).toBeNull();
+  });
+
+  it('la guarda es por queja: con la EPS en orden solo el paso 4 queda bloqueado y anuncia SU fecha', async () => {
+    const futura = new Date(Date.now() + 24 * 3_600_000).toISOString();
+    memoria.set(
+      'pendiente:pv',
+      conQueja({ quejaSupersalud: { radicadaEn: futura, radicado: 'SUP-9' } }),
+    );
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    expect(boton(el, 'Generar queja ante la EPS').disabled).toBe(false);
+    expect(boton(el, 'Generar queja ante la Supersalud').disabled).toBe(true);
+    const aviso = el.querySelector('.escalera-aviso')?.textContent ?? '';
+    expect(aviso).toContain('Tu queja ante la Supersalud es para el');
+    expect(aviso).not.toContain('ante la EPS');
+  });
+
+  it('«Regenerar documento» se deshabilita con la fecha futura de SU queja y el aviso la anuncia', async () => {
+    const futura = new Date(Date.now() + 24 * 3_600_000).toISOString();
+    memoria.set(
+      'pendiente:pv',
+      conQueja({ entregadoEn: hace(2), quejaSupersalud: { radicadaEn: futura, radicado: 'SUP-9' } }),
+    );
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    // Regenera la queja más avanzada (Supersalud), cuya fecha todavía es futura.
+    expect(boton(el, 'Regenerar documento').disabled).toBe(true);
+    expect(el.querySelector('.escalera-aviso')?.textContent).toContain(
+      'Tu queja ante la Supersalud es para el',
+    );
+  });
+
+  it('cerrar la hoja no copia ni genera nada', async () => {
+    memoria.set('pendiente:pv', conQueja());
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    await abrirHoja(fixture);
+    boton(el, 'Cerrar').click();
+    fixture.detectChanges();
+
+    expect(el.querySelector('.hoja-fondo')).toBeNull();
+    expect(pdf.createPdf).not.toHaveBeenCalled();
+    expect(clipboard.Clipboard.write).not.toHaveBeenCalled();
+    expect(share.Share.share).not.toHaveBeenCalled();
+  });
+
+  /* — "Regenerar documento" (decisión de Daniel, vuelta 2 de 3.6) ————————— */
+
+  it('«Regenerar documento» es un terciario visible con queja registrada y pendiente entregado', async () => {
+    memoria.set('pendiente:pv', conQueja({ entregadoEn: hace(2) }));
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    const regenerar = boton(el, 'Regenerar documento');
+    expect(regenerar.className).toContain('p48-boton-terciario');
+    expect(regenerar.className).not.toContain('p48-boton-principal');
+    expect(regenerar.disabled).toBe(false);
+  });
+
+  it('tocar «Regenerar documento» abre la hoja del documento de la EPS', async () => {
+    const p = conQueja({ entregadoEn: hace(2) });
+    memoria.set('pendiente:pv', p);
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    boton(el, 'Regenerar documento').click();
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    fixture.detectChanges();
+
+    const dialogo = hoja(el);
+    expect(dialogo.textContent).toContain('Generar queja ante la EPS');
+    const area = dialogo.querySelector('textarea') as HTMLTextAreaElement;
+    expect(area.value).toBe(textoCorto({ paso: 1, paciente, pendiente: p }));
+  });
+
+  it('con las dos quejas registradas, regenerar usa la de la Supersalud (la más avanzada)', async () => {
+    const p = conQueja({
+      entregadoEn: hace(2),
+      quejaSupersalud: { radicadaEn: hace(1), radicado: 'SUP-9' },
+    });
+    memoria.set('pendiente:pv', p);
+    const fixture = await crear('pv');
+    const el: HTMLElement = fixture.nativeElement;
+
+    boton(el, 'Regenerar documento').click();
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    fixture.detectChanges();
+
+    const dialogo = hoja(el);
+    expect(dialogo.textContent).toContain('Generar queja ante la Supersalud');
+    const area = dialogo.querySelector('textarea') as HTMLTextAreaElement;
+    expect(area.value).toBe(textoCorto({ paso: 2, paciente, pendiente: p }));
+  });
+
+  it('sin queja registrada no hay «Regenerar documento» aunque el pendiente esté entregado', async () => {
+    memoria.set('pendiente:p1', pendiente({ entregadoEn: hace(1) }));
+    const fixture = await crear('p1');
+
+    expect(
+      [...fixture.nativeElement.querySelectorAll('button')].some(
+        (b) => b.textContent?.trim() === 'Regenerar documento',
+      ),
+    ).toBe(false);
+  });
+
+  it('sin queja registrada no hay «Regenerar documento» con el pendiente en plazo', async () => {
+    memoria.set('pendiente:p1', pendiente());
+    const fixture = await crear('p1');
+
+    expect(
+      [...fixture.nativeElement.querySelectorAll('button')].some(
+        (b) => b.textContent?.trim() === 'Regenerar documento',
+      ),
+    ).toBe(false);
+  });
+
+  it('con la escalera visible (vencido, escalado) el botón no aparece: regeneran los pasos 3–4', async () => {
+    memoria.set('pendiente:pv', conQueja()); // escalado-eps, sin entregar
+    const escalado = await crear('pv');
+    expect(
+      [...escalado.nativeElement.querySelectorAll('button')].some(
+        (b) => b.textContent?.trim() === 'Regenerar documento',
+      ),
+    ).toBe(false);
+  });
+
+  it('una queja registrada escala el estado: nunca hay plazo con la escalera oculta', async () => {
+    // `estado()` revisa las quejas antes que el tiempo: una queja en plazo
+    // sigue siendo "escalado" (escalera visible). Este caso documenta que la
+    // combinación "queja + en-plazo" no existe en el modelo.
+    memoria.set(
+      'pendiente:p1',
+      pendiente({
+        horaReclamo: hace(2),
+        quejaEps: { radicadaEn: hace(1), radicado: 'PQR-1' },
+      }),
+    );
+    const fixture = await crear('p1');
+
+    expect(boton(fixture.nativeElement, 'Generar queja ante la EPS')).toBeTruthy();
+    expect(
+      [...fixture.nativeElement.querySelectorAll('button')].some(
+        (b) => b.textContent?.trim() === 'Regenerar documento',
+      ),
+    ).toBe(false);
   });
 });

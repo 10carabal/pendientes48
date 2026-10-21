@@ -19,3 +19,17 @@ export function isNative(): boolean {
 export function ayudaAvisosAplica(): boolean {
   return isNative();
 }
+
+/**
+ * Si el PDF directo ("PDF" descarga con `<a download>` y "PDF editable") aplica
+ * en esta plataforma.
+ *
+ * Existe para que la hoja del documento no pregunte `isNative()` directo
+ * (mismo patrón que `ayudaAvisosAplica()`). En Android el WebView no instala
+ * DownloadListener y `descargarArchivo()` escribiría el binario del PDF como
+ * texto UTF-8 (lo corrompería), así que allí el documento solo se entrega con
+ * la hoja nativa de compartir (`platform/compartir.ts`).
+ */
+export function pdfDirectoAplica(): boolean {
+  return !isNative();
+}

@@ -1,0 +1,64 @@
+/* Hoja del documento (tarea 3.6): mismo patrón de hoja que `ayuda-avisos`
+   (fondo con scrim a pantalla completa y caja anclada al pie). Solo tokens
+   --p48-* y clases de patrones.scss. */
+:host {
+  display: block;
+}
+
+.hoja-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 20; /* constante de capa: no es color, tamaño ni espaciado del sistema */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--p48-scrim);
+}
+
+.hoja-caja {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-3);
+  width: 100%;
+  max-width: var(--p48-ancho-hoja);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: var(--p48-espacio-5) var(--p48-espacio-4);
+  border-radius: var(--p48-radio-superficie) var(--p48-radio-superficie) 0 0;
+  background: var(--p48-fondo);
+}
+
+.hoja-titulo,
+.hoja-parrafo,
+.hoja-etiqueta {
+  margin: 0;
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.hoja-titulo {
+  font-size: var(--p48-tam-subtitulo);
+  font-weight: var(--p48-peso-titulo);
+}
+
+.hoja-etiqueta {
+  font-weight: var(--p48-peso-titulo);
+}
+
+.hoja-area {
+  resize: vertical;
+  min-height: calc(var(--p48-tam-boton) * 3);
+}
+
+.hoja-herramienta,
+.hoja-confirmacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-2);
+}
+
+.hoja-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--p48-espacio-2);
+}

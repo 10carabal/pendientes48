@@ -163,11 +163,20 @@ espaciados sueltos), y cada pantalla se verifica a 390 px y a 1280 px contra el 
     la queja; el segundo toque al `.ics` muestra el aviso; al borrar, desaparece de inicio, su aviso
     se cancela y la foto se elimina; con la red caída o el almacenamiento lleno la nota escrita se
     conserva en el campo y el fallo se anuncia; el enlace desde la tarjeta de Inicio abre el detalle
-- [ ] 3.6 `features/reclamo`: vista previa editable, nota de autorización incluida, copiar con aviso
+- [x] 3.6 `features/reclamo`: vista previa editable, nota de autorización incluida, copiar con aviso
   en pantalla, PDF, compartir
   - Depende de: 1.4, 2.3
   - Verificación: el texto copiado coincide con la plantilla aprobada y no trae el aviso; la nota de
     autorización aparece solo si no autorizó en la farmacia; el PDF trae fundamento legal, bitácora y pie
+  - Notas de trazabilidad (QA 2026-10-21): la generación vive dentro del detalle como subplanos
+    `documento.*` y `doc-pdf.*` en `features/pendiente-detalle/` (pasos 3–4 de la escalera, decisión
+    de Daniel); hoja con copia editable (textarea + "Reemplazar…", el portapapeles recibe el cuerpo
+    sin el aviso de no asesoría); "PDF" y "PDF editable" son solo web porque la descarga directa
+    corrompería el archivo en el WebView (ratificado por Daniel; en Android solo "Descargar y
+    compartir" nativo); segunda generación pide confirmación; sin fecha futura en la queja de cada
+    paso (guarda por queja, anuncio vivo "Tu queja ante la … es para el …"); botón terciario
+    "Regenerar documento" fuera de la escalera para queja registrada + pendiente entregado (spec
+    `reclamos` "Paso 1 completado", decisión de Daniel).
 - [x] 3.7 `features/inicio`: lista con estado (etiqueta + color), enlace a la pantalla de perfiles,
   aviso legal en la primera apertura y luego como línea fija al pie
   - Verificación: la primera vez exige "Entiendo"; después el aviso queda visible al pie en cada

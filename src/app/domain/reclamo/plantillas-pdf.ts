@@ -24,6 +24,19 @@ export interface DatosPdf extends DatosReclamo {
 /** Pie de página en TODAS las hojas (texto aprobado de plantillas.md). */
 export const PIE_PDF = 'Documento generado con Pendientes48. No constituye asesoría legal.';
 
+/** Títulos literales de los anexos del documento (los usa `pdfReclamo()`). */
+export const ANEXO_BITACORA = 'Anexo 1. Bitácora';
+export const ANEXO_FOTO = 'Anexo 2. Foto del comprobante';
+
+/**
+ * Aviso del anexo para la hoja del documento (tarea 3.6): dice qué lleva el
+ * PDF con los títulos EXACTOS de los anexos de arriba, para que la hoja no
+ * los reescriba y difieran en puntuación. La pantalla lo inyecta por input
+ * (D6); el texto copiado al portapapeles NO lo incluye.
+ */
+export const AVISO_ANEXO =
+  `El PDF incluye el ${ANEXO_BITACORA} y, si existe, el ${ANEXO_FOTO}.`;
+
 const numerado = (items: string[]): string =>
   items.map((item, i) => `${i + 1}. ${item}`).join('\n');
 
@@ -88,13 +101,13 @@ export function pdfReclamo(datos: DatosPdf): TDocumentDefinitions {
   }
 
   content.push(
-    { text: 'Anexo 1. Bitácora', bold: true, margin: [0, 12, 0, 4] },
+    { text: ANEXO_BITACORA, bold: true, margin: [0, 12, 0, 4] },
     bitacoraTabla
   );
 
   if (datos.fotoBase64) {
     content.push(
-      { text: 'Anexo 2. Foto del comprobante', bold: true, margin: [0, 12, 0, 4] },
+      { text: ANEXO_FOTO, bold: true, margin: [0, 12, 0, 4] },
       { image: datos.fotoBase64, width: 240 }
     );
   }

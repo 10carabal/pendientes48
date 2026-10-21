@@ -85,7 +85,10 @@
           class="detalle-escalera"
           [pendiente]="p"
           [ahora]="ahora()"
+          [plazoVigenteEps]="plazoVigenteEps()"
+          [plazoVigenteSupersalud]="plazoVigenteSupersalud()"
           (registrar)="registrarQueja($event)"
+          (generar)="abrirDocumento($event)"
         />
 
         <!-- 6 · Bitácora con notas manuales (el campo lo vacía la pantalla solo si guardó). -->
@@ -128,6 +131,21 @@
           <button type="button" class="p48-boton-terciario" (click)="abrirEdicion()">
             Editar
           </button>
+          @if (regenerarVisible() && quejaParaRegenerar(); as paso) {
+            <!-- Regenerar el documento de la queja ya registrada cuando la
+                 escalera quedó oculta (decisión de Daniel, 3.6 · spec
+                 `reclamos` · "Paso 1 completado"). Terciario, nunca sólido;
+                 con la fecha de SU queja futura queda deshabilitado y el
+                 aviso vivo de la escalera explica por qué. -->
+            <button
+              type="button"
+              class="p48-boton-terciario"
+              [disabled]="!regenerarVigente()"
+              (click)="abrirDocumento(paso)"
+            >
+              Regenerar documento
+            </button>
+          }
           <button
             type="button"
             class="p48-boton-terciario p48-boton-terciario--destructivo"
@@ -203,6 +221,36 @@
             </button>
           </div>
         </div>
+      }
+    }
+
+    <!-- 3.6 · Hoja del documento: vista previa editable, copia y PDF. -->
+    @if (hojaDocumento(); as paso) {
+      @if (pendiente(); as p) {
+        @if (paciente(); as px) {
+          <app-documento
+            [pendiente]="p"
+            [paciente]="px"
+            [paso]="paso"
+            [avisoNoAsesoria]="avisoNoAsesoria"
+            [avisoAnexo]="avisoAnexo"
+            [copiado]="copiadoHoja()"
+            [aviso]="avisoHoja() ?? ''"
+            [error]="errorHoja() ?? ''"
+            [copiando]="copiando()"
+            [generandoPdf]="generandoPdf()"
+            [compartiendo]="compartiendo()"
+            [confirmandoPdf]="confirmandoPdf()"
+            (cerrar)="cerrarHojaDocumento()"
+            (copiar)="copiarEnHoja($event)"
+            (descargar)="pedirPdf('descargar')"
+            (compartir)="pedirPdf('compartir')"
+            (confirmar)="confirmarPdf()"
+            (cancelarConfirmacion)="cancelarConfirmacion()"
+            (descargarEditable)="descargarPdfEditable($event)"
+            (compartirEditable)="compartirPdfEditable($event)"
+          />
+        }
       }
     }
   </div>

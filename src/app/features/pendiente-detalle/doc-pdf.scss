@@ -1,0 +1,38 @@
+/* Subdiálogo del PDF editable: caja modal centrada sobre el scrim, mismo
+   patrón de flotación que los diálogos del detalle. Solo tokens --p48-*. */
+:host {
+  display: block;
+}
+
+.doc-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 20; /* constante de capa: no es color, tamaño ni espaciado del sistema */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--p48-espacio-4);
+  background: var(--p48-scrim);
+}
+
+.doc-caja {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-3);
+  width: 100%;
+  max-width: var(--p48-ancho-modal);
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.doc-titulo,
+.doc-parrafo {
+  margin: 0;
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.doc-titulo {
+  font-size: var(--p48-tam-subtitulo);
+  font-weight: var(--p48-peso-titulo);
+}

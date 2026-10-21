@@ -186,4 +186,114 @@ describe('Escalera', () => {
       `${anterior.getFullYear()}-${dos(anterior.getMonth() + 1)}-${dos(anterior.getDate())}`,
     );
   });
+
+  it('el paso 3 se bloquea sin queja y habilita (emitiendo 1) con la queja registrada', () => {
+    // Sin queja: el paso existe con la red alterna, pero no se puede generar.
+    const sinQueja = crear(pendiente()).nativeElement as HTMLElement;
+    expect(
+      [...sinQueja.querySelectorAll('button')].some(
+        (b) => b.textContent?.trim() === 'Generar queja ante la EPS',
+      ),
+    ).toBe(true);
+    expect(boton(sinQueja, 'Generar queja ante la EPS').disabled).toBe(true);
+    expect(sinQueja.textContent).toContain('Circular Externa 017 de 2026 del Ministerio de Salud');
+
+    const fixture = crear(pendiente({ quejaEps: { radicadaEn: hace(2), radicado: 'PQR-1' } }));
+    const el: HTMLElement = fixture.nativeElement;
+    const emitidos: number[] = [];
+    fixture.componentInstance.generar.subscribe((p) => emitidos.push(p));
+
+    expect(boton(el, 'Generar queja ante la EPS').disabled).toBe(false);
+    boton(el, 'Generar queja ante la EPS').click();
+    expect(emitidos).toEqual([1]);
+  });
+
+  it('una queja de la EPS con plazoVigenteEps en false (fecha futura) se anuncia y bloquea el paso 3', () => {
+    // `plazoVigenteEps` lo aporta la pantalla con `esFechaPasada`; acá se baja explícitamente.
+    const futura = new Date(Date.now() + 24 * 3_600_000).toISOString();
+    const fixture = TestBed.createComponent(Escalera);
+    fixture.componentRef.setInput('pendiente', pendiente({ quejaEps: { radicadaEn: futura } }));
+    fixture.componentRef.setInput('ahora', new Date());
+    fixture.componentRef.setInput('plazoVigenteEps', false);
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    const el: HTMLElement = fixture.nativeElement;
+
+    expect(el.querySelector('.escalera-aviso')?.textContent).toContain(
+      'Tu queja ante la EPS es para el',
+    );
+    expect(boton(el, 'Generar queja ante la EPS').disabled).toBe(true);
+    // Con la queja ya registrada no se vuelve a pedir que la registre.
+    expect(el.textContent).not.toContain('Se habilita cuando registre la queja ante la EPS');
+  });
+
+  it('el paso 4 solo aparece con la queja de la Supersalud y emite su paso', () => {
+    const sinQueja2 = crear(
+      pendiente({ quejaEps: { radicadaEn: hace(2) } }),
+    ).nativeElement as HTMLElement;
+    expect(
+      [...sinQueja2.querySelectorAll('button')].some(
+        (b) => b.textContent?.trim() === 'Generar queja ante la Supersalud',
+      ),
+    ).toBe(false);
+
+    const fixture = crear(
+      pendiente({
+        quejaEps: { radicadaEn: hace(2) },
+        quejaSupersalud: { radicadaEn: hace(1), radicado: 'SUP-9' },
+      }),
+    );
+    const el: HTMLElement = fixture.nativeElement;
+    const emitidos: number[] = [];
+    fixture.componentInstance.generar.subscribe((p) => emitidos.push(p));
+
+    boton(el, 'Generar queja ante la Supersalud').click();
+    expect(emitidos).toEqual([2]);
+  });
+
+  it('el paso 4 se bloquea con la fecha futura de SU queja, sin tocar el paso 3', () => {
+    const fixture = TestBed.createComponent(Escalera);
+    fixture.componentRef.setInput(
+      'pendiente',
+      pendiente({
+        quejaEps: { radicadaEn: hace(2) },
+        quejaSupersalud: { radicadaEn: hace(1), radicado: 'SUP-9' },
+      }),
+    );
+    fixture.componentRef.setInput('ahora', new Date());
+    // Solo la fecha de la Supersalud es futura: la de la EPS sigue en orden.
+    fixture.componentRef.setInput('plazoVigenteSupersalud', false);
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    const el: HTMLElement = fixture.nativeElement;
+    const emitidos: number[] = [];
+    fixture.componentInstance.generar.subscribe((p) => emitidos.push(p));
+
+    expect(boton(el, 'Generar queja ante la EPS').disabled).toBe(false);
+    expect(boton(el, 'Generar queja ante la Supersalud').disabled).toBe(true);
+    boton(el, 'Generar queja ante la Supersalud').click();
+    expect(emitidos).toEqual([]);
+    // La región viva anuncia SOLO la queja fuera de temporada.
+    const aviso = el.querySelector('.escalera-aviso')?.textContent ?? '';
+    expect(aviso).toContain('Tu queja ante la Supersalud es para el');
+    expect(aviso).not.toContain('ante la EPS');
+  });
+
+  it('con las dos quejas fuera de temporada se anuncian sus dos fechas', () => {
+    const futura = new Date(Date.now() + 24 * 3_600_000).toISOString();
+    const fixture = TestBed.createComponent(Escalera);
+    fixture.componentRef.setInput(
+      'pendiente',
+      pendiente({ quejaEps: { radicadaEn: futura }, quejaSupersalud: { radicadaEn: futura } }),
+    );
+    fixture.componentRef.setInput('ahora', new Date());
+    fixture.componentRef.setInput('plazoVigenteEps', false);
+    fixture.componentRef.setInput('plazoVigenteSupersalud', false);
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    const aviso = fixture.nativeElement.querySelector('.escalera-aviso')?.textContent ?? '';
+
+    expect(aviso).toContain('Tu queja ante la EPS es para el');
+    expect(aviso).toContain('la de la Supersalud para el');
+  });
 });
