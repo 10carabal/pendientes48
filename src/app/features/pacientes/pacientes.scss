@@ -131,6 +131,14 @@
   line-height: var(--p48-interlineado);
 }
 
+/* H1 (solo bajo los campos del formulario): el mensaje de validación no queda
+   pegado a la caja de texto. En el formulario ya separa --p48-espacio-4 (gap
+   del formulario); este margen suma --p48-espacio-2. El error de lectura de la
+   lista no va bajo una caja y conserva margin: 0. */
+.pacientes-formulario .pacientes-error {
+  margin-top: var(--p48-espacio-2);
+}
+
 .pacientes-acciones {
   display: flex;
   flex-wrap: wrap;
