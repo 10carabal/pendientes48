@@ -6,7 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
+import { IonContent, IonHeader, IonTitle, IonToolbar, type ViewWillEnter } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { listarPendientes } from '@data/pendientes-store';
 import { actualizarPreferencias, leerPreferencias } from '@data/preferencias-store';
@@ -26,6 +26,8 @@ const ERROR_LECTURA = 'No se pudo leer la información. Intenta de nuevo.';
  * botón principal "Me dejaron un pendiente" que abre la guía de la farmacia
  * (tarea 3.3) y muestra el aviso legal como modal en la primera apertura y
  * como línea fija al pie en cada apertura siguiente.
+ *
+ * El almacén se lee en el constructor **y** en `ionViewWillEnter` (ver ahí).
  */
 @Component({
   selector: 'app-inicio',
@@ -34,7 +36,7 @@ const ERROR_LECTURA = 'No se pudo leer la información. Intenta de nuevo.';
   templateUrl: './inicio.html',
   styleUrl: './inicio.scss',
 })
-export class Inicio implements OnDestroy {
+export class Inicio implements OnDestroy, ViewWillEnter {
   private readonly router = inject(Router);
 
   readonly avisoLegal = AVISO_NO_ASESORIA;
@@ -57,7 +59,26 @@ export class Inicio implements OnDestroy {
     })),
   );
 
+  /**
+   * El constructor se conserva (es la carga de la primera creación y el patrón
+   * que sostienen los tests existentes); la lectura fresca al navegar vive en
+   * `ionViewWillEnter`.
+   */
   constructor() {
+    void this.cargar();
+  }
+
+  /**
+   * Ciclo de vida: `<ion-router-outlet>` apila las pantallas y al volver con
+   * "atrás" re-muestra **la misma instancia** sin ejecutar de nuevo el
+   * constructor (bug confirmado en el S22: la lista quedaba con datos
+   * viejos). La primera entrada también dispara este hook, así que la carga se
+   * ejecuta dos veces: es el mismo método y es inocua (reescribe las mismas
+   * señales, sin efectos visibles duplicados). Relee también las preferencias,
+   * de modo que tras "Borrar todos mis datos" el modal de primera apertura
+   * vuelve a aparecer (spec `normas` · "Primera apertura").
+   */
+  ionViewWillEnter(): void {
     void this.cargar();
   }
 

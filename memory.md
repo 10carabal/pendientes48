@@ -5,8 +5,9 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-21** — **3.6 lista para PR #39** (flujo multiagente, QA VERDE
-> 311/311); siguiente: **`fix/2.1-ciclo-vida-listas`** (PR #40, decisión de Daniel) y luego **3.8**.
+> Última actualización: **2026-10-21** — **3.6 mergeada** (PR #39, `main = 6e2c5db`) y **fix de
+> ciclo de vida listo** (`fix/2.1-ciclo-vida-listas`, PR #40, QA VERDE 315/315 + escenarios
+> verificados en navegador); siguiente: **3.8**.
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -23,11 +24,11 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   en el S22) · 2.3 ✅ (PR #29, smoke Android + escritorio) · 2.4 ✅ (PR #30, flujos A/B/C en el S22).
 - **Bloque 3 (pantallas) en marcha:** 3.1 ✅ (PR #31) · 3.2 ✅ (PR #32) · 3.7 ✅ (PR #33) ·
   3.4 ✅ (PR #34) · 3.3 ✅ (PR #35, flujo multiagente) · 3.5 ✅ (PR #37, flujo multiagente) ·
-  3.6 ✅ lista (PR #39, flujo multiagente);
+  3.6 ✅ (PR #39 mergeado, `main = 6e2c5db`);
   orden del bloque **3.4 → 3.3 → 3.5 → 3.6 → 3.8**
   (reordenado por Daniel el 2026-10-14: la 3.3 termina en "Registrar este pendiente", así que el
-  formulario de la 3.4 debía existir antes). Siguiente: **`fix/2.1-ciclo-vida-listas`** (PR #40,
-  decisión de Daniel tras el merge de #39) y luego **3.8**.
+  formulario de la 3.4 debía existir antes). En paralelo: **`fix/2.1-ciclo-vida-listas`** (PR #40,
+  en revisión) y después sigue **3.8**.
 - Repo sano en `main` (`0c15497`); PRs #1–#38 mergeados (incluye #36: créditos de desarrollador
   10carabal en README/`package.json`/manifest; #38: flujo multiagente en skill/comando/`AGENTS.md`);
   una rama por tarea; **Daniel revisa y mergea**.
@@ -317,7 +318,9 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   Pacientes → confirmar → Inicio **vacío** y con el modal de primera apertura otra vez (el fix
   re-lee también `leerPreferencias`, así que el aviso vuelve según spec — escenario 3 añadido por
   Daniel tras verlo en el celular).
-  Corre DESPUÉS del PR de 3.6 y ANTES de 3.8 (rama desde `main`, un archivo + tests por pantalla).
+  **RESUELTO en `fix/2.1-ciclo-vida-listas` (PR #40, 2026-10-21):** implementado + verificado en
+  navegador por CDP (los 3 escenarios capturados en evidencia); queda la regla como plantilla para
+  3.8 y toda pantalla nueva.
 - **Identidad visual:** sistema de diseño (D14–D16) e ícono/splash (D17) resueltos; solo quedan las
   capturas de pantalla del manifiesto (`screenshots`), que se agregan cuando existan pantallas reales.
 - **Hosting de la PWA** para compartirla por WhatsApp → decidir antes de la tarea 4.2.
@@ -346,6 +349,22 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   10carabal."** (decisión de Daniel, 2026-10-19 — ver Decisiones de ejecución).
 
 ## Registro de actualizaciones
+- **2026-10-21** — **`fix/2.1-ciclo-vida-listas`** (PR #40): `<ion-router-outlet>` re-muestra
+  Inicio/Pacientes al volver con "atrás" sin re-ejecutar el constructor → listas stale (reportado
+  por Daniel en el S22). Fix: **`ionViewWillEnter()`** (`ViewWillEnter` de `@ionic/angular`) en
+  `features/inicio` y `features/pacientes` delegando al mismo método privado del constructor
+  (constructor intacto para los tests; carga doble inocua; Inicio relee `leerPreferencias` → el
+  modal de primera apertura vuelve tras "Borrar todos mis datos"). +4 tests zona-less con helper
+  `reentrar()` (prueba negativa: hook vacío ⇒ los 4 fallan). **H1** (Daniel): espaciado de
+  "Falta completar: …" con tokens — `--p48-espacio-3` en `pendiente-form.scss` y selector acotado
+  `.pacientes-formulario .pacientes-error` (el error de la lista de perfiles no cambia). **QA
+  VERDE** en 1 pasada + micro-vuelta de 2 menores de higiene (cascada consolidada / alcance
+  acotado): **315/315 tests**, tsc/openspec strict en 0, build 521 kB. **Verificación real por
+  CDP** (serve 4202, Chrome headless, sin tocar la pestaña de Daniel): los 3 escenarios de arriba +
+  H1 en ambos formularios (390 y 1280) → 7 capturas en el PR. Lección: los clics por texto deben
+  **polling** (modal legal y chunk perezoso del detalle tardan en renderizar; un clic a ciegas
+  produjo 2 rondas de capturas falsas).
+
 - **2026-10-21** — **3.6** (`features/pendiente-detalle/`: subplanos `documento.*` + `doc-pdf.*`,
   `escalera.*` pasos 3–4, `fechas.ts`): la escalera gana "Generar queja ante la EPS/Supersalud" que
   abren la hoja "Documento": copia editable (textarea + "Reemplazar…"; el portapapeles recibe el

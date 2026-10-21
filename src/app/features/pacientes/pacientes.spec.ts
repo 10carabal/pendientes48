@@ -69,6 +69,17 @@ async function crear(): Promise<ComponentFixture<Pacientes>> {
   return fixture;
 }
 
+/**
+ * Simula el regreso con "atrás": `<ion-router-outlet>` re-muestra la **misma**
+ * instancia (el constructor no corre de nuevo) y Ionic dispara
+ * `ionViewWillEnter`, que es quien vuelve a leer el listado.
+ */
+async function reentrar(fixture: ComponentFixture<Pacientes>): Promise<void> {
+  fixture.componentInstance.ionViewWillEnter();
+  await asentar(); // la recarga async se asienta igual que la carga inicial
+  fixture.detectChanges();
+}
+
 function boton(el: HTMLElement, texto: string): HTMLButtonElement {
   const b = [...el.querySelectorAll('button')].find((x) => x.textContent?.trim() === texto);
   expect(b, `botón "${texto}"`).toBeTruthy();
@@ -422,5 +433,29 @@ describe('Pacientes', () => {
     expect(el.querySelector('[role="dialog"]')).toBeNull();
     expect(memoria.size).toBe(1);
     expect(cap.cancel).not.toHaveBeenCalled();
+  });
+
+  it('al re-entrar con "atrás" refresca la lista de perfiles', async () => {
+    memoria.set('paciente:px', perfil);
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.textContent).toContain('Ana Pérez');
+    expect(el.textContent).not.toContain('Luis Gómez');
+
+    // Otro perfil se guardó mientras esta pantalla seguía apilada debajo.
+    memoria.set('paciente:py', {
+      ...perfil,
+      id: 'py',
+      nombre: 'Luis Gómez',
+      numeroDocumento: '456',
+    });
+    await reentrar(fixture);
+    expect(el.textContent).toContain('Luis Gómez');
+
+    // Y si se borraron los datos mientras tanto, el listado queda vacío.
+    memoria.clear();
+    await reentrar(fixture);
+    expect(el.textContent).toContain('Aún no tiene perfiles');
+    expect(el.textContent).not.toContain('Ana Pérez');
   });
 });

@@ -7,7 +7,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
+import { IonContent, IonHeader, IonTitle, IonToolbar, type ViewWillEnter } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { borrarTodo } from '@data/app-db';
 import { encontrarPorDocumento, guardarPaciente, listarPacientes } from '@data/pacientes-store';
@@ -57,6 +57,8 @@ const ERROR_LECTURA = 'No se pudo leer la información. Intenta de nuevo.';
  * los avisos programados (`platform/notificaciones.cancelarTodos`) y vacía el
  * almacén, devolviendo la app a su primera apertura (D10: sin pantalla de
  * Ajustes; la acción vive al final de esta pantalla).
+ *
+ * El almacén se lee en el constructor **y** en `ionViewWillEnter` (ver ahí).
  */
 @Component({
   selector: 'app-pacientes',
@@ -65,7 +67,7 @@ const ERROR_LECTURA = 'No se pudo leer la información. Intenta de nuevo.';
   templateUrl: './pacientes.html',
   styleUrl: './pacientes.scss',
 })
-export class Pacientes {
+export class Pacientes implements ViewWillEnter {
   private readonly router = inject(Router);
 
   readonly pacientes = signal<Paciente[]>([]);
@@ -98,7 +100,21 @@ export class Pacientes {
         this.elementoPrevio = null;
       }
     });
+    // El constructor se conserva (carga inicial y patrón de los tests
+    // existentes); la lectura fresca al navegar vive en `ionViewWillEnter`.
     void this.recargar(); // recargar atrapa sus fallos: la promesa nunca rechaza
+  }
+
+  /**
+   * Ciclo de vida: `<ion-router-outlet>` apila las pantallas y al volver con
+   * "atrás" re-muestra **la misma instancia** sin ejecutar de nuevo el
+   * constructor (bug confirmado en el S22: el listado quedaba con datos
+   * viejos). La primera entrada también dispara este hook, así que la carga se
+   * ejecuta dos veces: es el mismo método y es inocua (reescribe las mismas
+   * señales, sin efectos visibles duplicados).
+   */
+  ionViewWillEnter(): void {
+    void this.recargar();
   }
 
   private async recargar(): Promise<void> {

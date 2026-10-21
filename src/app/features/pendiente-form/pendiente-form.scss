@@ -90,15 +90,21 @@
   padding: var(--p48-espacio-2) var(--p48-espacio-3);
 }
 
+/* El mensaje bajo un campo no queda pegado a la caja de texto (H1): el bloque
+   solo separa 4 px (--p48-espacio-1), así que este margen lleva la
+   separación total a --p48-espacio-4, el mismo que distingue los campos entre
+   sí. El error general del formulario no va bajo una caja: lo neutraliza
+   `.pendiente-form-error` más abajo. */
 .pendiente-form-error,
 .pendiente-form-error-campo {
-  margin: 0;
+  margin: var(--p48-espacio-3) 0 0;
   color: var(--p48-estado-vencido-texto);
   font-size: var(--p48-tam-base);
   line-height: var(--p48-interlineado);
 }
 
 .pendiente-form-error {
+  margin-top: 0;
   padding: var(--p48-espacio-2) var(--p48-espacio-3);
 }
 

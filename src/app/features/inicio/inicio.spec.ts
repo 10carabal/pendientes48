@@ -63,6 +63,17 @@ async function crear(): Promise<ComponentFixture<Inicio>> {
   return fixture;
 }
 
+/**
+ * Simula el regreso con "atrás": `<ion-router-outlet>` re-muestra la **misma**
+ * instancia (el constructor no corre de nuevo) y Ionic dispara
+ * `ionViewWillEnter`, que es quien vuelve a leer el almacén.
+ */
+async function reentrar(fixture: ComponentFixture<Inicio>): Promise<void> {
+  fixture.componentInstance.ionViewWillEnter();
+  await asentar(); // la recarga async se asienta igual que la carga inicial
+  fixture.detectChanges();
+}
+
 function boton(el: HTMLElement, texto: string): HTMLButtonElement {
   const b = [...el.querySelectorAll('button')].find((x) => x.textContent?.trim() === texto);
   expect(b, `botón "${texto}"`).toBeTruthy();
@@ -219,5 +230,55 @@ describe('Inicio', () => {
     boton(el, 'Me dejaron un pendiente').click();
 
     expect(navegar).toHaveBeenCalledWith('/ventanilla');
+  });
+
+  it('al re-entrar con "atrás" vuelve a leer: aparece el pendiente guardado mientras tanto', async () => {
+    await set('preferencias', { avisoLegalAceptado: true, ayudaAvisosVista: false });
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('.inicio-tarjeta')).toBeNull();
+
+    // Se guardó mientras esta pantalla seguía apilada debajo (sin instancia nueva).
+    await set('pendiente:p2', pendiente({ id: 'p2', medicamentos: ['Metformina 850 mg'] }));
+    await reentrar(fixture);
+
+    expect(el.querySelector('.inicio-tarjeta')?.textContent).toContain('Metformina 850 mg');
+    expect(el.querySelector('.inicio-vacio')).toBeNull();
+  });
+
+  it('al re-entrar con "atrás" el estado se recalcula: el entregado muestra "Entregado a tiempo"', async () => {
+    await set('pendiente:p1', pendiente());
+    await set('preferencias', { avisoLegalAceptado: true, ayudaAvisosVista: false });
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('.p48-etiqueta-estado--en-plazo')).toBeTruthy();
+    expect(el.textContent).toContain('Faltan 1 h');
+
+    // "Ya me llegó" en el detalle escribe `entregadoEn` en el almacén.
+    await set('pendiente:p1', pendiente({ entregadoEn: hace(1) }));
+    await reentrar(fixture);
+
+    expect(el.querySelector('.p48-etiqueta-estado--entregado-a-tiempo')).toBeTruthy();
+    expect(el.textContent).toContain('Entregado a tiempo');
+    expect(el.textContent).not.toContain('Faltan 1 h');
+  });
+
+  it('al re-entrar tras "Borrar todos mis datos" la lista vacía y vuelve el modal de primera apertura', async () => {
+    await set('pendiente:p1', pendiente());
+    await set('preferencias', { avisoLegalAceptado: true, ayudaAvisosVista: false });
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+
+    expect(el.querySelector('.inicio-tarjeta')).toBeTruthy();
+    expect(el.querySelector('[role="dialog"]')).toBeNull();
+
+    // "Borrar todos mis datos" vacía el almacén completo (preferencias incluidas).
+    memoria.clear();
+    await reentrar(fixture);
+
+    expect(el.querySelector('.inicio-tarjeta')).toBeNull();
+    expect(el.textContent).toContain('Aún no tiene pendientes');
+    expect(el.querySelector('.aviso-linea')).toBeNull();
+    expect(el.querySelector('[role="dialog"]')?.textContent).toContain(AVISO_NO_ASESORIA);
   });
 });
