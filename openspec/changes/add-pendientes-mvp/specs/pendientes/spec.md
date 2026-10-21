@@ -69,7 +69,8 @@ El sistema SHALL calcular el vencimiento como hora de reclamo + 48 horas y mostr
 
 #### Scenario: Pendiente vigente (1 h o más)
 - WHEN faltan 1 hora o más para el vencimiento
-- THEN la tarjeta del pendiente muestra "Faltan X h" y el estado "En plazo"
+- THEN la tarjeta del pendiente muestra "Faltan X h" (o "Faltan X h Y min" si quedan minutos)
+  y el estado "En plazo"
 
 #### Scenario: Menos de 1 hora
 - WHEN faltan menos de 60 minutos para el vencimiento
@@ -78,8 +79,9 @@ El sistema SHALL calcular el vencimiento como hora de reclamo + 48 horas y mostr
 #### Scenario: Pendiente vencido
 - WHEN la hora actual supera el vencimiento y el pendiente no está marcado como entregado
 - THEN el estado cambia a "Vencido"
-- AND el contador muestra "Vencido hace X h" (o "Vencido hace X min" si hace menos de 1 h,
-  o "Vencido hace X días" si pasaron 48 h o más desde el vencimiento)
+- AND el contador muestra "Vencido hace X h" (o "Vencido hace X h Y min" si quedan minutos,
+  "Vencido hace X min" si hace menos de 1 h, o "Vencido hace X días" si pasaron 48 h o más desde
+  el vencimiento)
 - AND se habilita el paso 1 de la escalera de reclamo
 
 ### Requirement: Aviso de vencimiento

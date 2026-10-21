@@ -27,24 +27,36 @@ export function estado(p: Pendiente, ahora: Date): EstadoPendiente {
   return 'en-plazo';
 }
 
+/** "2 h" o "2 h 30 min": piso en las dos unidades; sin minutos cuando son 0. */
+function horasConMinutos(ms: number): string {
+  const h = Math.floor(ms / HORA_MS);
+  const min = Math.floor((ms % HORA_MS) / MINUTO_MS);
+  return min > 0 ? `${h} h ${min} min` : `${h} h`;
+}
+
 /**
  * Texto del contador. Solo aplica a pendientes sin entregar: un pendiente
  * cerrado no muestra contador en pantalla, así que devuelve ''.
  * En el instante exacto del vencimiento sigue "en plazo" (estado() usa `>`),
  * por eso los 0 restantes se cuentan como faltantes.
+ *
+ * Con 1 h o más se escriben las dos unidades, con piso en cada una: si los
+ * minutos restantes son 0 se omiten (`Faltan 2 h`, `Vencido hace 1 h`); si no,
+ * van juntos (`Faltan 2 h 30 min`, `Vencido hace 1 h 5 min`). La rama de menos
+ * de 1 h y la de vencido con días (48 h o más) no llevan minutos.
  */
 export function textoContador(p: Pendiente, ahora: Date): string {
   if (p.entregadoEn !== undefined) return '';
 
   const resta = vencimiento(p.horaReclamo).getTime() - ahora.getTime();
   if (resta >= 0) {
-    if (resta >= HORA_MS) return `Faltan ${Math.floor(resta / HORA_MS)} h`;
+    if (resta >= HORA_MS) return `Faltan ${horasConMinutos(resta)}`;
     return `Faltan ${Math.floor(resta / MINUTO_MS)} min`;
   }
 
   const vencido = -resta;
   if (vencido >= PLAZO_HORAS * HORA_MS) return `Vencido hace ${Math.floor(vencido / DIA_MS)} días`;
-  if (vencido >= HORA_MS) return `Vencido hace ${Math.floor(vencido / HORA_MS)} h`;
+  if (vencido >= HORA_MS) return `Vencido hace ${horasConMinutos(vencido)}`;
   return `Vencido hace ${Math.floor(vencido / MINUTO_MS)} min`;
 }
 

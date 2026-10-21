@@ -206,11 +206,12 @@ Reglas de `estado()`, en orden:
 4. Si `ahora > vencimiento` → `vencido`.
 5. Si no → `en-plazo`.
 
-Reglas de `textoContador()` (solo cuando el pendiente no está entregado):
-- Falta 1 h o más → `Faltan X h` (redondeo hacia abajo)
+Reglas de `textoContador()` (solo cuando el pendiente no está entregado; redondeo hacia abajo;
+con minutos desde 2026-10-21, decisión de Daniel):
+- Falta 1 h o más → `Faltan X h` si los minutos restantes son 0, si no `Faltan X h Y min`
 - Falta menos de 1 h → `Faltan X min`
 - Vencido hace menos de 1 h → `Vencido hace X min`
-- Vencido hace 1 h o más, pero menos de 48 h → `Vencido hace X h`
+- Vencido hace 1 h o más, pero menos de 48 h → `Vencido hace X h` si Y = 0, si no `Vencido hace X h Y min`
 - Vencido hace 48 h o más → `Vencido hace X días`
 
 En la UI, una signal `ahora` se actualiza cada minuto.

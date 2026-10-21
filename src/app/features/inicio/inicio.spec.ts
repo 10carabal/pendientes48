@@ -35,7 +35,10 @@ function pendiente(sobrescribe: Partial<Pendiente> = {}): Pendiente {
     pacienteId: 'px',
     medicamentos: ['Losartán 50 mg'],
     farmacia: 'Droguería La 12',
-    horaReclamo: hace(46.5), // vence en 1 h: "Faltan 1 h"
+    // Vence en 1 h 30 min con medio minuto de holgura: la pantalla lee su
+    // reloj al crearse, y el contador se pinta "Faltan 1 h 30 min" aunque
+    // esos ms pasen (mismo cuidado que `contador.spec.ts`).
+    horaReclamo: new Date(Date.now() - 46.5 * 3_600_000 + 30_000).toISOString(),
     autorizoDomicilio: true,
     direccionEntrega: 'Calle 1 # 2-3',
     bitacora: [],
@@ -126,7 +129,13 @@ describe('Inicio', () => {
     await set('pendiente:p1', pendiente({ id: 'p1' }));
     await set(
       'pendiente:p2',
-      pendiente({ id: 'p2', medicamentos: ['Metformina 850 mg'], horaReclamo: hace(49) }),
+      pendiente({
+        id: 'p2',
+        medicamentos: ['Metformina 850 mg'],
+        // Venció hace 1 h con medio minuto de holgura: la pantalla lee su
+        // reloj al crearse, y "Vencido hace 1 h" no depende de cuántos ms.
+        horaReclamo: new Date(Date.now() - 49 * 3_600_000 - 30_000).toISOString(),
+      }),
     );
     await set(
       'pendiente:p3',
@@ -145,7 +154,7 @@ describe('Inicio', () => {
     const [enPlazo, vencido, entregado] = tarjetas.map((t) => t.textContent ?? '');
 
     expect(enPlazo).toContain('Losartán 50 mg');
-    expect(enPlazo).toContain('Faltan 1 h');
+    expect(enPlazo).toContain('Faltan 1 h 30 min');
     expect(enPlazo).toContain('En plazo');
 
     expect(vencido).toContain('Metformina 850 mg');
@@ -252,7 +261,7 @@ describe('Inicio', () => {
     const fixture = await crear();
     const el: HTMLElement = fixture.nativeElement;
     expect(el.querySelector('.p48-etiqueta-estado--en-plazo')).toBeTruthy();
-    expect(el.textContent).toContain('Faltan 1 h');
+    expect(el.textContent).toContain('Faltan 1 h 30 min');
 
     // "Ya me llegó" en el detalle escribe `entregadoEn` en el almacén.
     await set('pendiente:p1', pendiente({ entregadoEn: hace(1) }));
