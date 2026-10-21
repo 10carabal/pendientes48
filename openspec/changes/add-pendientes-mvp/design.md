@@ -273,7 +273,9 @@ diseño": Inicio y Detalle en celular y en escritorio, más el tablero de tokens
 4. **Menos bordes:** separar con espacio y `--p48-superficie`; el único borde es el de los campos.
 5. **Ícono pequeño dentro de un círculo:** el ícono se queda en 18–20 px; el círculo (36–44 px) le da presencia.
 6. **Barra de acento lateral (4 px):** tarjeta de la norma, alerta de vencimiento, aviso de permiso y aviso legal.
-7. **Tres niveles de botón:** principal sólido (**uno por pantalla**), secundario con contorno,
+7. **Tres niveles de botón:** principal sólido (**uno por pantalla y por capa** — un diálogo o
+   hoja puede llevar el suyo; el de la pantalla queda cubierto por el scrim, precedente «Borrar»
+   sobre «Ya me llegó», aprobado por Daniel el 2026-10-21), secundario con contorno,
    terciario como enlace (también el destructivo; el rojo sólido solo dentro de la confirmación).
 
 ### Adaptación por tamaño

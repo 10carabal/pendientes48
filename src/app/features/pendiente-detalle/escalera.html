@@ -1,11 +1,17 @@
 <section class="escalera">
   <h2 class="escalera-titulo">Escalera de reclamo</h2>
 
+  <!-- Región viva SIEMPRE en el DOM: anuncia la queja fuera de temporada. -->
+  <p class="escalera-aviso" role="status">{{ fueraDeTemporada() }}</p>
+
   @if (oculta()) {
     <p class="escalera-parrafo">
       La escalera de reclamo se habilita cuando venzan las 48 horas.
     </p>
-  } @else {
+  }
+
+  <!-- En plazo o entregado solo queda la queja ya registrada, como "Completado". -->
+  @if (!oculta() || hayQueja()) {
     <ol class="escalera-pasos">
       <li class="escalera-paso p48-superficie">
         <div class="escalera-paso-titulo">
@@ -19,19 +25,15 @@
             <span class="p48-etiqueta-estado p48-etiqueta-estado--escalado-eps">Completado</span>
           </p>
           <p class="escalera-detalle">{{ detallePaso1() }}</p>
-          <button type="button" class="p48-boton-secundario" (click)="abrirDialogo(1)">
-            Corregir queja ante la EPS
-          </button>
-        } @else {
+          @if (!oculta()) {
+            <button type="button" class="p48-boton-secundario" (click)="abrirDialogo(1)">
+              Corregir queja ante la EPS
+            </button>
+          }
+        } @else if (!oculta()) {
           <button type="button" class="p48-boton-secundario" (click)="abrirDialogo(1)">
             Registrar queja ante la EPS
           </button>
-        }
-
-        <!-- Spec `reclamos` · "Paso 1 disponible": red alterna desde normas.json,
-             con el aviso de no asesoría inyectado por input (D6). -->
-        @if (normaRedAlterna; as n) {
-          <app-norma-card [norma]="n" [aviso]="avisoNoAsesoria" />
         }
       </li>
 
@@ -48,10 +50,12 @@
             </span>
           </p>
           <p class="escalera-detalle">{{ detallePaso2() }}</p>
-          <button type="button" class="p48-boton-secundario" (click)="abrirDialogo(2)">
-            Corregir queja ante la Supersalud
-          </button>
-        } @else if (paso1Completado()) {
+          @if (!oculta()) {
+            <button type="button" class="p48-boton-secundario" (click)="abrirDialogo(2)">
+              Corregir queja ante la Supersalud
+            </button>
+          }
+        } @else if (!oculta() && paso1Completado()) {
           <!-- Literal aprobado (spec `reclamos` · "Paso 2 disponible"). -->
           <p class="escalera-parrafo">
             Si la EPS no responde o no entrega, puedes quejarte ante la Supersalud
@@ -59,13 +63,68 @@
           <button type="button" class="p48-boton-secundario" (click)="abrirDialogo(2)">
             Registrar queja ante la Supersalud
           </button>
-        } @else {
+        } @else if (!oculta()) {
           <!-- Literal aprobado: el paso 2 espera a la queja ante la EPS. -->
           <p class="escalera-parrafo escalera-parrafo--inactivo">
             Se habilita cuando registre la queja ante la EPS
           </p>
         }
       </li>
+
+      <!-- Pasos de generación (tarea 3.6): solo con la queja de ese paso
+           registrada; cada uno espera a que la fecha de SU queja deje de ser
+           futura (fuera de temporada se anuncia arriba). -->
+      @if (!oculta()) {
+        <li class="escalera-paso p48-superficie">
+          <div class="escalera-paso-titulo">
+            <span class="p48-icono-circulo" aria-hidden="true">3</span>
+            <h3 class="escalera-paso-nombre">Generar queja ante la EPS</h3>
+          </div>
+
+          @if (generarEpsDisponible()) {
+            <button type="button" class="p48-boton-secundario" (click)="generar.emit(1)">
+              Generar queja ante la EPS
+            </button>
+          } @else {
+            <!-- Con queja registrada y fecha futura no hay texto nuevo: la
+                 región viva de arriba anuncia "Tu queja ante la … es para el …". -->
+            @if (!paso1Completado()) {
+              <p class="escalera-parrafo escalera-parrafo--inactivo">
+                Se habilita cuando registre la queja ante la EPS
+              </p>
+            }
+            <button type="button" class="p48-boton-secundario" disabled>
+              Generar queja ante la EPS
+            </button>
+          }
+
+          <!-- Spec `reclamos` · "Paso 1 disponible": red alterna desde normas.json,
+               con el aviso de no asesoría inyectado por input (D6). -->
+          @if (normaRedAlterna; as n) {
+            <app-norma-card [norma]="n" [aviso]="avisoNoAsesoria" />
+          }
+        </li>
+
+        @if (paso2Completado()) {
+          <li class="escalera-paso p48-superficie">
+            <div class="escalera-paso-titulo">
+              <span class="p48-icono-circulo" aria-hidden="true">4</span>
+              <h3 class="escalera-paso-nombre">Generar queja ante la Supersalud</h3>
+            </div>
+            @if (generarSupersaludDisponible()) {
+              <button type="button" class="p48-boton-secundario" (click)="generar.emit(2)">
+                Generar queja ante la Supersalud
+              </button>
+            } @else {
+              <!-- Misma guarda por queja que el paso 3: sin texto nuevo,
+                   la región viva de arriba anuncia "Tu queja ante la … es para el …". -->
+              <button type="button" class="p48-boton-secundario" disabled>
+                Generar queja ante la Supersalud
+              </button>
+            }
+          </li>
+        }
+      }
     </ol>
   }
 </section>

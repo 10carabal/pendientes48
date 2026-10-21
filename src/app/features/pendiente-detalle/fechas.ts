@@ -30,3 +30,16 @@ export function aFechaInput(fecha: Date): string {
 export function deFechaInput(valor: string): string {
   return new Date(`${valor}T00:00:00`).toISOString();
 }
+
+/**
+ * true si la fecha de `iso` ya pasó o es la de hoy (comparación por día local).
+ * Sirve para saber si la queja registrada es de esta temporada: una queja con
+ * fecha futura todavía no se puede generar (tarea 3.6). Las fechas en formato
+ * ISO de `aFechaInput()` se comparan como texto porque comparten el orden
+ * cronológico.
+ */
+export function esFechaPasada(iso: string, ahora: Date): boolean {
+  const fecha = new Date(iso);
+  if (Number.isNaN(fecha.getTime())) return false;
+  return aFechaInput(fecha) <= aFechaInput(ahora);
+}

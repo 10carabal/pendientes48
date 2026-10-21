@@ -1,0 +1,39 @@
+<!-- Subdiálogo del PDF editable (solo web): el Escape cierra SOLO este
+     subdiálogo, sin arrastrar el cierre de la hoja que lo contiene. -->
+<div
+  class="doc-fondo"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="doc-pdf-titulo"
+  (keydown)="atraparFoco($event)"
+  (keydown.escape)="cerrar.emit(); $event.stopPropagation()"
+>
+  <div class="doc-caja p48-superficie p48-sombra-flotante">
+    <h3 id="doc-pdf-titulo" class="doc-titulo">PDF editable</h3>
+    <p class="doc-parrafo">{{ textoEditable() }}</p>
+    <p class="doc-parrafo">{{ avisoNoAsesoria() }}</p>
+    <!-- Región viva SIEMPRE en el DOM: el nodo existe antes que su texto. -->
+    <p class="doc-parrafo" role="alert">{{ error() }}</p>
+
+    <button
+      #botonDescargar
+      type="button"
+      class="p48-boton-principal"
+      [disabled]="ocupado()"
+      (click)="descargarEditable.emit()"
+    >
+      Descargar PDF editable
+    </button>
+    <button
+      type="button"
+      class="p48-boton-secundario"
+      [disabled]="ocupado()"
+      (click)="compartir.emit()"
+    >
+      {{ etiquetaCompartir() }}
+    </button>
+    <button type="button" class="p48-boton-terciario" (click)="cerrar.emit()">
+      Cerrar
+    </button>
+  </div>
+</div>

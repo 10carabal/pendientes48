@@ -5,8 +5,8 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-20** — **3.5 mergeada** (PR #37, `main = 25fb7c8`) y rama
-> **`chore/flujo-multiagente`** abierta con skill + comando + `AGENTS.md`; siguiente **3.6**.
+> Última actualización: **2026-10-21** — **3.6 lista para PR #39** (flujo multiagente, QA VERDE
+> 311/311); siguiente: **`fix/2.1-ciclo-vida-listas`** (PR #40, decisión de Daniel) y luego **3.8**.
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -22,12 +22,15 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 - **Bloque 2 (plataforma y persistencia) completo:** 2.1 ✅ (PR #26) · 2.2 ✅ (PR #27, smoke real
   en el S22) · 2.3 ✅ (PR #29, smoke Android + escritorio) · 2.4 ✅ (PR #30, flujos A/B/C en el S22).
 - **Bloque 3 (pantallas) en marcha:** 3.1 ✅ (PR #31) · 3.2 ✅ (PR #32) · 3.7 ✅ (PR #33) ·
-  3.4 ✅ (PR #34) · 3.3 ✅ (PR #35, flujo multiagente) · 3.5 ✅ (PR #37, flujo multiagente);
+  3.4 ✅ (PR #34) · 3.3 ✅ (PR #35, flujo multiagente) · 3.5 ✅ (PR #37, flujo multiagente) ·
+  3.6 ✅ lista (PR #39, flujo multiagente);
   orden del bloque **3.4 → 3.3 → 3.5 → 3.6 → 3.8**
   (reordenado por Daniel el 2026-10-14: la 3.3 termina en "Registrar este pendiente", así que el
-  formulario de la 3.4 debía existir antes). Siguiente: **3.6**.
-- Repo sano en `main` (`25fb7c8`); PRs #1–#37 mergeados (incluye #36: créditos de desarrollador
-  10carabal en README/`package.json`/manifest); una rama por tarea; **Daniel revisa y mergea**.
+  formulario de la 3.4 debía existir antes). Siguiente: **`fix/2.1-ciclo-vida-listas`** (PR #40,
+  decisión de Daniel tras el merge de #39) y luego **3.8**.
+- Repo sano en `main` (`0c15497`); PRs #1–#38 mergeados (incluye #36: créditos de desarrollador
+  10carabal en README/`package.json`/manifest; #38: flujo multiagente en skill/comando/`AGENTS.md`);
+  una rama por tarea; **Daniel revisa y mergea**.
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
   su verificación + PR (decisión de Daniel, 2026-10-04).
@@ -240,6 +243,46 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   `--p48-fondo`** dentro del contenido con scroll: `fixed` la saca del flujo y deja un hueco al
   final; sticky la mantiene visible durante el scroll (spec: "permanece siempre visible") y en su
   posición natural al llegar al final (3.7, 2026-10-14).
+- **Las pruebas en el S22 se sirven SIEMPRE por `adb reverse` + `http://localhost:<puerto>`**
+  (2026-10-20): sirviendo por IP LAN (`http://192.168.80.16:4201`) `crypto.randomUUID()` no existe
+  (contexto seguro) y guardar perfiles/pendientes/fotos moría en silencio al clickear "Guardar"
+  (rechazo no capturado). `adb reverse tcp:4201 tcp:4201` + `http://localhost:4201` lo resuelve;
+  además `ng serve` requiere `--host 0.0.0.0` para aceptar conexiones externas (por defecto solo
+  loopback) y puede hacer falta regla de firewall con elevación. No es bug de producto (producción
+  corre en HTTPS/nativo) pero conviene que las capturas de evidencia usen el mismo patrón.
+  **Dos pestañas con orígenes distintos = dos IndexedDB distintas**: si en la sesión quedó abierta
+  la pestaña por IP LAN y se sirve la nueva por `localhost`, lo guardado en una no se ve en la otra
+  (síntoma: "guardé pero no aparece en Inicio") — cerrar la pestaña vieja; la vista se arregla con
+  recarga. Diagnosticado con CDP por ADB (`adb forward tcp:9222 localabstract:chrome_devtools_remote`
+  + script Node con WebSocket nativo evaluando DOM/IndexedDB/errores: `p48-cdp.js`).
+  **Coordinar antes de tocar la pestaña cuando Daniel está probando** (2026-10-20): el coordinador
+  recargó/borró/navegó la pestaña mientras él probaba y eso produjo dos reportes falsos ("no aparece
+  el pendiente", "no se actualiza Ya me llegó") que eran cruce con el registro de prueba —
+  reproducir en registros con id `test-*`, avisar antes de manipular su pantalla, y que él recargue
+  antes de reportar.
+- **Regla de ciclo de vida para TODAS las pantallas nuevas** (2026-10-20, derivada del bug de
+  arriba): con `<ion-router-outlet>` una pantalla que lee datos en el `constructor` queda stale al
+  re-mostrarse desde el stack — **toda pantalla con lista o datos frescos necesita
+  `ionViewWillEnter()`** (además del constructor, para los tests). Las pantallas que se destruyen
+  al pop (detalle) no lo necesitan. Aplicar desde ya en 3.8.
+- **Pruebas manuales en el S22 (2026-10-20/21, `main` en `localhost:4201`, operador coordinador vía
+  CDP): 11 escenarios PASS sin fallos de producto** — gestión de cuidador completa (validación de los
+  4 campos, detalle "Quien gestiona… de parentesco hija", precarga de dirección al cambiar perfil,
+  perfil duplicado con "Usar el perfil existente"), estados vencido/escalado/entregado tarde, escalera
+  EPS→Supersalud con radicados y "Corregir queja", nota manual, doble toque `.ics` y edición.
+  **Sin cubrir todavía:** guía con cámara real, aviso local nativo (solo existe en el APK: en la PWA
+  `LocalNotifications` es no-op), borrar pendiente, modo avión, y los 3 escenarios del fix de ciclo
+  de vida (verificarse post-fix). **Hallazgos sin cerrar:** H1 — el mensaje "Falta completar: …" queda
+  muy pegado a la caja de texto (reportado por Daniel; candidato a token de espaciado en el fix de
+  ciclos de vida); H2 (menor) — el texto de validación persiste un instante en la región aria-live
+  tras un guardado exitoso. La tabla completa A/B/C se comenta en el PR de 3.6.
+- **Watcher de dispositivo `p48-escucha.js`** (Temp\opencode): escucha pasiva de la pestaña de Daniel
+  (consola + excepciones + ahora navegaciones vía `Page.enable`/`frameNavigated`); NO recarga ni
+  navega y se reconecta solo tras navegaciones. Detectó una **navegación anómala en el histórico de
+  Chrome** (una entrada del detalle con barra final `/`, origen sin explicar, Daniel no la provocó);
+  el log de navegaciones queda listo para capturarla si se repite. Lección de coordinación reforzada:
+  con Daniel probando en vivo, verificar `location.href` antes de cada evaluación CDP (las
+  "Illegal invocation" eran scripts corriendo sobre una página que había cambiado).
 - **Los scripts de captura CDP se reutilizan por pantalla** (`p48-pacientes.js` → `p48-inicio.js`:
   sembrar + click por texto + shots). Ojo: `scrollIntoView` sobre el elemento sticky **no hace
   scroll** si ya está visible → la captura "al pie" salió idéntica a la de scroll y se descarta del
@@ -262,6 +305,19 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   `--body-file` (sobra texto, pero no falla por argumentos).
 
 ## Pendientes conocidos (no bloqueantes)
+- **Fix aprobado por Daniel (opción A, 2026-10-20): `fix/2.1-ciclo-vida-listas`** — BUG confirmado
+  con CDP en el S22: `<ion-router-outlet>` **apila** páginas (la anterior queda viva y oculta) y al
+  volver **no re-ejecuta el constructor**, así que Inicio (`cargar`) y Pacientes (`recargar`) leen
+  datos SOLO al crear la instancia y muestran listas stale al re-entrar — por eso "no aparece el
+  pendiente nuevo", "Ya me llegó no se actualiza" y "no se ve Entregado en Inicio" eran el MISMO
+  bug. Fix: `ionViewWillEnter()` en `features/inicio` y `features/pacientes` (constructor intacto
+  para no romper tests; lectura idempotente) + tests que mutan IDB y asientan el refresco.
+  **3 escenarios a verificar en CDP post-fix:** (1) guardar pendiente → atrás → tarjeta presente;
+  (2) "Ya me llegó" → atrás → "Entregado a tiempo" en Inicio; (3) "Borrar todos mis datos" en
+  Pacientes → confirmar → Inicio **vacío** y con el modal de primera apertura otra vez (el fix
+  re-lee también `leerPreferencias`, así que el aviso vuelve según spec — escenario 3 añadido por
+  Daniel tras verlo en el celular).
+  Corre DESPUÉS del PR de 3.6 y ANTES de 3.8 (rama desde `main`, un archivo + tests por pantalla).
 - **Identidad visual:** sistema de diseño (D14–D16) e ícono/splash (D17) resueltos; solo quedan las
   capturas de pantalla del manifiesto (`screenshots`), que se agregan cuando existan pantallas reales.
 - **Hosting de la PWA** para compartirla por WhatsApp → decidir antes de la tarea 4.2.
@@ -290,6 +346,26 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   10carabal."** (decisión de Daniel, 2026-10-19 — ver Decisiones de ejecución).
 
 ## Registro de actualizaciones
+- **2026-10-21** — **3.6** (`features/pendiente-detalle/`: subplanos `documento.*` + `doc-pdf.*`,
+  `escalera.*` pasos 3–4, `fechas.ts`): la escalera gana "Generar queja ante la EPS/Supersalud" que
+  abren la hoja "Documento": copia editable (textarea + "Reemplazar…"; el portapapeles recibe el
+  cuerpo **sin** el aviso de no asesoría), "PDF" y "PDF editable" (solo web — en Android la descarga
+  directa corrompería el archivo en el WebView y manda el compartir nativo; ratificado por Daniel),
+  "Descargar y compartir" en todas las plataformas con fallback silencioso ("Descargar" sin
+  `navigator.share`), nota de autorización D6 y confirmación en la segunda generación. Botón
+  terciario **"Regenerar documento"** fuera de la escalera (queja registrada + pendiente entregado;
+  spec `reclamos` "Paso 1 completado", decisión de Daniel); guarda de fecha futura **por queja**
+  (cada paso con SU fecha; anuncio vivo "Tu queja ante la … es para el …"). `AVISO_ANEXO` compuesto
+  en `domain/reclamo/plantillas-pdf.ts` e inyectado por input (D6); plataforma consultada solo vía
+  `pdfDirectoAplica()`/`comparteArchivosPdf()` (nunca `isNative()` en la feature). **QA (flujo
+  multiagente, 3 pasadas):** VERDE — 3 mayores + 8 menores en la primera pasada, corregidos en 2
+  vueltas del implementador + micro-vuelta final (**311/311 tests**, +62); 6 decisiones de Daniel
+  consolidadas en UNA pregunta (regenerar como alcance nuevo, PDF web-only ratificado, "Descargar",
+  `allowedCommonJsDependencies: ["pdfmake"]`, textarea plenamente editable, "un solo sólido por
+  capa" en `design.md` patrón 7). Gates: `tsc`/`openspec --strict` en 0, `ng build` 521,34 kB
+  inicial (pdfmake en el chunk lazy del detalle). Dispositivo: 11 escenarios PASS en el S22 (ver
+  Lecciones/Pendientes); tras el merge sigue el fix de ciclos de vida (PR #40).
+
 - **2026-10-19** — **3.5** (`features/pendiente-detalle/` + ruta + enlace desde Inicio): pantalla
   con **4 subplanos** (`pendiente-detalle` contenedor, `contador`, `bitacora-lista`, `escalera`) por
   `design.md`. La escalera **solo registra quejas** (paso 1/2 con fecha + radicado vía `registrarQueja`;

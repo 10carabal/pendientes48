@@ -1,4 +1,4 @@
-import { compartirPdf, copiarTexto } from './compartir';
+import { compartirPdf, comparteArchivosPdf, copiarTexto } from './compartir';
 
 /** `platform/plataforma.ts` delega en `Capacitor.isNativePlatform()` (mockeado aquí). */
 const capacitor = vi.hoisted(() => ({
@@ -72,6 +72,24 @@ describe('compartir', () => {
       expect(clipboard.Clipboard.write).toHaveBeenCalledWith({
         string: 'Texto para pegar en el formulario',
       });
+    });
+  });
+
+  describe('comparteArchivosPdf()', () => {
+    it('en Android siempre (la hoja nativa comparte el archivo)', () => {
+      expect(comparteArchivosPdf()).toBe(true);
+    });
+
+    it('en la PWA depende de canShare con archivos', () => {
+      capacitor.Capacitor.isNativePlatform.mockReturnValue(false);
+      vi.stubGlobal('navigator', { canShare: vi.fn(() => true), share: vi.fn() });
+      expect(comparteArchivosPdf()).toBe(true);
+
+      vi.stubGlobal('navigator', { canShare: vi.fn(() => false), share: vi.fn() });
+      expect(comparteArchivosPdf()).toBe(false);
+
+      vi.stubGlobal('navigator', {}); // sin Web Share
+      expect(comparteArchivosPdf()).toBe(false);
     });
   });
 
