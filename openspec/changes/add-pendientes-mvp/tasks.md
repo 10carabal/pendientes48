@@ -181,11 +181,13 @@ espaciados sueltos), y cada pantalla se verifica a 390 px y a 1280 px contra el 
   aviso legal en la primera apertura y luego como línea fija al pie
   - Verificación: la primera vez exige "Entiendo"; después el aviso queda visible al pie en cada
     apertura; el enlace de la cabecera abre la pantalla de perfiles
-- [ ] 3.8 `features/inicio`: introducción de la app — copy aprobado verbatim (3ª persona) en el
+- [x] 3.8 `features/inicio`: introducción de la app — copy aprobado verbatim (3ª persona) en el
   estado vacío tras la línea de vacío, enlace terciario persistente de cabecera "¿Cómo funciona?"
   que abre la hoja con las mismas tres secciones (Cerrar terciario + Escape + toque fuera), enlace
   al pie de la hoja a la guía de la 3.3 y línea de crédito "Pendientes48 fue desarrollada por
-  10carabal." (decisiones de Daniel, 2026-10-14 y 2026-10-19 — `memory.md`)
+  10carabal." (decisiones de Daniel, 2026-10-14 y 2026-10-19 — `memory.md`; la hoja vive en
+  `shared/como-funciona/` con el copy como fuente única exportada, el estado vacío en
+  `features/inicio/` y la pie de la hoja es sticky para que "Cerrar" nunca quede fuera de pantalla)
   - Verificación: con Inicio vacío se lee la introducción completa (las 3 secciones); el enlace de
     cabecera abre la hoja también con pendientes en la lista; Escape y el toque fuera la cierran;
     el enlace del pie abre la guía "Me dejaron un pendiente" y la línea de crédito es visible;

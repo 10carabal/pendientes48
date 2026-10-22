@@ -1,0 +1,110 @@
+/* Introducción de la app (tarea 3.8): secciones en línea y hoja "¿Cómo funciona?".
+   Solo tokens --p48-* y clases de patrones.scss. */
+
+:host {
+  display: block;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-4);
+}
+
+.seccion-titulo,
+.seccion-texto,
+.seccion-lista {
+  margin: 0;
+  font-size: var(--p48-tam-base);
+  line-height: var(--p48-interlineado);
+}
+
+.seccion-titulo {
+  font-size: var(--p48-tam-subtitulo);
+  font-weight: var(--p48-peso-titulo);
+}
+
+.seccion-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-2);
+  padding-left: var(--p48-espacio-5);
+}
+
+/* --- Modo hoja (diálogo), calco de ayuda-avisos ------------------------- */
+
+.hoja-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 20; /* constante de capa: no es color, tamaño ni espaciado del sistema */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--p48-scrim);
+}
+
+.hoja-caja {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-4);
+  width: 100%;
+  max-width: var(--p48-ancho-hoja);
+  /* La caja crece con su contenido (altura natural, calco de ayuda-avisos);
+     el tope del 85 % del scrim deja su borde superior siempre por debajo de la
+     cabecera de la app (≈ 45 px), que se apila encima: el título nunca queda
+     tapado. Con contenido largo hace scroll interno y el pie sticky sigue
+     anclado abajo. */
+  max-height: 85%;
+  overflow-y: auto;
+  padding: var(--p48-espacio-5) var(--p48-espacio-4) 0;
+  border-radius: var(--p48-radio-superficie) var(--p48-radio-superficie) 0 0;
+  background: var(--p48-fondo);
+}
+
+.hoja-titulo {
+  margin: 0;
+  font-size: var(--p48-tam-titulo);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+/* Pie pegajoso (decisión de Daniel, 3.8: "Cerrar siempre visible"): es hijo
+   directo del scrollport, así que el bloque entero — enlace, crédito y
+   Cerrar — queda a la vista sin hacer scroll mientras el contenido pasa por
+   detrás con fondo --p48-fondo. Mismo pie pegajoso que la línea legal de
+   Inicio (3.7). El padding-top con token separa el contenido que pasa. */
+.hoja-pie {
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0; /* el scrollport no la comprime mientras hay contenido */
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-2);
+  padding-top: var(--p48-espacio-3);
+  background: var(--p48-fondo);
+}
+
+.hoja-enlace {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--p48-tam-tactil);
+  color: var(--p48-enlace);
+  font-size: var(--p48-tam-base);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+.hoja-credito {
+  margin: 0;
+  color: var(--p48-texto-secundario);
+  font-size: var(--p48-tam-base); /* crédito a tamaño base: sin letra pequeña */
+  line-height: var(--p48-interlineado);
+}
+
+/* Terciario a ancho de caja (área táctil de la fila entera) y con el texto
+   alineado al enlace y al crédito; el sticky vive en el pie completo. */
+.hoja-cerrar {
+  width: 100%;
+  padding-right: 0;
+  padding-left: 0;
+}

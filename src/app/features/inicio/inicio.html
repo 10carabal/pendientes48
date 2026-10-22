@@ -10,6 +10,11 @@
         <button type="button" class="p48-boton-terciario" (click)="abrirPacientes()">
           Ver perfiles
         </button>
+        <!-- Persistente en la cabecera (con y sin pendientes): abre la hoja
+             con la introducción de la app (tarea 3.8). -->
+        <button type="button" class="p48-boton-terciario" (click)="comoFunciona.set(true)">
+          ¿Cómo funciona?
+        </button>
         <!-- En celular flota al pie (ver .inicio-principal); en escritorio sube junto al título. -->
         <button
           type="button"
@@ -30,8 +35,10 @@
     } @else if (pendientes().length === 0) {
       <div class="p48-superficie inicio-vacio">
         <p class="inicio-parrafo">
-          Aún no tiene pendientes. Aquí verá cada pendiente con su plazo de 48 horas.
+          El paciente aún no tiene pendientes. Aquí verá cada pendiente con su plazo de 48 horas.
         </p>
+        <!-- Introducción en línea, mismo copy que la hoja (tarea 3.8). -->
+        <app-como-funciona />
       </div>
     } @else {
       <ul class="inicio-lista">
@@ -56,6 +63,17 @@
         }
       </ul>
     }
+
+    <!-- Hoja "¿Cómo funciona?" de la introducción (tarea 3.8): va ANTES del
+         aviso legal, que en el orden DOM siempre queda encima. El pie navega
+         a la guía y cierra la hoja antes (con <ion-router-outlet> volver de la
+         guía no debe reencontrar la hoja abierta). -->
+    <app-como-funciona
+      [hoja]="true"
+      [visible]="comoFunciona()"
+      (cerrado)="comoFunciona.set(false)"
+      (abrirGuia)="comoFunciona.set(false); abrirGuia()"
+    />
 
     @if (avisoAceptado() !== null) {
       <!-- Pegado al pie mientras se hace scroll: el spec exige que el aviso

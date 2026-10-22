@@ -14,25 +14,28 @@ import { AVISO_NO_ASESORIA } from '@domain/norma/aviso';
 import type { Pendiente } from '@domain/pendiente/pendiente.model';
 import { estado, textoContador } from '@domain/pendiente/plazo';
 import { AvisoLegal } from '@shared/aviso-legal/aviso-legal';
+import { ComoFunciona } from '@shared/como-funciona/como-funciona';
 import { EstadoChip } from '@shared/estado-chip/estado-chip';
 
 /** Fallo de lectura (IndexedDB no disponible), igual que en `pacientes`. */
 const ERROR_LECTURA = 'No se pudo leer la información. Intenta de nuevo.';
 
 /**
- * Pantalla de inicio (spec `pendientes` · "Plazo de 48 horas"; `normas` ·
- * "Aviso de no asesoría legal"; `ventanilla` · "Guía de ventanilla"): lista
- * cada pendiente con su contador y su estado (etiqueta + color), ofrece el
- * botón principal "Me dejaron un pendiente" que abre la guía de la farmacia
- * (tarea 3.3) y muestra el aviso legal como modal en la primera apertura y
- * como línea fija al pie en cada apertura siguiente.
+ * Pantalla de inicio (spec `pendientes` · "Plazo de 48 horas" e "Introducción
+ * de la app"; `normas` · "Aviso de no asesoría legal"; `ventanilla` · "Guía de
+ * ventanilla"): lista cada pendiente con su contador y su estado (etiqueta +
+ * color), ofrece el botón principal "Me dejaron un pendiente" que abre la
+ * guía de la farmacia (tarea 3.3), muestra el aviso legal como modal en la
+ * primera apertura y como línea fija al pie en cada apertura siguiente, y en
+ * el estado vacío presenta la introducción de la app junto al enlace terciario
+ * "¿Cómo funciona?", que abre la hoja con el mismo copy (tarea 3.8).
  *
  * El almacén se lee en el constructor **y** en `ionViewWillEnter` (ver ahí).
  */
 @Component({
   selector: 'app-inicio',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, AvisoLegal, EstadoChip],
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, AvisoLegal, ComoFunciona, EstadoChip],
   templateUrl: './inicio.html',
   styleUrl: './inicio.scss',
 })
@@ -45,6 +48,8 @@ export class Inicio implements OnDestroy, ViewWillEnter {
   readonly error = signal<string | null>(null);
   /** null mientras carga; false = primera apertura (modal); true = línea al pie. */
   readonly avisoAceptado = signal<boolean | null>(null);
+  /** Hoja de la introducción (tarea 3.8): abierta desde "¿Cómo funciona?". */
+  readonly comoFunciona = signal(false);
 
   /** Reloj compartido: el contador se refresca cada minuto (design · "Estado derivado"). */
   private readonly ahora = signal(new Date());
