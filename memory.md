@@ -5,9 +5,9 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-21** — **3.6 (PR #39) y fix de ciclo de vida (PR #40) mergeados**;
-> **contador con minutos listo** (`feat/contador-minutos`, PR #41, QA VERDE 315/315 + evidencia
-> en navegador); plan de **3.8** aprobado con Daniel (3 decisiones de copy cerradas); siguiente: **3.8**.
+> Última actualización: **2026-10-22** — **3.8 (introducción de la app) lista para PR #42** (QA
+> ROJO → correcciones → VERDE 0/0/0, 335/335, evidencia 8 capturas): **bloque 3 completo**.
+> Siguiente: bloque 4 (verificación en el S22 de Daniel) y decisiones de dispositivo pendientes.
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -22,18 +22,18 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
   integración) · 1.4 ✅ (PR #24) · 1.5 ✅ (PR #25).
 - **Bloque 2 (plataforma y persistencia) completo:** 2.1 ✅ (PR #26) · 2.2 ✅ (PR #27, smoke real
   en el S22) · 2.3 ✅ (PR #29, smoke Android + escritorio) · 2.4 ✅ (PR #30, flujos A/B/C en el S22).
-- **Bloque 3 (pantallas) en marcha:** 3.1 ✅ (PR #31) · 3.2 ✅ (PR #32) · 3.7 ✅ (PR #33) ·
+- **Bloque 3 (pantallas) completo:** 3.1 ✅ (PR #31) · 3.2 ✅ (PR #32) · 3.7 ✅ (PR #33) ·
   3.4 ✅ (PR #34) · 3.3 ✅ (PR #35, flujo multiagente) · 3.5 ✅ (PR #37, flujo multiagente) ·
-  3.6 ✅ (PR #39 mergeado, `main = 6e2c5db`);
+  3.6 ✅ (PR #39) · contador con minutos ✅ (PR #41) · **3.8 introducción lista para PR #42**
+  (rama `feat/3.8-introduccion`);
   orden del bloque **3.4 → 3.3 → 3.5 → 3.6 → 3.8**
   (reordenado por Daniel el 2026-10-14: la 3.3 termina en "Registrar este pendiente", así que el
-  formulario de la 3.4 debía existir antes). **PR #41** (contador con minutos, rama
-  `feat/contador-minutos`) en revisión; después sigue **3.8** (plan aprobado, decisiones de copy
-  cerradas: línea vacía en 3ª persona, label del pie, Cerrar sticky).
-- Repo sano en `main` (`632769c`); PRs #1–#40 mergeados (incluye #39: documentos 3.6; #40:
-  fix de ciclo de vida `ionViewWillEnter`; #36: créditos de desarrollador
+  formulario de la 3.4 debía existir antes).
+- Repo sano en `main` (`9c481af`); PRs #1–#41 mergeados (incluye #39: documentos 3.6; #40:
+  fix de ciclo de vida `ionViewWillEnter`; #41: contador con minutos; #36: créditos de desarrollador
   10carabal en README/`package.json`/manifest; #38: flujo multiagente en skill/comando/`AGENTS.md`);
-  una rama por tarea; **Daniel revisa y mergea**.
+  una rama por tarea; **Daniel revisa y mergea**. Siguiente fase: **bloque 4** (verificación en
+  dispositivo) + decisiones de Daniel pendientes (APK para avisos nativos, hosting de la PWA).
 - Multiagente: Claude y MiMo trabajan en el mismo repo bajo las reglas de `AGENTS.md`.
 - Tareas de instalación pura (como 0.3): **no** requieren flujo `/opsx:*`; solo ejecución +
   su verificación + PR (decisión de Daniel, 2026-10-04).
@@ -87,8 +87,9 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 ### Copy aprobado de la introducción (3.8 — aprobación de Daniel, 2026-10-14)
 
 Alternativa 2 (sujeto "la aplicación"), 3ª persona, profesional y sencillo. Verbatim, para el
-estado vacío de Inicio (tras la línea "Aún no tiene pendientes", pendiente de confirmar si esa
-línea de 3.7 pasa también a 3ª persona):
+estado vacío de Inicio tras la línea de vacío, que **también pasó a 3ª persona** (decisión de
+Daniel, 2026-10-19): "El paciente aún no tiene pendientes. Aquí verá cada pendiente con su plazo
+de 48 horas.":
 
 > **¿Qué es Pendientes48?** — Pendientes48 es una aplicación que lleva el control de los
 > medicamentos pendientes en la farmacia. Cuenta 48 horas desde el reclamo y muestra al paciente
@@ -306,6 +307,21 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   (`01-inicio-390-boton-flotante.png`); si llegaron con tildes, renombrar con
   `Rename-Item -LiteralPath` antes de adjuntar. Adjuntar en 2 lotes de ~6-7 archivos con el mismo
   `--body-file` (sobra texto, pero no falla por argumentos).
+- **En CDP, `Runtime.evaluate` con `returnByValue` NO serializa elementos**: `querySelector(...)`
+  sin `!!` devuelve objeto vacío y el poll parece TIMEOUT aunque el elemento exista — devolver
+  SIEMPRE booleano (`!!`) o string (3.8, 2026-10-22).
+- **El selector `[role="dialog"] .clase` NO matchea si `.clase` es el propio diálogo** (el
+  combinador descendiente no auto-matchea): el scrollport de la hoja ES el `[role="dialog"]` →
+  usar la clase directa (3.8, 2026-10-22).
+- **Las pruebas de sticky necesitan viewport REALISTA**: a `390×2400` la hoja de 3.8 cabía entera
+  y nunca scrolleaba → la captura "tras scroll" era inválida; con **390×844** desborda y el pie
+  sticky queda demostrado de verdad (3.8, 2026-10-22; mismo principio que el `scrollIntoView` sin
+  scroll de 3.7).
+- **Los reinicios del servidor matan los `ng serve` de captura (4201/4202)**: verificar con
+  `Invoke-WebRequest http://localhost:<p>` antes de cada corrida de capturas y re-lanzar el serve
+  en background si cayó (4 caídas en una tarde, 2026-10-22). El worktree `p48-main` (serve 4201
+  de Daniel) además puede quedar en detached HEAD tras reinicios: `git checkout main && git pull`
+  antes de servir.
 
 ## Pendientes conocidos (no bloqueantes)
 - **Fix aprobado por Daniel (opción A, 2026-10-20): `fix/2.1-ciclo-vida-listas`** — BUG confirmado
@@ -343,14 +359,25 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   "Me dejaron un pendiente" → `/ventanilla` (guía), que conduce al formulario como paso final;
   las tarjetas **ya navegan al detalle** desde 3.5; queda: orden de la lista = orden de
   claves de IndexedDB (la spec no define orden; candidato a ordenar por vencimiento).
-- **Tarea 3.8 (introducción de la app):** copy **aprobado** (ver "Copy aprobado de la
-  introducción"); falta confirmar si la línea "Aún no tiene pendientes." (2ª persona, de 3.7)
-  pasa también a 3ª. Como 3.8 va al final del bloque, el enlace a la guía de 3.3 se agrega
-  **en la propia 3.8** (entonces la 3.3 ya existe). Regla vigente: sin botones muertos.
-  **Agregar también al pie de la hoja la línea de crédito "Pendientes48 fue desarrollada por
-  10carabal."** (decisión de Daniel, 2026-10-19 — ver Decisiones de ejecución).
 
 ## Registro de actualizaciones
+- **2026-10-22** — **3.8** (`shared/como-funciona/` + `features/inicio/` + `features/guia/`):
+  introducción de la app — copy aprobado verbatim como **fuente única exportada** (`SECCIONES`),
+  dos modos con el mismo texto: **inline** (h2 por sección, tras la línea de vacío en 3ª persona,
+  solo en la rama vacía) y **hoja** (scrim, `role="dialog"` + foco con `foco-dialogo`, Escape y
+  toque fuera solo desde el scrim, secciones con h3, `ul` de 5 + `ol` de 3, y **pie sticky** con
+  el enlace "Ver la guía: Me dejaron un pendiente" a `/ventanilla` + crédito "Pendientes48 fue
+  desarrollada por 10carabal." + Cerrar). Botón terciario "¿Cómo funciona?" persistente en la
+  cabecera de Inicio (con y sin pendientes); la instancia de diálogo va ANTES de `.inicio-aviso`
+  en el DOM (el aviso legal queda encima); galería de demo en `/guia` con Router cableado.
+  **QA (flujo multiagente): ROJO** — 1 mayor (la hoja quedaba abierta al volver de la guía → el
+  binding cierra `comoFunciona` **antes** de navegar + test nuevo) + 2 menores (el sticky del
+  botón no pegaba de verdad → el **pie completo** quedó sticky en el scrollport, enlace+crédito+
+  Cerrar siempre visibles sin scroll; enlace muerto en la galería → `irAGuia()` con Router en
+  `guia.ts`) → 1 vuelta de correcciones al mismo implementador → **re-verificación VERDE 0/0/0**.
+  Gates: `tsc` ✅, **335/335**, `openspec --strict` ✅, build **523,51 kB**. Evidencia: 8 capturas
+  390/1280, incluida la prueba dura del sticky (scroll a media hoja con el pie visible, viewport
+  844). **Bloque 3 completo** (3.1→3.8 + fix de ciclo de vida + contador con minutos).
 - **2026-10-21** — **`feat/contador-minutos`** (PR #41): el contador de 48 h ahora muestra
   minutos — `textoContador()` pinta `Faltan X h Y min` / `Vencido hace X h Y min` (**Y solo si
   > 0**, piso en ambas unidades; ramas <1 h, días y entregado intactas) vía la helper privada

@@ -179,7 +179,7 @@ describe('Inicio', () => {
     const fixture = await crear();
     const el: HTMLElement = fixture.nativeElement;
 
-    expect(el.textContent).toContain('Aún no tiene pendientes');
+    expect(el.textContent).toContain('El paciente aún no tiene pendientes');
     expect(el.textContent).toContain('plazo de 48 horas');
     expect(el.querySelector('.inicio-tarjeta')).toBeNull();
   });
@@ -286,8 +286,168 @@ describe('Inicio', () => {
     await reentrar(fixture);
 
     expect(el.querySelector('.inicio-tarjeta')).toBeNull();
-    expect(el.textContent).toContain('Aún no tiene pendientes');
+    expect(el.textContent).toContain('El paciente aún no tiene pendientes');
     expect(el.querySelector('.aviso-linea')).toBeNull();
     expect(el.querySelector('[role="dialog"]')?.textContent).toContain(AVISO_NO_ASESORIA);
+  });
+
+  it('estado vacío: la introducción completa va después de la línea de vacío', async () => {
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+    const texto = el.textContent ?? '';
+
+    const iLinea = texto.indexOf('El paciente aún no tiene pendientes');
+    const iIntro = texto.indexOf('¿Qué es Pendientes48?');
+    expect(iLinea).toBeGreaterThanOrEqual(0);
+    expect(iIntro).toBeGreaterThan(iLinea);
+
+    // Las 3 secciones en línea con h2 (el h1 es de la pantalla: h1 → h3 rompería
+    // heading-order) y sus listas verbatim.
+    const vacio = el.querySelector<HTMLElement>('.inicio-vacio')!;
+    expect([...vacio.querySelectorAll('h2')].map((h) => h.textContent?.trim())).toEqual([
+      '¿Qué es Pendientes48?',
+      'Qué puede hacer',
+      'Cómo funciona',
+    ]);
+    expect(vacio.querySelector('h3')).toBeNull();
+    expect(vacio.querySelectorAll('ul li')).toHaveLength(5);
+    expect(vacio.querySelectorAll('ol li')).toHaveLength(3);
+    // El crédito vive solo en el pie de la hoja, no en la intro en línea.
+    expect(vacio.textContent).not.toContain('Pendientes48 fue desarrollada por 10carabal.');
+  });
+
+  it('la introducción no bloquea el estado vacío: la línea y el botón principal siguen', async () => {
+    await set('preferencias', { avisoLegalAceptado: true, ayudaAvisosVista: false });
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+
+    expect(el.textContent).toContain('El paciente aún no tiene pendientes');
+    expect(boton(el, 'Me dejaron un pendiente')).toBeTruthy();
+    // único sólido de la pantalla: la intro en línea no añade botones
+    expect([...el.querySelectorAll('.p48-boton-principal')]).toHaveLength(1);
+  });
+
+  it('con pendientes no hay introducción y las tarjetas siguen intactas', async () => {
+    await set('pendiente:p1', pendiente());
+    await set('preferencias', { avisoLegalAceptado: true, ayudaAvisosVista: false });
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+
+    expect(el.querySelector('.inicio-vacio')).toBeNull();
+    expect(el.textContent).not.toContain('¿Qué es Pendientes48?');
+    expect(el.querySelector('.inicio-tarjeta')?.textContent).toContain('Losartán 50 mg');
+  });
+
+  it('en cargando y en error no se muestra la introducción', async () => {
+    // Cargando: la lista async aún no se asienta, la pantalla muestra "Cargando…".
+    const cargando = TestBed.createComponent(Inicio);
+    cargando.detectChanges();
+    const elCargando: HTMLElement = cargando.nativeElement;
+    expect(elCargando.textContent).toContain('Cargando');
+    expect(elCargando.querySelector('.inicio-vacio')).toBeNull();
+    expect(elCargando.textContent).not.toContain('¿Qué es Pendientes48?');
+
+    vi.mocked(keys).mockRejectedValueOnce(new Error('sin espacio'));
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('[role="alert"]')).toBeTruthy();
+    expect(el.querySelector('.inicio-vacio')).toBeNull();
+    expect(el.textContent).not.toContain('¿Qué es Pendientes48?');
+  });
+
+  it('el botón terciario "¿Cómo funciona?" está en cabecera con y sin pendientes y abre la hoja', async () => {
+    await set('preferencias', { avisoLegalAceptado: true, ayudaAvisosVista: false });
+    const sinDatos = await crear();
+    const el: HTMLElement = sinDatos.nativeElement;
+
+    const abrir = boton(el, '¿Cómo funciona?');
+    expect(abrir.classList.contains('p48-boton-terciario')).toBe(true);
+    expect(abrir.classList.contains('p48-boton-principal')).toBe(false);
+    expect(el.querySelector('[role="dialog"]')).toBeNull();
+
+    abrir.click();
+    sinDatos.detectChanges();
+    expect(el.querySelector('[role="dialog"]')).toBeTruthy();
+
+    // Con pendientes en la lista, el mismo enlace sigue abriendo la hoja.
+    await set('pendiente:p1', pendiente());
+    const conDatos = await crear();
+    const el2: HTMLElement = conDatos.nativeElement;
+    boton(el2, '¿Cómo funciona?').click();
+    conDatos.detectChanges();
+    expect(el2.querySelector('.inicio-tarjeta')).toBeTruthy();
+    expect(el2.querySelector('[role="dialog"]')).toBeTruthy();
+  });
+
+  it('Escape y el toque fuera cierran la hoja desde Inicio', async () => {
+    await set('preferencias', { avisoLegalAceptado: true, ayudaAvisosVista: false });
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+
+    boton(el, '¿Cómo funciona?').click();
+    fixture.detectChanges();
+    expect(el.querySelector('[role="dialog"]')).toBeTruthy();
+
+    el.querySelector<HTMLElement>('[role="dialog"]')!.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+    );
+    fixture.detectChanges();
+    expect(el.querySelector('[role="dialog"]')).toBeNull();
+
+    boton(el, '¿Cómo funciona?').click();
+    fixture.detectChanges();
+    expect(el.querySelector('[role="dialog"]')).toBeTruthy();
+
+    el.querySelector<HTMLElement>('.hoja-fondo')!.click();
+    fixture.detectChanges();
+    expect(el.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('la hoja muestra el crédito exacto y el enlace del pie navega a la guía', async () => {
+    await set('preferencias', { avisoLegalAceptado: true, ayudaAvisosVista: false });
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+    boton(el, '¿Cómo funciona?').click();
+    fixture.detectChanges();
+
+    expect(el.textContent).toContain('Pendientes48 fue desarrollada por 10carabal.');
+    const enlace = el.querySelector<HTMLAnchorElement>('.hoja-caja a')!;
+    expect(enlace.textContent?.trim()).toBe('Ver la guía: Me dejaron un pendiente');
+    expect(enlace.getAttribute('href')).toBe('/ventanilla');
+
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    enlace.click();
+
+    expect(navegar).toHaveBeenCalledWith('/ventanilla');
+  });
+
+  it('con la hoja abierta sigue habiendo exactamente un botón principal sólido en Inicio', async () => {
+    await set('pendiente:p1', pendiente());
+    await set('preferencias', { avisoLegalAceptado: true, ayudaAvisosVista: false });
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+
+    boton(el, '¿Cómo funciona?').click();
+    fixture.detectChanges();
+
+    expect([...el.querySelectorAll('.p48-boton-principal')]).toHaveLength(1);
+    expect(el.querySelector('[role="dialog"] .p48-boton-principal')).toBeNull();
+  });
+
+  it('al navegar desde el enlace del pie la hoja se cierra: volver de la guía no la reencuentra', async () => {
+    await set('preferencias', { avisoLegalAceptado: true, ayudaAvisosVista: false });
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+    boton(el, '¿Cómo funciona?').click();
+    fixture.detectChanges();
+    expect(el.querySelector('[role="dialog"]')).toBeTruthy();
+
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    el.querySelector<HTMLAnchorElement>('.hoja-caja a')!.click();
+    fixture.detectChanges();
+
+    expect(navegar).toHaveBeenCalledWith('/ventanilla');
+    expect(fixture.componentInstance.comoFunciona()).toBe(false);
+    expect(el.querySelector('[role="dialog"]')).toBeNull();
   });
 });

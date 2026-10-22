@@ -1,10 +1,12 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { IonContent, IonHeader, IonIcon, IonTitle, IonToolbar } from '@ionic/angular';
 import { NORMAS } from '@data/normas-catalogo';
 import { AVISO_NO_ASESORIA } from '@domain/norma/aviso';
 import type { EstadoPendiente } from '@domain/pendiente/pendiente.model';
 import { AvisoLegal } from '@shared/aviso-legal/aviso-legal';
 import { AyudaAvisos } from '@shared/ayuda-avisos/ayuda-avisos';
+import { ComoFunciona } from '@shared/como-funciona/como-funciona';
 import { EstadoChip } from '@shared/estado-chip/estado-chip';
 import { NormaCard } from '@shared/norma-card/norma-card';
 
@@ -24,15 +26,27 @@ import { NormaCard } from '@shared/norma-card/norma-card';
     NormaCard,
     AvisoLegal,
     AyudaAvisos,
+    ComoFunciona,
   ],
   templateUrl: './guia.html',
   styleUrl: './guia.scss',
 })
 export class Guia {
+  private readonly router = inject(Router);
+
   readonly avisoLegal = AVISO_NO_ASESORIA;
   readonly normaMuestra = NORMAS[0];
   readonly avisoModal = signal(false);
   readonly ayudaVisible = signal(false);
+  readonly comoFuncionaHoja = signal(false);
+
+  /**
+   * El enlace del pie de la hoja navega de verdad a la guía (3.3): en la
+   * galería el componente emite sin navegar, así que el enlace no queda muerto.
+   */
+  irAGuia(): void {
+    void this.router.navigateByUrl('/ventanilla').catch(() => undefined);
+  }
 
   readonly colores = [
     { token: '--p48-fondo', valor: 'var(--p48-fondo)', uso: 'Fondo de pantalla' },

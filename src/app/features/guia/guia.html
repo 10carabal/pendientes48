@@ -218,6 +218,24 @@
         </button>
       </div>
       <app-ayuda-avisos [visible]="ayudaVisible()" (cerrado)="ayudaVisible.set(false)" />
+
+      <h3>ComoFunciona — introducción en línea (estado vacío de Inicio)</h3>
+      <div class="p48-superficie">
+        <app-como-funciona />
+      </div>
+
+      <h3>ComoFunciona — hoja "¿Cómo funciona?"</h3>
+      <div class="guia-fila">
+        <button type="button" class="p48-boton-secundario" (click)="comoFuncionaHoja.set(true)">
+          Ver hoja
+        </button>
+      </div>
+      <app-como-funciona
+        [hoja]="true"
+        [visible]="comoFuncionaHoja()"
+        (cerrado)="comoFuncionaHoja.set(false)"
+        (abrirGuia)="irAGuia()"
+      />
     </section>
 
     <section class="guia-seccion">
