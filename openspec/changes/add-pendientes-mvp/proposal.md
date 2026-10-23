@@ -30,6 +30,12 @@ papel y nadie le hace seguimiento. La ley ya le da 48 horas a la EPS para entreg
 - Exportación a Word (.docx)
 - ESLint con reglas automáticas de dependencias entre capas (en el MVP se revisan en cada PR)
 - Modo oscuro (`design.md` D15)
+- Tipos de pendiente no-médicos (citas con especialistas, insumos, procedimientos): las 3 normas de
+  `normas.json` (DL 019/2012 art. 131, Res. 1604/2013, CE 017/2026) y `plantillas.md` solo cubren
+  medicamentos → investigación de normas antes de ampliar
+- Incluir "farmacia o dispensario" en los textos legales (plantillas de queja y normas) con
+  aprobación explícita de Daniel
+- Navegación con pestañas/acciones siempre visibles (rediseño de información post-MVP)
 
 ## Impacto
 - Capacidades nuevas: `ventanilla`, `pendientes`, `reclamos`, `normas`
