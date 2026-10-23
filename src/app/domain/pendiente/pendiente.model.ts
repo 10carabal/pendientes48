@@ -5,7 +5,7 @@ export interface Pendiente {
   pacienteId: string;
   gestion?: Gestion; // si alguien gestiona por el paciente
   medicamentos: string[];
-  farmacia: string; // farmacia o gestor farmacéutico
+  farmacia: string; // farmacia o dispensario
   horaReclamo: string; // ISO; inicia el plazo; nunca futura
   numeroComprobante?: string;
   fotoComprobanteKey?: string; // clave del Blob en IndexedDB

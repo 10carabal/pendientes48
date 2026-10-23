@@ -20,7 +20,7 @@ describe('pendiente.model', () => {
     const evento: EventoGuardado = {
       en: '2026-10-05T09:00:00.000Z',
       tipo: 'creado',
-      texto: 'Pendiente registrado en la farmacia',
+      texto: 'Registraste el pendiente',
     };
     const pendiente: Pendiente = {
       id: 'pen-1',

@@ -91,5 +91,6 @@ describe('ics', () => {
     expect(ics).toContain('SUMMARY:Vence el plazo de 48 horas - Droguería central');
     expect(ics).toContain('LOCATION:Droguería central');
     expect(ics).toContain('Medicamentos: Losartán 50 mg\\, Metformina.');
+    expect(ics).toContain('Farmacia o dispensario: Droguería central.');
   });
 });
