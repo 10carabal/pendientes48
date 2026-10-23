@@ -5,9 +5,10 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-22** — **3.8 (introducción de la app) lista para PR #42** (QA
-> ROJO → correcciones → VERDE 0/0/0, 335/335, evidencia 8 capturas): **bloque 3 completo**.
-> Siguiente: bloque 4 (verificación en el S22 de Daniel) y decisiones de dispositivo pendientes.
+> Última actualización: **2026-10-23** — **5.1 (copy "farmacia o dispensario") lista para PR**
+> (flujo multiagente: plan → implementación → corrección → VERDE 0/0/0, 335/335, 523.51 kB):
+> **primer ciclo del bloque 5** (retroalimentación de probadores). Siguiente: 5.2 (navegación) y
+> 5.3 (toasts); el bloque 4 sigue esperando a Daniel en el S22.
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -83,8 +84,10 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 | Introducción de la app en el **estado vacío de Inicio** + hoja "¿Cómo funciona?" (enlace terciario persistente en la cabecera), como tarea 3.8 **al final del bloque 3** (primero iba a salir tras 3.7) | evita un segundo bloqueo tras el aviso legal (onboarding descartado), ayuda en el momento exacto en que el usuario no tiene nada que hacer y no duplica la guía de 3.3; al final del bloque para que el copy no prometa pantallas inexistentes (decisiones de Daniel, 2026-10-14) |
 | Copy de la introducción: **Alternativa 2** (sujeto "la aplicación"), 3ª persona, profesional y sencillo para usuarios de la 3ª edad; aviso **solo al vencer** | la regla "usted" de `design.md` solo aplica a `normas.json`; texto completo en "Copy aprobado de la introducción" más abajo (aprobación de Daniel, 2026-10-14) |
 | **Marca de desarrollador "10carabal"** en README (`## Créditos`), `package.json` (`author`) y `manifest.webmanifest` (`author`); la línea visible al usuario se agrega en la 3.8 | proyecto sin interés económico: la marca debe estar presente sin tocar alcance ni tiempo; fuera de `src/` = cero impacto en bundle/gates (aprobación de Daniel, 2026-10-19) |
+| **Bloque 5 (retroalimentación de probadores) dentro del mismo change**, tareas 5.1–5.3, ejecutándose antes del archive 4.7 y en orden secuencial (5.1↔5.3 comparten `pendiente-form`; 5.1↔5.2 comparten `ventanilla`) | feedback del usuario real (2026-10-22) aprobado por Daniel dentro del MVP; la numeración 5.x evita la colisión con "Bloque 4 — Verificación" sin renumerar nada (decisión de coordinación, 2026-10-23) |
 
-### Copy aprobado de la introducción (3.8 — aprobación de Daniel, 2026-10-14)
+### Copy aprobado de la introducción (3.8 — aprobación de Daniel, 2026-10-14; "farmacia" →
+"farmacia o dispensario" en 2026-10-22, Bloque 5 5.1)
 
 Alternativa 2 (sujeto "la aplicación"), 3ª persona, profesional y sencillo. Verbatim, para el
 estado vacío de Inicio tras la línea de vacío, que **también pasó a 3ª persona** (decisión de
@@ -92,11 +95,12 @@ Daniel, 2026-10-19): "El paciente aún no tiene pendientes. Aquí verá cada pen
 de 48 horas.":
 
 > **¿Qué es Pendientes48?** — Pendientes48 es una aplicación que lleva el control de los
-> medicamentos pendientes en la farmacia. Cuenta 48 horas desde el reclamo y muestra al paciente
-> el plazo que le queda.
+> medicamentos pendientes en la farmacia o dispensario. Cuenta 48 horas desde el reclamo y muestra
+> al paciente el plazo que le queda.
 >
-> **Qué puede hacer** — Registrar cada pendiente con sus medicamentos, la farmacia y la hora del
-> reclamo · Mostrar el tiempo que queda y la fecha de vencimiento · Avisar al paciente cuando se
+> **Qué puede hacer** — Registrar cada pendiente con sus medicamentos, la farmacia o dispensario y
+> la hora del reclamo · Mostrar el tiempo que queda y la fecha de vencimiento · Avisar al paciente
+> cuando se
 > acaben las 48 horas · Preparar el texto y el PDF para reclamar ante la EPS o Supersalud ·
 > Guardar los datos del paciente para no volver a pedirlos.
 >
@@ -109,6 +113,17 @@ botón **Cerrar** (terciario) + Escape + toque fuera; desde que exista la 3.3 se
 enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso paso a paso (3.3).
 
 ## Lecciones del entorno
+- **Auditoría de copy en bloque:** antes de cambiar un string repartido en pantallas, ubicar la
+  **fuente única** (p. ej. el copy de la introducción vive exportado en
+  `shared/como-funciona/como-funciona.ts`) y hacer `grep` de la frase en `src/` **y en
+  `openspec/specs/` + `specs/` del change**: los deltas de spec citan strings que también hay que
+  actualizar, y los fixtures de specs que afirman copy viejo (p. ej. `pendiente.model.spec.ts`) se
+  corrigen aunque no sean la fuente (5.1, 2026-10-23).
+- **`.angular/cache` corrupta infla `ng build`** (~569 kB vs 523 kB reales: falso positivo del
+  presupuesto de 550 kB): `Remove-Item -Recurse -Force .angular\cache` y re-ejecutar (5.1, 2026-10-23).
+- **El hook de Console Ninja (extensión VS Code) puede tumbar `ng serve`** tras un reinicio de
+  sistema (WebSocket 1006 en su build hook): arrancar el serve con `Remove-Item env:NODE_OPTIONS`
+  previo para que no se inyecte (5.1, 2026-10-23).
 - **`npm ci` siempre** después de un merge que toque `package-lock.json`; sin eso fallan `ng build`,
   `ng test` y `cap sync` por dependencias locales viejas.
 - **`ng serve` no sirve el service worker**: para verificar la PWA → `ng build` + `npx http-server
