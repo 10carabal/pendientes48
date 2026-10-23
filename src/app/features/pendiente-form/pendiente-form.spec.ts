@@ -160,7 +160,7 @@ function llenar(el: HTMLElement, cambios: Partial<Record<'direccion' | 'hora', s
   escribir(el, 'Paciente', 'px');
   escribir(el, 'Dirección de entrega', cambios.direccion ?? 'Cra 9 # 8-7');
   escribir(el, 'Medicamento', 'Losartán 50 mg');
-  escribir(el, 'Farmacia o gestor', 'Droguería La 12');
+  escribir(el, 'Farmacia o dispensario', 'Droguería La 12');
   escribir(el, 'Hora de reclamo', cambios.hora ?? horaPasada());
 }
 
@@ -247,6 +247,7 @@ describe('PendienteForm', () => {
     expect(navegar).not.toHaveBeenCalled();
     expect(el.textContent).toContain('Falta completar: dirección de entrega.');
     expect(el.textContent).toContain('Falta completar: medicamento.');
+    expect(el.textContent).toContain('Falta completar: farmacia o dispensario.');
     expect([...el.querySelectorAll('[aria-invalid="true"]')]).toHaveLength(4); // sin paciente, dirección, medicamento ni farmacia
     expect(document.activeElement?.id).toBe('campo-pacienteId'); // el primer faltante recibe el foco
   });
@@ -344,7 +345,7 @@ describe('PendienteForm', () => {
     const navegar = navegarAPrueba();
     escribir(el, 'Dirección de entrega', 'Cra 1 # 2-3');
     escribir(el, 'Medicamento', 'Metformina 850 mg');
-    escribir(el, 'Farmacia o gestor', 'Farmacia del Barrio');
+    escribir(el, 'Farmacia o dispensario', 'Farmacia del Barrio');
     await enviar(fixture);
 
     expect(pendienteGuardado()).toMatchObject({
@@ -601,7 +602,7 @@ describe('PendienteForm', () => {
     const el: HTMLElement = fixture.nativeElement;
     const navegar = navegarAPrueba();
 
-    escribir(el, 'Farmacia o gestor', 'Farmacia del Barrio');
+    escribir(el, 'Farmacia o dispensario', 'Farmacia del Barrio');
     await enviar(fixture);
 
     expect(el.querySelector('[role="dialog"]')).toBeNull();

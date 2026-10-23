@@ -55,7 +55,7 @@ const REQUERIDOS: ReadonlyArray<{ campo: CampoTexto; etiqueta: string }> = [
   { campo: 'pacienteId', etiqueta: 'paciente' },
   { campo: 'direccionEntrega', etiqueta: 'dirección de entrega' },
   { campo: 'medicamentos', etiqueta: 'medicamento' },
-  { campo: 'farmacia', etiqueta: 'farmacia o gestor' },
+  { campo: 'farmacia', etiqueta: 'farmacia o dispensario' },
   { campo: 'horaReclamo', etiqueta: 'hora de reclamo' },
 ];
 

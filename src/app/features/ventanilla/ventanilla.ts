@@ -15,9 +15,9 @@ import { NormaCard } from '@shared/norma-card/norma-card';
 /** Línea de apoyo del paso 1 (copia funcional: enlaza el comprobante con el paso 3). */
 const APOYO_COMPROBANTE = 'Pida también el número del comprobante: puede anotarlo en el paso 3.';
 
-/** Línea de apoyo del paso 2: aprobada verbatim (decisión Daniel, 2026-10-14). */
+/** Línea de apoyo del paso 2: aprobada verbatim (decisión Daniel, 2026-10-14; copy actualizado 2026-10-22, Bloque 5). */
 const APOYO_DOMICILIO =
-  'Si usted autoriza, la EPS debe entregar el medicamento en su casa dentro de las 48 horas. Pídelo en la farmacia antes de irte.';
+  'Si usted autoriza, la EPS debe entregar el medicamento en su casa dentro de las 48 horas. Pídelo en la farmacia o dispensario antes de irte.';
 
 /** Aviso no bloqueante del paso 3: la foto es opcional y el botón final sigue activo. */
 const AVISO_FOTO = 'No se pudo tomar la foto. Puede elegir de la galería o anotar el número.';

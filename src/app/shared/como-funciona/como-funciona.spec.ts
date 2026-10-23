@@ -5,9 +5,9 @@ import { ComoFunciona } from './como-funciona';
 const TITULOS = ['¿Qué es Pendientes48?', 'Qué puede hacer', 'Cómo funciona'];
 const PARRAFO =
   'Pendientes48 es una aplicación que lleva el control de los medicamentos pendientes en la ' +
-  'farmacia. Cuenta 48 horas desde el reclamo y muestra al paciente el plazo que le queda.';
+  'farmacia o dispensario. Cuenta 48 horas desde el reclamo y muestra al paciente el plazo que le queda.';
 const PUEDE = [
-  'Registrar cada pendiente con sus medicamentos, la farmacia y la hora del reclamo',
+  'Registrar cada pendiente con sus medicamentos, la farmacia o dispensario y la hora del reclamo',
   'Mostrar el tiempo que queda y la fecha de vencimiento',
   'Avisar al paciente cuando se acaben las 48 horas',
   'Preparar el texto y el PDF para reclamar ante la EPS o Supersalud',

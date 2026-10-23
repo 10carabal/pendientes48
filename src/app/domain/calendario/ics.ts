@@ -28,7 +28,7 @@ function escapar(texto: string): string {
 export function generarIcs(p: Pendiente, ahora: Date = new Date()): string {
   const vence = vencimiento(p.horaReclamo);
   const resumen = `Vence el plazo de 48 horas - ${p.farmacia}`;
-  const detalle = `Medicamentos: ${p.medicamentos.join(', ')}. Farmacia: ${p.farmacia}.`;
+  const detalle = `Medicamentos: ${p.medicamentos.join(', ')}. Farmacia o dispensario: ${p.farmacia}.`;
 
   const lineas = [
     'BEGIN:VCALENDAR',

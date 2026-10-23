@@ -34,10 +34,18 @@ documento, EPS, teléfono, correo, dirección) y reutilizarlos en cada pendiente
 - AND se cancelan todos los avisos programados
 
 ### Requirement: Registro de pendiente
-El sistema SHALL registrar un pendiente con: paciente, medicamento(s), farmacia o gestor,
+El sistema SHALL registrar un pendiente con: paciente, medicamento(s), farmacia o dispensario,
 hora de reclamo, número de comprobante (opcional), foto del comprobante (opcional),
 dirección de entrega (obligatoria, precargada desde el perfil del paciente)
 y si autorizó entrega a domicilio.
+
+#### Scenario: El lugar en la interfaz se llama "farmacia o dispensario"
+- WHEN la app se refiere al lugar donde se reclamó el medicamento en una etiqueta, un mensaje,
+  el copy de la introducción o el detalle del recordatorio del calendario
+- THEN la frase usada es "farmacia o dispensario" y ninguna etiqueta visible usa "gestor" para el lugar
+- AND "Lo gestiono por otra persona" y "Quien gestiona" (la gestión por un tercero) no cambian
+- AND los textos legales de `normas.json` y `plantillas.md` quedan intactos
+  (su actualización requiere aprobación explícita y queda pendiente de fase 2, ver `proposal.md`)
 
 #### Scenario: Hora de reclamo por defecto
 - WHEN el usuario registra un pendiente
@@ -159,3 +167,19 @@ El sistema SHALL permitir editar y borrar un pendiente registrado.
 - WHEN el usuario pide borrar un pendiente
 - THEN la app pide confirmación
 - AND al confirmar se cancela el aviso programado, se elimina la foto del comprobante y se borra el pendiente
+
+### Requirement: Confirmación visual de las acciones
+El sistema SHALL confirmar cada acción exitosa con un aviso breve (`ion-toast`): duración de
+3000 ms, cierre al tocarlo, `role="status"` (aria-live), posición inferior, texto de 18 px o más
+y solo tokens `--p48-*` con las clases de `src/theme/patrones.scss`.
+
+#### Scenario: Textos de confirmación
+- WHEN se guarda un pendiente nuevo, se guardan sus cambios, se borra un pendiente,
+  se guarda un perfil, se borra un perfil o se guarda una nota en la bitácora
+- THEN el aviso muestra, respectivamente, "Pendiente guardado", "Cambios guardados",
+  "Pendiente borrado", "Perfil guardado", "Perfil borrado" o "Nota guardada"
+
+#### Scenario: Borrar todos mis datos sin aviso
+- WHEN el usuario confirma "Borrar todos mis datos"
+- THEN NO se muestra ningún aviso de confirmación
+- AND la doble confirmación y el estado vacío con el modal legal son la confirmación de la acción

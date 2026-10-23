@@ -194,7 +194,7 @@ espaciados sueltos), y cada pantalla se verifica a 390 px y a 1280 px contra el 
     sin botones muertos, sin texto legal hardcodeado (D6) y sin bloquear el estado vacío
 
 ## Bloque 4 — Verificación (la haces tú, en un celular real)
-- [ ] 4.1 Flujo completo en Android: registrar → vence (horaReclamo editada a 47 h 59 min atrás) → notificación → queja EPS → queja Supersalud
+- [ ] 4.1 Flujo completo en Android: registrar → vence (horaReclamo editada a 47 h 50 min atrás, quedan 10 min para el aviso) → notificación → queja EPS → queja Supersalud
   - Verificación: cada paso queda en la bitácora y el PDF del paso 2 cita la queja ante la EPS
 - [ ] 4.2 Flujo completo en la PWA, incluido el `.ics` en el calendario del celular
   - Verificación: el evento aparece en el calendario a la hora de vencimiento
@@ -210,3 +210,57 @@ espaciados sueltos), y cada pantalla se verifica a 390 px y a 1280 px contra el 
   - Verificación: el flujo 4.2 corre de principio a fin sin intervención
 - [ ] 4.7 `/opsx:archive` del change `add-pendientes-mvp`
   - Verificación: las specs quedan en `openspec/specs/` y el change en el archivo
+
+## Bloque 5 — Retroalimentación de probadores (2026-10-22)
+Bloque aprobado por Daniel dentro del MVP; decisiones cerradas (no reabrir). Nace de la
+verificación del bloque 4 (4.5, usuario real) y se ejecuta antes del archive 4.7. Sin dependencias
+nuevas. Van en orden (no en paralelo): 5.1 y 5.3 comparten `pendiente-form`; 5.1 y 5.2 comparten
+`ventanilla`.
+- [x] 5.1 Copy "farmacia o dispensario" en toda la interfaz
+  - La app, al referirse al lugar, usa "farmacia o dispensario": la etiqueta visible "Farmacia o
+    gestor" pasa a "Farmacia o dispensario" (ÚNICA etiqueta visible con "gestor"; "Lo gestiono por
+    otra persona" y "Quien gestiona" son otro concepto y NO cambian), el mensaje de campo faltante
+    ("Falta completar: farmacia o dispensario."), el copy de la introducción y de la hoja "¿Cómo
+    funciona?", la línea de apoyo de la guía ("Pídelo en la farmacia o dispensario antes de irte."),
+    la etiqueta del detalle del `.ics` y el comentario del modelo; los specs unitarios que afirman
+    esos strings se actualizan en el mismo PR. Texto legal INTACTO (`normas.json`,
+    `plantillas.md`/`plantillas.ts`, `PIE_PDF`, `AVISO_NO_ASESORIA`): usar "farmacia o
+    dispensario" en los textos legales queda como pendiente post-MVP (`proposal.md`).
+  - Verificación: los 4 gates en verde (`npx tsc -p tsconfig.spec.json --noEmit`,
+    `ng test --watch=false`, `npx openspec validate add-pendientes-mvp --strict`,
+    `ng build` < 550 kB); evidencia con capturas a 390 px y 1280 px del formulario (etiqueta y
+    error obligatorio), de la hoja/introducción "¿Cómo funciona?", de la guía de ventanilla y del
+    detalle del `.ics`; `grep -i "gestor"` en `src/app` no deja etiquetas visibles con "gestor"
+    para el lugar; flujo manual en PWA y APK: registrar un pendiente escribiendo el campo y
+    forzando el error "Falta completar: farmacia o dispensario."
+  - Notas de trazabilidad (2026-10-23): 4 gates verdes (335/335 tests, 523.51 kB). `ics.ts` sin
+    cambio: SUMMARY/LOCATION nunca nombraban el lugar. Fuente única del copy de la
+    introducción/hoja: `shared/como-funciona/como-funciona.ts`. Auditoría `grep -i gestor`: los
+    restantes ("Lo gestiono por otra persona", "Quien gestiona") son el concepto de gestión, no el
+    lugar. Flujo manual hecho en PWA (campo escrito + error forzado); el chequeo manual en APK
+    queda junto a la prueba del bloque 4 en el S22.
+- [ ] 5.2 Navegación: retorno visible y salida confirmada
+  - Botón "Volver" visible en `/pacientes` y `/ventanilla` (hoy no tienen retorno visible); botón
+    físico/gesto de Android manejado con `Platform.backButton` de `@ionic/angular` (SIN
+    dependencias nuevas): dentro de la app retrocede; en la raíz abre diálogo de confirmación
+    "¿Salir de la app?" con botón sólido "Salir" y secundario "Cancelar"; componente compartido
+    agregado a la ruta dev `/guia`.
+  - Verificación: los 4 gates en verde (`npx tsc -p tsconfig.spec.json --noEmit`,
+    `ng test --watch=false`, `npx openspec validate add-pendientes-mvp --strict`,
+    `ng build` < 550 kB); evidencia con capturas a 390 px y 1280 px del botón "Volver" en
+    `/pacientes` y `/ventanilla` y del diálogo "¿Salir de la app?" (con "Salir" sólido y
+    "Cancelar"); matriz keyevent 4 en Galaxy S22 documentada (atrás en cada pantalla y en la raíz
+    → diálogo, con "Salir" y "Cancelar"); el componente aparece en `/guia`; flujo manual en PWA y
+    APK: retroceso sin romper la navegación y salida confirmada solo en la raíz
+- [ ] 5.3 Toasts de confirmación de las acciones
+  - `ion-toast` (`@ionic/angular` ya instalado): duración 3000 ms, cierre con tap,
+    `role="status"` (aria-live), texto ≥ 18 px, solo tokens `--p48-*` y clases de
+    `src/theme/patrones.scss`, posición inferior. Copy exacto: "Pendiente guardado", "Cambios
+    guardados", "Pendiente borrado", "Perfil guardado", "Perfil borrado", "Nota guardada".
+    EXCLUIDO: "Borrar todos mis datos" NO lleva toast (ya hay doble confirmación + estado vacío
+    con modal legal).
+  - Verificación: los 4 gates en verde (`npx tsc -p tsconfig.spec.json --noEmit`,
+    `ng test --watch=false`, `npx openspec validate add-pendientes-mvp --strict`,
+    `ng build` < 550 kB); evidencia con capturas a 390 px y 1280 px de los 6 toasts (al menos uno
+    por pantalla afectada); flujo manual en PWA y APK recorriendo los 6 textos y comprobando que
+    "Borrar todos mis datos" NO muestra toast

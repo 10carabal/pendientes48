@@ -171,7 +171,7 @@ describe('Ventanilla', () => {
     // El texto legal no está hardcodeado: llega por input (D6).
     expect(tarjeta?.querySelector('.norma-aviso')?.textContent?.trim()).toBe(AVISO_NO_ASESORIA);
     expect(el.textContent).toContain(
-      'Si usted autoriza, la EPS debe entregar el medicamento en su casa dentro de las 48 horas.',
+      'Si usted autoriza, la EPS debe entregar el medicamento en su casa dentro de las 48 horas. Pídelo en la farmacia o dispensario antes de irte.',
     );
   });
 

@@ -24,7 +24,8 @@ interface Seccion {
 /**
  * Copy aprobado de la introducción, verbatim y en 3ª persona
  * (memory.md · "Copy aprobado de la introducción"; decisiones de Daniel,
- * 2026-10-14 y 2026-10-19). **Única fuente del copy**: la usa la versión en
+ * 2026-10-14 y 2026-10-19; copy actualizado 2026-10-22, Bloque 5).
+ * **Única fuente del copy**: la usa la versión en
  * línea (estado vacío de Inicio) y la hoja "¿Cómo funciona?". Sin contenido
  * legal (D6): el texto vive aquí, no en `normas.json`.
  */
@@ -33,12 +34,12 @@ export const SECCIONES: readonly Seccion[] = [
     titulo: '¿Qué es Pendientes48?',
     parrafo:
       'Pendientes48 es una aplicación que lleva el control de los medicamentos pendientes en la ' +
-      'farmacia. Cuenta 48 horas desde el reclamo y muestra al paciente el plazo que le queda.',
+      'farmacia o dispensario. Cuenta 48 horas desde el reclamo y muestra al paciente el plazo que le queda.',
   },
   {
     titulo: 'Qué puede hacer',
     items: [
-      'Registrar cada pendiente con sus medicamentos, la farmacia y la hora del reclamo',
+      'Registrar cada pendiente con sus medicamentos, la farmacia o dispensario y la hora del reclamo',
       'Mostrar el tiempo que queda y la fecha de vencimiento',
       'Avisar al paciente cuando se acaben las 48 horas',
       'Preparar el texto y el PDF para reclamar ante la EPS o Supersalud',
