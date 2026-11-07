@@ -5,10 +5,10 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-10-23** — **5.1 (copy "farmacia o dispensario") lista para PR**
-> (flujo multiagente: plan → implementación → corrección → VERDE 0/0/0, 335/335, 523.51 kB):
-> **primer ciclo del bloque 5** (retroalimentación de probadores). Siguiente: 5.2 (navegación) y
-> 5.3 (toasts); el bloque 4 sigue esperando a Daniel en el S22.
+> Última actualización: **2026-11-07** — **5.2 (navegación: retorno visible y salida confirmada)
+> lista para PR** (plan → implementación → verificador VERDE 0/0/1, 358/358, 528.35 kB):
+> **segundo ciclo del bloque 5**. Siguiente: 5.3 (toasts); el bloque 4 sigue esperando a Daniel
+> en el S22.
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -85,6 +85,11 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 | Copy de la introducción: **Alternativa 2** (sujeto "la aplicación"), 3ª persona, profesional y sencillo para usuarios de la 3ª edad; aviso **solo al vencer** | la regla "usted" de `design.md` solo aplica a `normas.json`; texto completo en "Copy aprobado de la introducción" más abajo (aprobación de Daniel, 2026-10-14) |
 | **Marca de desarrollador "10carabal"** en README (`## Créditos`), `package.json` (`author`) y `manifest.webmanifest` (`author`); la línea visible al usuario se agrega en la 3.8 | proyecto sin interés económico: la marca debe estar presente sin tocar alcance ni tiempo; fuera de `src/` = cero impacto en bundle/gates (aprobación de Daniel, 2026-10-19) |
 | **Bloque 5 (retroalimentación de probadores) dentro del mismo change**, tareas 5.1–5.3, ejecutándose antes del archive 4.7 y en orden secuencial (5.1↔5.3 comparten `pendiente-form`; 5.1↔5.2 comparten `ventanilla`) | feedback del usuario real (2026-10-22) aprobado por Daniel dentro del MVP; la numeración 5.x evita la colisión con "Bloque 4 — Verificación" sin renumerar nada (decisión de coordinación, 2026-10-23) |
+| **`@capacitor/app` como ÚNICA dependencia nueva (D1-A de 5.2)** | la cláusula pedía "sin dependencias nuevas", pero Capacitor 8 no despacha el retroceso al JS (`MainActivity` es `BridgeActivity` vacío, sin `onBackPressed`): sin el plugin oficial el back seguiría cerrando la app y "Salir" no tendría puente JS→nativo. Detectado por el planificador con evidencia de `node_modules`; aprobado por Daniel, 2026-11-07 |
+| **"Salir" = `App.exitApp()` en APK y `window.close()` con fallback en PWA (D2)** | en la PWA `window.close()` casi nunca cierra la pestaña del usuario: si no cierra, se cierra el diálogo y la app queda en la raíz (decisión de Daniel, 2026-11-07) |
+| **Alcance de "Volver" SOLO en `/pacientes` y `/ventanilla` (D3)** | la spec dice "toda pantalla que no es la raíz" pero la cláusula y el escenario solo nombran esas dos; detalle y formulario conservan su "Cancelar" propio (decisión de Daniel, 2026-11-07) |
+| **PWA: el flujo manual solo verifica el retroceso del navegador (D4)** | `Platform.backButton` no emite cuando no es híbrido (Ionic llama `blockHardwareBackButton()`), así que el diálogo "¿Salir de la app?" es evidencia exclusiva del APK (decisión de Daniel, 2026-11-07) |
+| **Prioridad de decisión: la retroalimentación de usuarios potenciales gana sobre el planteamiento inicial; ambigüedades grandes se escalan a Daniel** | regla de Daniel para el resto del MVP (2026-11-05) |
 
 ### Copy aprobado de la introducción (3.8 — aprobación de Daniel, 2026-10-14; "farmacia" →
 "farmacia o dispensario" en 2026-10-22, Bloque 5 5.1)
@@ -337,6 +342,28 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   en background si cayó (4 caídas en una tarde, 2026-10-22). El worktree `p48-main` (serve 4201
   de Daniel) además puede quedar en detached HEAD tras reinicios: `git checkout main && git pull`
   antes de servir.
+- **La cadena `ionBackButton` de Ionic tiene DOS fases**: los listeners (plataforma, overlays,
+  menú) colectan con `register(prioridad, cb)` — por eso un mock de `register` recibe VARIAS
+  llamadas, no una — y luego el despachador de `ion-app` ejecuta de mayor a menor prioridad; un
+  handler que no llama al siguiente corta la cadena. En tests hay que replicar el despachador
+  completo, no solo dispatchear el evento (5.2, 2026-11-07).
+- **`Platform.backButton` no emite en PWA** (Ionic llama `blockHardwareBackButton()` cuando no es
+  híbrido) y en el APK requiere `@capacitor/app`: Capacitor 8 no despacha el retroceso al JS por
+  sí solo (D1-A de 5.2, 2026-11-07).
+- **jsdom para tests de navegación**: `history.length` NO crece con `pushState` (fijar la
+  propiedad con `Object.defineProperty` para ejercitar `location.back()`), la URL persiste entre
+  tests del mismo archivo (`history.replaceState` en `beforeEach`) y `router.url` inicial puede
+  ser `''` → `esRaiz` acepta `''` además de `/` (5.2, 2026-11-07).
+- **Los subagentes mueren en silencio con los reinicios del servidor** (hasta 4 h sin aviso):
+  tras cada reinicio verificar el árbol con `git status`, y lanzar al verificador en foreground
+  con los 4 gates encadenados en UN solo comando para acotar la ventana de riesgo (5.2,
+  2026-11-07).
+- **Colisión de nombres en specs**: el componente raíz `App` tapa al `App` de `@capacitor/app` →
+  importarlo como `PluginApp` (5.2, 2026-11-07).
+- **Evidencia UI sin dispositivo**: Chrome headless (`--headless=new --remote-debugging-port`) +
+  CDP (`Emulation.setDeviceMetricsOverride` + `Page.captureScreenshot`) da capturas 390/1280 de
+  la PWA; ojo: `ng serve` puede quedar escuchando solo en `[::1]` → usar `localhost`, no
+  `127.0.0.1` (5.2, 2026-11-07).
 
 ## Pendientes conocidos (no bloqueantes)
 - **Fix aprobado por Daniel (opción A, 2026-10-20): `fix/2.1-ciclo-vida-listas`** — BUG confirmado

@@ -239,7 +239,7 @@ nuevas. Van en orden (no en paralelo): 5.1 y 5.3 comparten `pendiente-form`; 5.1
     restantes ("Lo gestiono por otra persona", "Quien gestiona") son el concepto de gestión, no el
     lugar. Flujo manual hecho en PWA (campo escrito + error forzado); el chequeo manual en APK
     queda junto a la prueba del bloque 4 en el S22.
-- [ ] 5.2 Navegación: retorno visible y salida confirmada
+- [x] 5.2 Navegación: retorno visible y salida confirmada
   - Botón "Volver" visible en `/pacientes` y `/ventanilla` (hoy no tienen retorno visible); botón
     físico/gesto de Android manejado con `Platform.backButton` de `@ionic/angular` (SIN
     dependencias nuevas): dentro de la app retrocede; en la raíz abre diálogo de confirmación
@@ -252,6 +252,18 @@ nuevas. Van en orden (no en paralelo): 5.1 y 5.3 comparten `pendiente-form`; 5.1
     "Cancelar"); matriz keyevent 4 en Galaxy S22 documentada (atrás en cada pantalla y en la raíz
     → diálogo, con "Salir" y "Cancelar"); el componente aparece en `/guia`; flujo manual en PWA y
     APK: retroceso sin romper la navegación y salida confirmada solo en la raíz
+  - Cierre 2026-11-07 (flujo multiagente): decisiones de Daniel **D1-A** (`@capacitor/app` como
+    única dependencia nueva aprobada — Capacitor 8 no despacha el retroceso al JS, detectado por
+    el planificador), **D2** ("Salir" = `App.exitApp()` en APK / `window.close()` con fallback en
+    PWA), **D3** ("Volver" solo en las dos pantallas nombradas) y **D4** (PWA: solo retroceso del
+    navegador). Gates: `tsc` 0, **358/358 tests**, `openspec --strict` válido, build **528.35 kB**
+    (corridos por el coordinador y re-ejecutados por el verificador). Verificador en sesión nueva:
+    **VERDE** (0 bloqueantes / 0 mayores / 1 menor aceptado: la demo de `BotonVolver` en `/guia`
+    es un botón vivo — comportamiento decidido en el plan). Evidencia: 8 capturas 390/1280
+    (`Volver` en ambas pantallas, diálogo "¿Salir de la app?" y `/guia`) vía Chrome headless +
+    CDP. **Pendiente en el S22:** matriz keyevent 4 con el APK nuevo + flujo manual de retroceso
+    y salida (junto con la prueba del bloque 4, igual que 5.1); el chequeo de "Volver" sin perder
+    datos ya está cubierto por specs (borrador y listado sobreviven al retroceso).
 - [ ] 5.3 Toasts de confirmación de las acciones
   - `ion-toast` (`@ionic/angular` ya instalado): duración 3000 ms, cierre con tap,
     `role="status"` (aria-live), texto ≥ 18 px, solo tokens `--p48-*` y clases de
