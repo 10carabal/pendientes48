@@ -236,6 +236,28 @@
         (cerrado)="comoFuncionaHoja.set(false)"
         (abrirGuia)="irAGuia()"
       />
+
+      <h3>BotonVolver — retorno visible</h3>
+      <p class="guia-parrafo">
+        Botón secundario de <code>/pacientes</code> y <code>/ventanilla</code>: regresa a la
+        pantalla anterior dentro de la app.
+      </p>
+      <div class="p48-superficie">
+        <app-boton-volver />
+      </div>
+
+      <h3>SalidaApp — diálogo "¿Salir de la app?"</h3>
+      <div class="guia-fila">
+        <button type="button" class="p48-boton-secundario" (click)="salidaDemo.set(true)">
+          Ver diálogo
+        </button>
+      </div>
+      <!-- En la galería "Salir" solo cierra la demo: el cierre real vive en la raíz. -->
+      <app-salida-app
+        [visible]="salidaDemo()"
+        (salir)="salidaDemo.set(false)"
+        (cancelar)="salidaDemo.set(false)"
+      />
     </section>
 
     <section class="guia-seccion">

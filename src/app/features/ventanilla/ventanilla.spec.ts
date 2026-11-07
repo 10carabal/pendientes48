@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { CameraErrorCode } from '@capacitor/camera';
 import { guardarBorrador, leerBorrador, limpiarBorrador } from '@data/borrador-store';
@@ -95,6 +96,11 @@ function boton(el: HTMLElement, texto: string): HTMLButtonElement {
   const b = [...el.querySelectorAll('button')].find((x) => x.textContent?.trim() === texto);
   expect(b, `botón "${texto}"`).toBeTruthy();
   return b as HTMLButtonElement;
+}
+
+/** jsdom arranca con historia de 1 (ver `retroceder.spec.ts`): el retroceso real usa `location.back()`. */
+function forzarHistorial(largo: number): void {
+  Object.defineProperty(window.history, 'length', { configurable: true, value: largo });
 }
 
 function navegarAPrueba(): ReturnType<typeof vi.spyOn> {
@@ -335,5 +341,28 @@ describe('Ventanilla', () => {
 
     expect(el.textContent).toContain('Foto lista');
     expect((el.querySelector('#ventanilla-numero') as HTMLInputElement).value).toBe('7788');
+  });
+
+  it('muestra el botón "Volver" y al tocarlo retrocede sin perder el borrador', async () => {
+    guardarBorrador({ numeroComprobante: '7788' });
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+
+    const volver = boton(el, 'Volver');
+    expect(volver.classList.contains('p48-boton-secundario')).toBe(true); // no compite con el sólido
+    expect(el.querySelectorAll('.p48-boton-principal')).toHaveLength(1); // único sólido: "Registrar este pendiente"
+
+    forzarHistorial(2);
+    try {
+      const atras = vi.spyOn(TestBed.inject(Location), 'back');
+      volver.click();
+      expect(atras).toHaveBeenCalledTimes(1);
+    } finally {
+      delete (window.history as unknown as Record<string, unknown>)['length'];
+    }
+
+    // El borrador en memoria sobrevive al retroceso (spec: sin perder datos).
+    expect(leerBorrador().numeroComprobante).toBe('7788');
+    expect(el.textContent).toContain('Me dejaron un pendiente');
   });
 });

@@ -10,6 +10,7 @@ import { guardarBorrador, leerBorrador } from '@data/borrador-store';
 import { paraPaso } from '@data/normas-catalogo';
 import { AVISO_NO_ASESORIA } from '@domain/norma/aviso';
 import { elegirFoto as elegirDeLaGaleria, tomarFoto as tomarConLaCamara } from '@platform/camara';
+import { BotonVolver } from '@shared/boton-volver/boton-volver';
 import { NormaCard } from '@shared/norma-card/norma-card';
 
 /** Línea de apoyo del paso 1 (copia funcional: enlaza el comprobante con el paso 3). */
@@ -33,7 +34,7 @@ const AVISO_FOTO = 'No se pudo tomar la foto. Puede elegir de la galería o anot
 @Component({
   selector: 'app-ventanilla',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, NormaCard],
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, NormaCard, BotonVolver],
   templateUrl: './ventanilla.html',
   styleUrl: './ventanilla.scss',
 })

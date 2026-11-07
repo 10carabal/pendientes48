@@ -1,0 +1,38 @@
+/* Diálogo "¿Salir de la app?" (tarea 5.2): solo tokens --p48-* y clases de
+   patrones.scss. Calco de `aviso-legal` (caja centrada sobre el scrim). */
+
+:host {
+  display: block;
+}
+
+.salida-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 20; /* constante de capa: no es color, tamaño ni espaciado del sistema */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--p48-espacio-4);
+  background: var(--p48-scrim);
+}
+
+.salida-caja {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p48-espacio-4);
+  width: 100%;
+  max-width: var(--p48-ancho-modal);
+  padding: var(--p48-espacio-5);
+}
+
+.salida-titulo {
+  margin: 0;
+  font-size: var(--p48-tam-titulo);
+  font-weight: var(--p48-peso-titulo);
+  line-height: var(--p48-interlineado);
+}
+
+/* Ancho de caja: área táctil de la fila entera, sin dejar letra pequeña. */
+.salida-boton {
+  width: 100%;
+}
