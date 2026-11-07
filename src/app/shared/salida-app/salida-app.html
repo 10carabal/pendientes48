@@ -1,0 +1,29 @@
+@if (visible()) {
+  <div class="salida-fondo" (click)="tocarFuera($event)">
+    <section
+      class="salida-caja p48-superficie p48-sombra-flotante"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="salida-titulo"
+      (keydown)="atraparFoco($event)"
+      (keydown.escape)="cancelar.emit()"
+    >
+      <h2 id="salida-titulo" class="salida-titulo">¿Salir de la app?</h2>
+      <button
+        #botonSalir
+        type="button"
+        class="p48-boton-principal salida-boton"
+        (click)="salir.emit()"
+      >
+        Salir
+      </button>
+      <button
+        type="button"
+        class="p48-boton-secundario salida-boton"
+        (click)="cancelar.emit()"
+      >
+        Cancelar
+      </button>
+    </section>
+  </div>
+}

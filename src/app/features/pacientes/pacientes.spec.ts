@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { ErrorDeEscritura } from '@data/app-db';
 import type { Paciente } from '@domain/paciente/paciente.model';
@@ -84,6 +85,11 @@ function boton(el: HTMLElement, texto: string): HTMLButtonElement {
   const b = [...el.querySelectorAll('button')].find((x) => x.textContent?.trim() === texto);
   expect(b, `botón "${texto}"`).toBeTruthy();
   return b as HTMLButtonElement;
+}
+
+/** jsdom arranca con historia de 1 (ver `retroceder.spec.ts`): el retroceso real usa `location.back()`. */
+function forzarHistorial(largo: number): void {
+  Object.defineProperty(window.history, 'length', { configurable: true, value: largo });
 }
 
 function escribir(el: HTMLElement, etiqueta: string, valor: string): void {
@@ -457,5 +463,29 @@ describe('Pacientes', () => {
     await reentrar(fixture);
     expect(el.textContent).toContain('Aún no tiene perfiles');
     expect(el.textContent).not.toContain('Ana Pérez');
+  });
+
+  it('muestra el botón "Volver" como retorno visible y retrocede sin perder el listado', async () => {
+    memoria.set('paciente:px', perfil);
+    const fixture = await crear();
+    const el: HTMLElement = fixture.nativeElement;
+
+    const volver = boton(el, 'Volver');
+    expect(volver.classList.contains('p48-boton-secundario')).toBe(true); // no compite con el sólido
+    expect(el.querySelectorAll('.p48-boton-principal')).toHaveLength(1); // sigue habiendo un solo sólido
+    expect(el.textContent).toContain('Ana Pérez');
+
+    forzarHistorial(2);
+    try {
+      const atras = vi.spyOn(TestBed.inject(Location), 'back');
+      volver.click();
+      expect(atras).toHaveBeenCalledTimes(1);
+    } finally {
+      delete (window.history as unknown as Record<string, unknown>)['length'];
+    }
+
+    // Los datos guardados siguen ahí: el listado no se pierde al volver.
+    expect(el.textContent).toContain('Ana Pérez');
+    expect(memoria.size).toBe(1);
   });
 });

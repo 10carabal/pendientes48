@@ -6,9 +6,11 @@ import { AVISO_NO_ASESORIA } from '@domain/norma/aviso';
 import type { EstadoPendiente } from '@domain/pendiente/pendiente.model';
 import { AvisoLegal } from '@shared/aviso-legal/aviso-legal';
 import { AyudaAvisos } from '@shared/ayuda-avisos/ayuda-avisos';
+import { BotonVolver } from '@shared/boton-volver/boton-volver';
 import { ComoFunciona } from '@shared/como-funciona/como-funciona';
 import { EstadoChip } from '@shared/estado-chip/estado-chip';
 import { NormaCard } from '@shared/norma-card/norma-card';
+import { SalidaApp } from '@shared/salida-app/salida-app';
 
 /**
  * Guía de estilo (/guia): muestra todos los tokens --p48-* y los 7 patrones.
@@ -26,7 +28,9 @@ import { NormaCard } from '@shared/norma-card/norma-card';
     NormaCard,
     AvisoLegal,
     AyudaAvisos,
+    BotonVolver,
     ComoFunciona,
+    SalidaApp,
   ],
   templateUrl: './guia.html',
   styleUrl: './guia.scss',
@@ -39,6 +43,8 @@ export class Guia {
   readonly avisoModal = signal(false);
   readonly ayudaVisible = signal(false);
   readonly comoFuncionaHoja = signal(false);
+  /** Demo de `SalidaApp`: en la galería solo cierra (el cierre real vive en `app.ts`). */
+  readonly salidaDemo = signal(false);
 
   /**
    * El enlace del pie de la hoja navega de verdad a la guía (3.3): en la

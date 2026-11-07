@@ -1,1 +1,10 @@
-<ion-app><ion-router-outlet /></ion-app>
+<ion-app>
+  <ion-router-outlet />
+  <!-- Diálogo "¿Salir de la app?" (tarea 5.2): vive en la raíz, sobre las
+       páginas (scrim `position: fixed` con z-index, ver salida-app.scss). -->
+  <app-salida-app
+    [visible]="salidaAbierta()"
+    (salir)="salir()"
+    (cancelar)="cerrarSalida()"
+  />
+</ion-app>

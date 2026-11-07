@@ -1,0 +1,8 @@
+/* Solo espaciado: el estilo del botón vive en `patrones.scss` (patrón 1). */
+
+:host {
+  display: block;
+  /* Empuja el botón del título hasta el borde en celular (mismo espaciado
+     que el resto de la columna) y no deja pegado el h1 siguiente. */
+  margin-bottom: var(--p48-espacio-4);
+}

@@ -13,6 +13,7 @@ import { borrarTodo } from '@data/app-db';
 import { encontrarPorDocumento, guardarPaciente, listarPacientes } from '@data/pacientes-store';
 import type { Paciente } from '@domain/paciente/paciente.model';
 import { cancelarTodos } from '@platform/notificaciones';
+import { BotonVolver } from '@shared/boton-volver/boton-volver';
 import { atraparFoco } from '@shared/foco-dialogo';
 
 /** Campos del formulario de perfil (spec `pendientes` · "Perfil de paciente"). */
@@ -63,7 +64,7 @@ const ERROR_LECTURA = 'No se pudo leer la información. Intenta de nuevo.';
 @Component({
   selector: 'app-pacientes',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent],
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, BotonVolver],
   templateUrl: './pacientes.html',
   styleUrl: './pacientes.scss',
 })

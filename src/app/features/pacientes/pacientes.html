@@ -3,6 +3,9 @@
 </ion-header>
 <ion-content>
   <div class="pacientes">
+    <!-- Retorno visible (spec `navegacion` · "Retorno visible"): también con
+         el formulario abierto, antes de cualquier contenido. -->
+    <app-boton-volver />
     @if (campos(); as formulario) {
       <form
         class="pacientes-formulario p48-superficie"
