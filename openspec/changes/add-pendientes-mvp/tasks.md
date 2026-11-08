@@ -264,7 +264,7 @@ nuevas. Van en orden (no en paralelo): 5.1 y 5.3 comparten `pendiente-form`; 5.1
     CDP. **Pendiente en el S22:** matriz keyevent 4 con el APK nuevo + flujo manual de retroceso
     y salida (junto con la prueba del bloque 4, igual que 5.1); el chequeo de "Volver" sin perder
     datos ya está cubierto por specs (borrador y listado sobreviven al retroceso).
-- [ ] 5.3 Toasts de confirmación de las acciones
+- [x] 5.3 Toasts de confirmación de las acciones
   - `ion-toast` (`@ionic/angular` ya instalado): duración 3000 ms, cierre con tap,
     `role="status"` (aria-live), texto ≥ 18 px, solo tokens `--p48-*` y clases de
     `src/theme/patrones.scss`, posición inferior. Copy exacto: "Pendiente guardado", "Cambios
@@ -276,3 +276,15 @@ nuevas. Van en orden (no en paralelo): 5.1 y 5.3 comparten `pendiente-form`; 5.1
     `ng build` < 550 kB); evidencia con capturas a 390 px y 1280 px de los 6 toasts (al menos uno
     por pantalla afectada); flujo manual en PWA y APK recorriendo los 6 textos y comprobando que
     "Borrar todos mis datos" NO muestra toast
+  - Cierre 2026-11-07 (flujo multiagente): **D1** — son 5 toasts con disparador real y la
+    evidencia se ajusta a 5 textos: "'Perfil borrado' queda en el mapa del helper sin disparador
+    porque el producto no tiene acción de borrar un perfil individual (decisión de Daniel)";
+    **D2** — el toast complementa los avisos en línea ("Guardado", live region "Nota guardada");
+    **D3** — toast inmediato al guardar. Gates: `tsc` 0, **363/363 tests**, `openspec --strict`
+    válido, build **478.56 kB** (< 550; se resolvió un regreso a 561 kB quitando el barril de
+    `@ionic/angular` del grafo inicial con subrutas documentadas). Verificador en sesión nueva:
+    **VERDE** (0/0/1; el menor —un número en un comentario— se revisó y NO procede: la raíz CSS
+    es 18 px y `0.875rem` = 15,75 px, como dice el comentario). Evidencia: 10 capturas (5 textos
+    × 390/1280) verificadas por CDP: mensaje exacto, `font-size: 18px`, `aria-live: polite`,
+    posición inferior. **Pendiente en el S22:** flujo manual de los 5 textos + comprobar que
+    "Borrar todos mis datos" NO muestra toast (junto con la prueba del bloque 4).

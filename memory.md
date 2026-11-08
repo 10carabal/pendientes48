@@ -5,10 +5,10 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-11-07** — **5.2 (navegación: retorno visible y salida confirmada)
-> lista para PR** (plan → implementación → verificador VERDE 0/0/1, 358/358, 528.35 kB):
-> **segundo ciclo del bloque 5**. Siguiente: 5.3 (toasts); el bloque 4 sigue esperando a Daniel
-> en el S22.
+> Última actualización: **2026-11-07** — **5.3 (toasts de confirmación) lista para PR: BLOQUE 5
+> COMPLETO** (plan → implementación → corrección de bundle → verificador VERDE 0/0/1,
+> 363/363, 478.56 kB). Siguiente: bloque 4 (verificación en dispositivo, pendiente de Daniel
+> en el S22) y archive del change.
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -90,6 +90,9 @@ en la fase 2: tutela, OCR, login/sincronización, redacción con IA, ESLint.
 | **Alcance de "Volver" SOLO en `/pacientes` y `/ventanilla` (D3)** | la spec dice "toda pantalla que no es la raíz" pero la cláusula y el escenario solo nombran esas dos; detalle y formulario conservan su "Cancelar" propio (decisión de Daniel, 2026-11-07) |
 | **PWA: el flujo manual solo verifica el retroceso del navegador (D4)** | `Platform.backButton` no emite cuando no es híbrido (Ionic llama `blockHardwareBackButton()`), así que el diálogo "¿Salir de la app?" es evidencia exclusiva del APK (decisión de Daniel, 2026-11-07) |
 | **Prioridad de decisión: la retroalimentación de usuarios potenciales gana sobre el planteamiento inicial; ambigüedades grandes se escalan a Daniel** | regla de Daniel para el resto del MVP (2026-11-05) |
+| **5.3 = 5 toasts: `'perfil-borrado'` queda en el mapa SIN disparador (D1)** | la cláusula pedía 6 textos + evidencia de 6, pero el producto no tiene acción de borrar un perfil individual (solo "Borrar todos mis datos", excluido); agregar el botón era alcance nuevo con pregunta de cascada. Nota en `tasks.md` (decisión de Daniel, 2026-11-07) |
+| **El toast COMPLEMENTA los avisos en línea existentes (D2)** | "Guardado" de perfiles y la live region "Nota guardada" (fix de accesibilidad m2) se conservan; cero aserciones existentes modificadas (decisión de Daniel, 2026-11-07) |
+| **Toast inmediato al guardar (D3, coordinador)** | la spec exige aviso al guardar; convive 3 s con la hoja `ayuda-avisos` si esta se abre |
 
 ### Copy aprobado de la introducción (3.8 — aprobación de Daniel, 2026-10-14; "farmacia" →
 "farmacia o dispensario" en 2026-10-22, Bloque 5 5.1)
@@ -364,6 +367,21 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
   CDP (`Emulation.setDeviceMetricsOverride` + `Page.captureScreenshot`) da capturas 390/1280 de
   la PWA; ojo: `ng serve` puede quedar escuchando solo en `[::1]` → usar `localhost`, no
   `127.0.0.1` (5.2, 2026-11-07).
+- **Un import del barril `@ionic/angular` en el grafo INICIAL arrastra todo el vendor de
+  overlays a `main`**: al usar `ToastController` en features lazy, esbuild conservó el re-export
+  del barril (vivo en `app.config.ts`/`app.ts`) y `ion-toast.js` + helpers heredaron el bit de
+  inicial: +32.6 kB. Solución: subrutas documentadas en `exports` (`@ionic/angular/provide`,
+  `/ion-app`, `/ion-router-outlet`, `/platform`) — el initial bajó de 561 a **478.56 kB**, 49.8
+  kB por debajo de la base. Antes de aceptar un gate de presupuesto, identificar QUÉ import subió
+  el vendor con `--stats-json`/grep de strings en `dist/` (5.3, 2026-11-07).
+- **`ion-toast` no tiene opción `role` ni `dismissOnClick`**: `role="status"` + `aria-live` ya
+  vienen pintados en `.toast-content` del shadow DOM (no duplicar con `htmlAttributes`), y el
+  cierre con tap es un listener `click` propio sobre el elemento de `create()`; el theming se
+  hace con `--background/--color` + `::part(message)` en `src/styles.scss` (precedente:
+  `ion-title`) (5.3, 2026-11-07).
+- **El botón del aviso legal dice "Entiendo"** (no "Entendido", pese al copy "Entendido" que
+  aparece en otros diálogos): los scripts de evidencia deben matchear `/entien/i`, si no el
+  modal legal tapa cada captura sin error visible (5.3, 2026-11-07).
 
 ## Pendientes conocidos (no bloqueantes)
 - **Fix aprobado por Daniel (opción A, 2026-10-20): `fix/2.1-ciclo-vida-listas`** — BUG confirmado
