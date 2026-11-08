@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
+import { ToastController } from '@ionic/angular';
 import { ErrorDeEscritura } from '@data/app-db';
 import type { Paciente } from '@domain/paciente/paciente.model';
 import { clear, set } from 'idb-keyval';
@@ -18,6 +19,28 @@ const cap = vi.hoisted(() => ({
   getPending: vi.fn(() => Promise.resolve({ notifications: [] as Array<{ id: number }> })),
   schedule: vi.fn(() => Promise.resolve({ notifications: [] as Array<{ id: number }> })),
 }));
+
+/** Toast falso por provider (patrón de doble, sin `vi.mock`): `EventTarget` real para el tap. */
+const toasts = vi.hoisted(() => {
+  class Falso extends EventTarget {
+    present = vi.fn(() => Promise.resolve());
+    dismiss = vi.fn(() => Promise.resolve(true));
+    constructor(readonly opciones: Record<string, unknown>) {
+      super();
+    }
+  }
+  const creados: Falso[] = [];
+  return {
+    creados,
+    controller: {
+      create: vi.fn((o: Record<string, unknown>) => {
+        const t = new Falso(o);
+        creados.push(t);
+        return Promise.resolve(t);
+      }),
+    },
+  };
+});
 
 vi.mock('idb-keyval', () => ({
   createStore: vi.fn(() => () => Promise.resolve(undefined)),
@@ -62,6 +85,9 @@ async function asentar(turnos = 20): Promise<void> {
 }
 
 async function crear(): Promise<ComponentFixture<Pacientes>> {
+  TestBed.configureTestingModule({
+    providers: [{ provide: ToastController, useValue: toasts.controller }],
+  });
   const fixture = TestBed.createComponent(Pacientes);
   fixture.detectChanges();
   await asentar(); // la carga inicial del listado
@@ -143,7 +169,11 @@ describe('Pacientes', () => {
     boton(el, 'Guardar').click();
     await asentar();
     fixture.detectChanges();
+    TestBed.flushEffects();
 
+    expect(toasts.controller.create).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Perfil guardado' }),
+    );
     const claves = [...memoria.keys()].filter((c) => c.startsWith('paciente:'));
     expect(claves).toHaveLength(1);
     expect(memoria.get(claves[0])).toMatchObject({
@@ -281,7 +311,11 @@ describe('Pacientes', () => {
     boton(el, 'Guardar').click();
     await asentar();
     fixture.detectChanges();
+    TestBed.flushEffects();
 
+    expect(toasts.controller.create).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Perfil guardado' }),
+    );
     expect(memoria.get('paciente:px')).toMatchObject({
       nombre: perfil.nombre,
       telefono: '3001112233',
@@ -384,7 +418,10 @@ describe('Pacientes', () => {
     boton(el, 'Sí, borrar todo').click();
     await asentar();
     fixture.detectChanges();
+    TestBed.flushEffects();
 
+    // Spec: sin toast (doble confirmación + estado vacío con modal legal)
+    expect(toasts.controller.create).not.toHaveBeenCalled();
     expect(memoria.size).toBe(0); // perfiles, pendientes, fotos y preferencias
     expect(cap.cancel).toHaveBeenCalledWith({ notifications: [{ id: 11 }, { id: 22 }] });
     expect(navegar).toHaveBeenCalledWith('/');

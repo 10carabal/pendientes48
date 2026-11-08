@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
+import { ToastController } from '@ionic/angular';
 import { ErrorDeEscritura } from '@data/app-db';
 import {
   guardarBorrador,
@@ -27,6 +28,28 @@ const cap = vi.hoisted(() => ({
     }) => Promise.resolve({ notifications: [] as Array<{ id: number }> }),
   ),
 }));
+
+/** Toast falso por provider (patrón de doble, sin `vi.mock`): `EventTarget` real para el tap. */
+const toasts = vi.hoisted(() => {
+  class Falso extends EventTarget {
+    present = vi.fn(() => Promise.resolve());
+    dismiss = vi.fn(() => Promise.resolve(true));
+    constructor(readonly opciones: Record<string, unknown>) {
+      super();
+    }
+  }
+  const creados: Falso[] = [];
+  return {
+    creados,
+    controller: {
+      create: vi.fn((o: Record<string, unknown>) => {
+        const t = new Falso(o);
+        creados.push(t);
+        return Promise.resolve(t);
+      }),
+    },
+  };
+});
 
 vi.mock('idb-keyval', () => ({
   createStore: vi.fn(() => () => Promise.resolve(undefined)),
@@ -116,6 +139,7 @@ async function crear(opciones: { id?: string } = {}): Promise<ComponentFixture<P
           snapshot: { paramMap: convertToParamMap(opciones.id ? { id: opciones.id } : {}) },
         },
       },
+      { provide: ToastController, useValue: toasts.controller },
     ],
   });
   const fixture = TestBed.createComponent(PendienteForm);
@@ -198,6 +222,13 @@ describe('PendienteForm', () => {
     expect(el.querySelector('h1')?.textContent?.trim()).toBe('Registrar pendiente');
     llenar(el);
     await enviar(fixture);
+    TestBed.flushEffects();
+
+    expect(toasts.controller.create).toHaveBeenCalledWith({
+      message: 'Pendiente guardado',
+      duration: 3000,
+      position: 'bottom',
+    });
 
     const guardado = pendienteGuardado();
     expect(guardado).toMatchObject({
@@ -392,7 +423,11 @@ describe('PendienteForm', () => {
 
     escribir(el, 'Medicamento', 'Metformina 850 mg');
     await enviar(fixture);
+    TestBed.flushEffects();
 
+    expect(toasts.controller.create).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Cambios guardados' }),
+    );
     expect(pendienteGuardado()).toEqual({
       ...original,
       medicamentos: ['Metformina 850 mg'],
@@ -433,6 +468,7 @@ describe('PendienteForm', () => {
     llenar(el);
     escribir(el, '¿Autorizó la entrega a domicilio?', 'no');
     await enviar(fixture);
+    TestBed.flushEffects();
 
     expect(el.textContent).toContain('No se pudo guardar. Libera espacio e intenta de nuevo');
     expect(el.querySelector('h1')?.textContent?.trim()).toBe('Registrar pendiente'); // sigue en el form
@@ -442,6 +478,7 @@ describe('PendienteForm', () => {
     expect((el.querySelector('#campo-autorizoDomicilio') as HTMLSelectElement).value).toBe('no');
     expect(pendienteGuardado()).toBeUndefined();
     expect(navegar).not.toHaveBeenCalled();
+    expect(toasts.controller.create).not.toHaveBeenCalled(); // sin toast en fallo de escritura
   });
 
   it('con borrador de la guía: el número aparece prellenado y la foto se adjunta al registrar', async () => {
