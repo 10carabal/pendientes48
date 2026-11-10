@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router, type ParamMap } from '@angular/router';
+import { ToastController } from '@ionic/angular';
 import { ErrorDeEscritura } from '@data/app-db';
 import { AVISO_NO_ASESORIA } from '@domain/norma/aviso';
 import type { Paciente } from '@domain/paciente/paciente.model';
@@ -25,6 +26,28 @@ const cap = vi.hoisted(() => ({
   checkPermissions: vi.fn(() => Promise.resolve({ display: 'granted' })),
   requestPermissions: vi.fn(() => Promise.resolve({ display: 'granted' })),
 }));
+
+/** Toast falso por provider (patrón de doble, sin `vi.mock`): `EventTarget` real para el tap. */
+const toasts = vi.hoisted(() => {
+  class Falso extends EventTarget {
+    present = vi.fn(() => Promise.resolve());
+    dismiss = vi.fn(() => Promise.resolve(true));
+    constructor(readonly opciones: Record<string, unknown>) {
+      super();
+    }
+  }
+  const creados: Falso[] = [];
+  return {
+    creados,
+    controller: {
+      create: vi.fn((o: Record<string, unknown>) => {
+        const t = new Falso(o);
+        creados.push(t);
+        return Promise.resolve(t);
+      }),
+    },
+  };
+});
 
 const fs = vi.hoisted(() => ({
   Directory: { Documents: 'DOCUMENTS', Cache: 'CACHE' },
@@ -130,6 +153,7 @@ async function crear(
         // Ruta viva (m1): la pantalla se suscribe, no lee el snapshot.
         useValue: { paramMap: parametros },
       },
+      { provide: ToastController, useValue: toasts.controller },
     ],
   });
   const fixture = TestBed.createComponent(PendienteDetalle);
@@ -455,7 +479,11 @@ describe('PendienteDetalle', () => {
     boton(el, 'Guardar nota').click();
     await asentar();
     fixture.detectChanges();
+    TestBed.flushEffects();
 
+    expect(toasts.controller.create).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Nota guardada' }),
+    );
     expect(pendienteGuardado()?.bitacora.at(-1)).toMatchObject({
       tipo: 'nota',
       texto: 'Llamé a la línea, dijeron que mañana',
@@ -479,6 +507,8 @@ describe('PendienteDetalle', () => {
     fixture.detectChanges();
 
     expect(campoNota(el).value).toBe('Hablé con la EPS'); // el texto sigue ahí
+    TestBed.flushEffects();
+    expect(toasts.controller.create).not.toHaveBeenCalled(); // sin toast en fallo de nota
     expect(el.querySelector('.detalle-error')?.textContent).toContain(
       'No se pudo guardar. Libera espacio e intenta de nuevo',
     );
@@ -669,7 +699,11 @@ describe('PendienteDetalle', () => {
     confirmar!.click();
     await asentar();
     fixture.detectChanges();
+    TestBed.flushEffects();
 
+    expect(toasts.controller.create).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Pendiente borrado' }),
+    );
     expect(cap.cancel).toHaveBeenCalledTimes(1); // el aviso programado se cancela
     expect(pendienteGuardado()).toBeUndefined();
     expect(memoria.has('foto:foto-abc')).toBe(false); // la foto también se elimina

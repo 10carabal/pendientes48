@@ -6,7 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
+import { IonContent, IonHeader, IonTitle, IonToolbar, ToastController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 import { leerBorrador, limpiarBorrador } from '@data/borrador-store';
 import { listarPacientes } from '@data/pacientes-store';
@@ -23,6 +23,7 @@ import { validarHoraReclamo, vencimiento } from '@domain/pendiente/plazo';
 import { programarAviso } from '@platform/notificaciones';
 import { ayudaAvisosAplica } from '@platform/plataforma';
 import { AyudaAvisos } from '@shared/ayuda-avisos/ayuda-avisos';
+import { mostrarToast } from '@shared/toast';
 
 /** Fallo de lectura (IndexedDB no disponible), igual que en `pacientes` e `inicio`. */
 const ERROR_LECTURA = 'No se pudo leer la información. Intenta de nuevo.';
@@ -106,6 +107,7 @@ export class PendienteForm {
   private readonly router = inject(Router);
   private readonly ruta = inject(ActivatedRoute);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly toast = inject(ToastController);
 
   readonly pacientes = signal<Paciente[]>([]);
   readonly cargando = signal(true);
@@ -369,6 +371,10 @@ export class PendienteForm {
       await programarAviso({ id, vencimiento: vencimiento(horaIso).toISOString() }).catch(
         () => undefined,
       );
+
+      // Toast de confirmación (5.3, D3): sale de inmediato al guardar, aunque
+      // después se abra la hoja `ayuda-avisos`; convive con ella 3 s.
+      void mostrarToast(this.toast, enRegistro ? 'pendiente-guardado' : 'cambios-guardados');
 
       // "Primera ayuda de avisos en Android" (design.md · "Avisos"): solo en el
       // primer registro, y la navegación termina al cerrar la hoja (marcando la

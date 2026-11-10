@@ -7,7 +7,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { IonContent, IonHeader, IonTitle, IonToolbar, type ViewWillEnter } from '@ionic/angular';
+import { IonContent, IonHeader, IonTitle, IonToolbar, ToastController, type ViewWillEnter } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { borrarTodo } from '@data/app-db';
 import { encontrarPorDocumento, guardarPaciente, listarPacientes } from '@data/pacientes-store';
@@ -15,6 +15,7 @@ import type { Paciente } from '@domain/paciente/paciente.model';
 import { cancelarTodos } from '@platform/notificaciones';
 import { BotonVolver } from '@shared/boton-volver/boton-volver';
 import { atraparFoco } from '@shared/foco-dialogo';
+import { mostrarToast } from '@shared/toast';
 
 /** Campos del formulario de perfil (spec `pendientes` · "Perfil de paciente"). */
 interface Campos {
@@ -70,6 +71,7 @@ const ERROR_LECTURA = 'No se pudo leer la información. Intenta de nuevo.';
 })
 export class Pacientes implements ViewWillEnter {
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastController);
 
   readonly pacientes = signal<Paciente[]>([]);
   readonly cargando = signal(true);
@@ -219,7 +221,8 @@ export class Pacientes implements ViewWillEnter {
     }
     await this.recargar();
     this.campos.set(null);
-    this.aviso.set('Guardado');
+    this.aviso.set('Guardado'); // la región viva sigue anunciando (D2): el toast la complementa
+    void mostrarToast(this.toast, 'perfil-guardado');
   }
 
   pedirBorrado(): void {
@@ -243,6 +246,7 @@ export class Pacientes implements ViewWillEnter {
     }
     this.confirmacion.set(0);
     this.pacientes.set([]);
+    // Spec: sin toast (doble confirmación + estado vacío con modal legal)
     // los datos ya quedaron borrados: aunque la navegación falle, el listado queda vacío
     await this.router.navigateByUrl('/').catch(() => undefined);
   }

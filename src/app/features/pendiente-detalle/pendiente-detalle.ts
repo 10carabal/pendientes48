@@ -10,7 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
+import { IonContent, IonHeader, IonTitle, IonToolbar, ToastController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 import { paraPaso, NORMAS } from '@data/normas-catalogo';
 import { leerPaciente } from '@data/pacientes-store';
@@ -35,6 +35,7 @@ import {
 } from '@platform/notificaciones';
 import { atraparFoco } from '@shared/foco-dialogo';
 import { NormaCard } from '@shared/norma-card/norma-card';
+import { mostrarToast } from '@shared/toast';
 import { BitacoraLista } from './bitacora-lista';
 import { Contador } from './contador';
 import {
@@ -103,6 +104,7 @@ const mensajePdfDe = (causa: unknown): string => {
 export class PendienteDetalle implements OnDestroy {
   private readonly router = inject(Router);
   private readonly ruta = inject(ActivatedRoute);
+  private readonly toast = inject(ToastController);
 
   readonly avisoNoAsesoria = AVISO_NO_ASESORIA;
   /** Aviso del anexo del PDF, con los títulos exactos del documento (D6). */
@@ -297,6 +299,8 @@ export class PendienteDetalle implements OnDestroy {
       await guardarPendiente(actualizado);
       this.pendiente.set(actualizado);
       this.notaGuardada.set(true);
+      // La región viva "Nota guardada" sigue anunciando (D2): el toast la complementa.
+      void mostrarToast(this.toast, 'nota-guardada');
       this.errorAccion.set(null);
       // Solo si el usuario no siguió escribiendo mientras se guardaba (M2).
       if (this.notaTexto().trim() === nota) this.notaTexto.set('');
@@ -545,6 +549,7 @@ export class PendienteDetalle implements OnDestroy {
     try {
       await cancelarAviso(p.id).catch(() => undefined); // nunca quedan avisos huérfanos
       await borrarPendiente(p.id); // borra también la foto del comprobante
+      void mostrarToast(this.toast, 'pendiente-borrado');
       this.cerrarHojaDocumento();
       this.dialogo.set(null);
       await this.router.navigateByUrl('/').catch(() => undefined);

@@ -30,6 +30,17 @@ ion-title {
   font-weight: var(--p48-peso-titulo);
 }
 
+/* Toast de confirmación (spec "Confirmación visual de las acciones", 5.3):
+   el overlay de Ionic trae su propio estilo; aquí solo tokens --p48-*. */
+ion-toast {
+  --background: var(--p48-fondo);
+  --color: var(--p48-texto);
+  --border-radius: var(--p48-radio-superficie);
+  --box-shadow: var(--p48-sombra-flotante);
+}
+/* Tamaño de letra sin variable propia: el host usa clamp(14px, .875rem, …) = 15,75 px */
+ion-toast::part(message) { font-size: var(--p48-tam-base); }
+
 /* Anillo de foco visible (accesibilidad), construido con tokens. */
 :focus-visible {
   outline: var(--p48-ancho-acento) solid var(--p48-enlace);

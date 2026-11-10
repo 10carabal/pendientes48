@@ -1,7 +1,10 @@
 import { Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonApp, IonRouterOutlet, Platform } from '@ionic/angular';
+// Rutas profundas de `@ionic/angular` (no el barril): ver comentario en `app.config.ts`.
+import { IonApp } from '@ionic/angular/ion-app';
+import { IonRouterOutlet } from '@ionic/angular/ion-router-outlet';
+import { Platform } from '@ionic/angular/platform';
 import { retroceder } from '@shared/retroceder';
 import { SalidaApp } from '@shared/salida-app/salida-app';
 import { salirDeLaApp } from '@platform/salida';
