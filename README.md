@@ -2,6 +2,26 @@
 
 > Tu medicamento en 48 horas, con la ley de tu lado.
 
+## Demo en vivo
+
+**[pendientes48.pendientes48.workers.dev](https://pendientes48.pendientes48.workers.dev)** — funciona en
+cualquier navegador. En Android, Chrome ofrece **Instalar aplicación** desde la misma URL: queda con
+ícono propio y se abre a pantalla completa, sin barra del navegador.
+
+> 🔜 **Muy pronto en tiendas de aplicaciones:** en una fase cercana la app estará disponible en
+> Google Play (y otras tiendas) para descargarla e instalarla directamente en el celular.
+
+## Capturas
+
+| | |
+|---|---|
+| ![](docs/screenshots/perfiles-toast.png) | ![](docs/screenshots/ventanilla.png) |
+| *Confirmación al guardar + botón "Volver"* | *Guía de ventanilla con la norma visible* |
+| ![](docs/screenshots/dialogo-salida.png) | ![](docs/screenshots/detalle-nota.png) |
+| *Salida confirmada desde la raíz* | *Detalle con bitácora y aviso* |
+
+![Pendientes48 corriendo en un Galaxy S22](docs/screenshots/s22-dialogo.png)
+
 Este README es la referencia para personas. El contexto que leen los agentes de IA está en
 `openspec/config.yaml` (resumen de este archivo). Si cambias uno, actualiza el otro.
 
@@ -16,13 +36,25 @@ no entrega un medicamento completo y queda "pendiente". La app:
 - Pacientes crónicos y adultos mayores, muchas veces con baja alfabetización digital.
 - Familiares que gestionan los trámites de otra persona.
 
+## Cómo se construyó
+- **Spec-driven (OpenSpec):** cada tarea nace como un cambio con propuesta, diseño, tareas y
+  escenarios; la especificación es el contrato y los gates la validan antes de cada PR.
+- **Flujo multiagente:** un planificador detecta ambigüedades, un implementador ejecuta sin
+  re-planificar y un verificador con ojos frescos (sesión aparte) solo detecta. Las decisiones de
+  alcance, texto legal y dependencias siempre las toma el humano.
+- **Gates antes de cada PR:** type-check, 363 pruebas unitarias, validador estricto de la
+  especificación y build con presupuesto de tamaño (< 550 kB; actual 478 kB).
+- **Verificación en dispositivo real:** matriz de retroceso del botón de Android, toasts y
+  capturas en un Galaxy S22, además de la evidencia a 390 px y 1280 px.
+
 ## Stack
 - Ionic (última versión estable) + Angular (standalone, Signals, zoneless) + Capacitor
 - Plataformas: Android (Capacitor) y PWA (mismo código)
 - Persistencia: IndexedDB vía `idb-keyval` (un solo camino para Android y web)
 - PDF: `pdfmake` (generado en el dispositivo) + `@types/pdfmake` (tipos para `domain/`)
-- Plugins: `@capacitor/local-notifications`, `@capacitor/camera` + `@ionic/pwa-elements`,
-  `@capacitor/clipboard`, `@capacitor/share`, `@capacitor/filesystem`
+- Plugins: `@capacitor/app`, `@capacitor/local-notifications`, `@capacitor/camera` +
+  `@ionic/pwa-elements`, `@capacitor/clipboard`, `@capacitor/share`, `@capacitor/filesystem`
+- Despliegue: Cloudflare (Workers/Pages con `wrangler`) + service worker de Angular
 - Pruebas: unitarias en servicios de dominio (plazos, plantillas)
 - Íconos y splash: `@capacitor/assets` (devDependency) a partir de `assets/` (`design.md` D17)
 
@@ -57,6 +89,15 @@ Regla: si una guía de una herramienta contradice este README o `openspec/config
 - Commits con Conventional Commits en ingles: `feat: calculate expiration of 48 h`
 - Al terminar una tarea: push de la rama → pull request → revisión → merge a `main`
 - Secretos (tokens, `.env`) nunca se suben; `.env.example` sí
+
+## Desarrollo local
+```bash
+npm install
+npm start        # dev server en http://localhost:4200
+npm test         # pruebas unitarias (Vitest)
+npm run build    # build de producción con service worker
+npm run deploy   # despliegue a Cloudflare con wrangler
+```
 
 ## Restricciones (no negociables)
 - **Local-first:** sin backend, sin login, sin envío de datos a terceros. Los datos de salud
