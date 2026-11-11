@@ -5,10 +5,11 @@
 > de su PR**, agregando solo decisiones, lecciones y pendientes con impacto futuro. No duplica el
 > progreso (`tasks.md`), las decisiones de diseño (D1–D17 en `design.md`) ni las reglas (`AGENTS.md`).
 >
-> Última actualización: **2026-11-07** — **5.3 (toasts de confirmación) lista para PR: BLOQUE 5
-> COMPLETO** (plan → implementación → corrección de bundle → verificador VERDE 0/0/1,
-> 363/363, 478.56 kB). Siguiente: bloque 4 (verificación en dispositivo, pendiente de Daniel
-> en el S22) y archive del change.
+> Última actualización: **2026-11-10** — **BLOQUE 5 CERRADO: 5.1/5.2/5.3 mergeadas (PRs #43–#45)
+> y verificadas en el Galaxy S22** (ronda G: TODO VERDE 15/15 — copy 5.1 en APK, matriz
+> keyevent 4 T1–T5, los 5 toasts y "Borrar todos mis datos" sin toast; 10 capturas verificadas
+> en `%TEMP%\opencode\p48-evid-dispositivo\`). Siguiente: bloque 4 (pruebas restantes en el
+> S22) y archive del change.
 
 ## Por qué (resumen de `proposal.md`)
 App Android + PWA para que el paciente colombiano dé seguimiento a un medicamento "pendiente"
@@ -382,6 +383,17 @@ enlace a la guía del reclamo. Sin texto legal (D6) y sin mencionar el proceso p
 - **El botón del aviso legal dice "Entiendo"** (no "Entendido", pese al copy "Entendido" que
   aparece en otros diálogos): los scripts de evidencia deben matchear `/entien/i`, si no el
   modal legal tapa cada captura sin error visible (5.3, 2026-11-07).
+- **El framebuffer del S22 queda REZAGADO durante ráfagas de operaciones**: `screencap` y
+  `Page.captureScreenshot` devuelven el frame anterior (a veces de corridas previas). Lo que
+  funciona: **un flujo por proceso** (`am force-stop` + `am start`) y `input keyevent 224`
+  (WAKEUP) antes de capturar; frescura verificable con el reloj del status bar. El parámetro
+  `fromSurface:false` NO ayudó en este WebView (ronda G, 2026-11-10).
+- **El read tool de OpenCode cachea imágenes por PATH**: re-leer un archivo recién sobreescrito
+  sirve la versión VIEJA, lo que simula "capturas desfasadas" que no existen. Para revisar
+  evidencia: copiar a un nombre nuevo y leer UNA imagen por mensaje (ronda G, 2026-11-10).
+- **Siembra en IndexedDB siempre en DOS transacciones**: con `getAllKeys` y `put` en la misma,
+  el snapshot de borrado se procesa DESPUÉS de los puts y borra lo recién sembrado — dos veces
+  el mismo bug en la misma ronda (ronda G, 2026-11-10).
 
 ## Pendientes conocidos (no bloqueantes)
 - **Fix aprobado por Daniel (opción A, 2026-10-20): `fix/2.1-ciclo-vida-listas`** — BUG confirmado
